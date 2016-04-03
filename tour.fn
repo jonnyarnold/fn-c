@@ -1,0 +1,147 @@
+###### FN
+###### Feature Tour
+
+
+
+### Numbers
+# Integers and floats are unified as a Number type.
+1
+0.5
+3.14
+1 + 2   # => 3
+5 - 3.5 # => 1.5
+0.5 * 4 # => 2
+5 / 2   # => 2.5
+
+
+
+### Strings
+"string"
+
+
+
+### Booleans
+true
+false
+
+# Following on from Python, Ruby, et al.:
+# - `or` will return the first true argument, or false is all are false.
+# - `and` will return the last true argument, or false if any are false.
+true and false # => false
+false or true  # => true
+
+# The not operator is a function. (More on functions later.)
+not(true) # => false
+not(false) and true # => true
+
+
+
+### Variables
+# 'Variables' cannot be redefined. This is declarative programming, yo.
+a = 1
+# a = 2 would throw an error.
+
+
+
+### Equality
+x = 1
+y = 2
+z = 1
+x eq y # => false
+x eq z # => true
+
+
+
+### Functions
+# Functions are assigned to variables.
+# Function prototypes are values.
+add = (a,b) { a + b } 
+add(2,3) # => 5
+
+
+
+### Built-in Functions
+# print() outputs to the console.
+print("Hello, world!")
+
+
+
+### Complex Data Structures: The Block
+# A Block is an object with attributes.
+block = {
+  foo = "foo"
+  bar = "bar"
+}
+
+# Attributes can be accessed using the dereference operator.
+block.foo
+block.bar
+
+# A block can be extended from outside.
+block.baz = "baz"
+block.baz
+
+# A block can nest other blocks.
+
+Utils = {
+  Math = {
+    pi = 3
+    area = (diameter) { pi * diameter }
+  }
+}
+
+Utils.Math.area(3) # => 9
+
+### Infix Operators
+# The following infix operators are defined (in order of precedence):
+# .       --- Dereference operator
+# =       --- Assignment operator
+# eq      --- Equality comparison
+# and or  --- Logical operators
+# + - * / --- Mathematical operations
+
+
+
+### Lists
+list = List(1, "two", true)
+
+# Lists are accessed by calling it as if it were a function.
+list(1) # => "two"
+
+# Lists can be iterated over with the each() function.
+list.each((item) {
+  print(item)
+})
+
+
+
+### Conditions
+# Only one structure exists for conditions: `when`.
+# This serves the purpose of `if/unless/else` as well as `case`.
+#
+# A `when` includes a collection of branches, with a condition and a block.
+# `when` runs the first block whose condition is true.
+#
+# It is useful to add a `true` clause at the end to catch the case
+# where no branches are matched.
+guessMyNumber = (guess) {
+  when {
+    guess eq 42 { "You win!" }
+    true        { "Sorry, try again" }
+  }
+}
+
+print(guessMyNumber(42)) # => "You win!"
+
+
+
+### Importing Other Files
+# There are two ways of importing:
+#
+# 1. Use import!() to import all of the file's scope into the current one
+import!("tour-import.fn")
+print(importedX) # => 1
+
+# 2. Use import() to import all of the file's scope into a variable
+i = import("tour-import.fn")
+print(i.importedY) # => 2
