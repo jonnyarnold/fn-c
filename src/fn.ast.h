@@ -9,28 +9,34 @@
 class astStatement {
 public:
   virtual ~astStatement() {};
-  virtual llvm::Value* codegen();
+  virtual llvm::Value* codegen() = 0;
 };
 
-class astValue : public astStatement {};
+class astValue : public astStatement {
+public:
+  virtual ~astValue() {};
+  virtual llvm::Value* codegen() = 0;
+};
 
 class astId : public astValue {
   std::string* name;
   astId* child;
 
 public:
-  astId(std::string* name, astId* child) {}
+  astId(std::string* name, astId* child) { this->name = name; this->child = child; }
   astId(std::string* name) : astId(name, NULL) {}
-  llvm::Value* codegen();
+  virtual llvm::Value* codegen() override;
 };
 
 class astBlock : public astValue {
-  std::vector<astStatement> statements;
+  std::vector<astStatement*> statements;
 
 public:
-  astBlock(std::vector<astStatement> statements) {}
+  astBlock(std::vector<astStatement*> statements) { this->statements = statements; }
   astBlock() {}
-  llvm::Value* codegen();
+  virtual llvm::Value* codegen() override;
+
+  uint size() { return statements.size(); }
 };
 
 class astAssignment : public astStatement {
@@ -38,49 +44,49 @@ class astAssignment : public astStatement {
   astValue* value;
 
 public:
-  astAssignment(astId* key, astValue* value) {}
-  llvm::Value* codegen();
+  astAssignment(astId* key, astValue* value) { this->key = key; this->value = value; }
+  virtual llvm::Value* codegen() override;
 };
 
 class astInt : public astValue {
   int value;
 
 public:
-  astInt(int value) {}
-  llvm::Value* codegen();
+  astInt(int value) { this->value = value; }
+  virtual llvm::Value* codegen() override;
 };
 
 class astDouble : public astValue {
   double value;
 
 public:
-  astDouble(double value) {}
-  llvm::Value* codegen();
+  astDouble(double value) { this->value = value; }
+  virtual llvm::Value* codegen() override;
 };
 
 class astString : public astValue {
   std::string* value;
 
 public:
-  astString(std::string* value) {}
-  llvm::Value* codegen();
+  astString(std::string* value) { this->value = value; }
+  virtual llvm::Value* codegen() override;
 };
 
 class astBool : public astValue {
   bool value;
 
 public:
-  astBool(bool value) {}
-  llvm::Value* codegen();
+  astBool(bool value) { this->value = value; }
+  virtual llvm::Value* codegen() override;
 };
 
 class astFnCall : public astValue {
   astId* name;
-  std::vector<astValue>* args;
+  std::vector<astValue*>* args;
 
 public:
-  astFnCall(astId* name, std::vector<astValue>* args) {}
-  llvm::Value* codegen();
+  astFnCall(astId* name, std::vector<astValue*>* args) { this->name = name; this->args = args; }
+  virtual llvm::Value* codegen() override;
 };
 
 class astFnDef : public astValue {
@@ -88,8 +94,8 @@ class astFnDef : public astValue {
   astBlock* body;
 
 public:
-  astFnDef(std::vector<astId>* params, astBlock* body) {}
-  llvm::Value* codegen(); 
+  astFnDef(std::vector<astId>* params, astBlock* body) { this->params = params; this->body = body; }
+  virtual llvm::Value* codegen() override; 
 };
 
 class astCondition : public astStatement {
@@ -97,16 +103,16 @@ class astCondition : public astStatement {
   astBlock* body;
 
 public:
-  astCondition(astValue* test, astBlock* body) {}
-  llvm::Value* codegen();
+  astCondition(astValue* test, astBlock* body) { this->test = test; this->body = body; }
+  virtual llvm::Value* codegen() override;
 };
 
 class astConditional : public astValue {
   std::vector<astCondition>* conditions;
 
 public:
-  astConditional(std::vector<astCondition>* conditions) {}
-  llvm::Value* codegen();
+  astConditional(std::vector<astCondition>* conditions) { this->conditions = conditions; }
+  llvm::Value* codegen() override;
 };
 
 #endif

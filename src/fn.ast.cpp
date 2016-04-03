@@ -17,13 +17,13 @@ std::unique_ptr<Module> TheModule = make_unique<Module>("MAIN", getGlobalContext
 
 #include "../src/fn.ast.h"
 
-Value* astStatement::codegen() {
-  std::cout << "astStatement\n";
-  return NULL;
-}
-
 Value* astBlock::codegen() {
   std::cout << "astBlock\n";
+  std::cout << statements.size();
+  for(auto statement: statements) {
+    statement->codegen();
+  }
+
   return NULL;
 }
 
@@ -39,7 +39,7 @@ Value* astAssignment::codegen() {
 
 Value* astInt::codegen() {
   std::cout << "astInt\n";
-  return NULL;
+  return ConstantInt::get(getGlobalContext(), APInt(value, sizeof(int)));
 }
 
 Value* astDouble::codegen() {

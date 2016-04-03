@@ -35,8 +35,8 @@
   astFnDef* v_fndef;
 
   // Intermediaries
-  std::vector<astStatement>* v_statements;
-  std::vector<astValue>* v_values;
+  std::vector<astStatement*>* v_statements;
+  std::vector<astValue*>* v_values;
   std::vector<astId>* v_ids;
   std::vector<astCondition>* v_conditions;
 }
@@ -54,8 +54,8 @@
 %type <v_statement> statement
 %type <v_id> identifier
 %type <v_value> value literal test
-%type <v_values> args argList
-%type <v_ids> params paramList
+%type <v_values> args
+%type <v_ids> params
 %type <v_conditional> conditional
 %type <v_conditions> conditions
 %type <v_condition> condition
@@ -64,6 +64,7 @@
 %type <v_fncall> functionCall infixOperation
 
 // Infix operators
+// FIXME: All operators have the same precedence.
 %left TINFIX
 
 // The starting rule.
@@ -71,11 +72,13 @@
 
 %%
 
-program: statements { std::cout << "program\n"; programBlock = new astBlock(*$1); }
+program: 
+  /* empty */ { std::cout << "program(1)\n"; std::vector<astStatement*>* stmts = new std::vector<astStatement*>{}; programBlock = new astBlock(*stmts); }
+| statements  { std::cout << "program(2)\n"; programBlock = new astBlock(*$1); std::cout << programBlock->size(); }
 
 statements:
-  statement            { std::cout << "statement(1)\n"; $$ = new std::vector<astStatement>{*$1}; }
-| statement statements { std::cout << "statement(2)\n"; ($2)->push_back(*$1); $$ = $2; }
+  statement            { std::cout << "statement(1)\n"; $$ = new std::vector<astStatement*>{$1}; }
+| statement statements { std::cout << "statement(2)\n"; ($2)->push_back($1); $$ = $2; }
   ;
 
 statement: 
@@ -104,43 +107,38 @@ literal:
   ;
 
 infixOperation: 
-  value TINFIX value { std::cout << "infix\n"; astId* id = new astId($2); $$ = new astFnCall(id, new std::vector<astValue>{$1, $3}); }
+  value TINFIX value { std::cout << "infix\n"; astId* id = new astId($2); $$ = new astFnCall(id, new std::vector<astValue*>{$1, $3}); }
 
 identifier:
   TID                { std::cout << "id(1)\n"; $$ = new astId($1); }
 | TID '.' identifier { std::cout << "id(2)\n"; $$ = new astId($1, $3); }
 
 functionCall:
-  identifier argList { std::cout << "fnCall\n"; $$ = new astFnCall($1, $2); }
-
-argList:
-  '(' args
+  identifier '(' args ')' { std::cout << "fnCall\n"; $$ = new astFnCall($1, $3); }
 
 args:
-  ')'            { std::cout << "args(1)\n"; $$ = new std::vector<astValue>{}; }
-| value ')'      { std::cout << "args(2)\n"; $$ = new std::vector<astValue>{*$1}; }
-| value ',' args { std::cout << "args(3)\n"; ($3)->push_back(*$1); $$ = $3; }
+  /* empty */    { std::cout << "args(1)\n"; $$ = new std::vector<astValue*>{}; }
+| value          { std::cout << "args(2)\n"; $$ = new std::vector<astValue*>{$1}; }
+| value ',' args { std::cout << "args(3)\n"; ($3)->push_back($1); $$ = $3; }
 
 functionDef:
-  paramList block { $$ = new astFnDef($1, $2); }
-
-paramList:
-  '(' params
+  '(' params ')' block { $$ = new astFnDef($2, $4); }
 
 params:
-  ')'            { std::cout << "params(1)\n"; $$ = new std::vector<astId>(); }
-| TID ')'        { std::cout << "params(2)\n"; astId* id = new astId($1); $$ = new std::vector<astId>{*id}; }
-| TID ',' params { std::cout << "params(3)\n"; astId* id = new astId($1); ($3)->push_back(*id), $$ = $3; }
+  /* empty */    { std::cout << "params(1)\n"; $$ = new std::vector<astId>(); }
+| TID            { std::cout << "params(2)\n"; astId* id = new astId($1); $$ = new std::vector<astId>{*id}; }
+| TID ',' params { std::cout << "params(3)\n"; astId* id = new astId($1); ($3)->push_back(*id); $$ = $3; }
 
 block:
-  '{' statements '}' { std::cout << "block\n"; $$ = new astBlock(*$2); }
+  '{' '}'            { std::cout << "block(1)\n"; std::vector<astStatement*>* stmts = new std::vector<astStatement*>{}; $$ = new astBlock(*stmts); }
+| '{' statements '}' { std::cout << "block(2)\n"; std::cout << ($2)->size(); $$ = new astBlock(*$2); }
 
 conditional:
-  TWHEN '{' conditions { std::cout << "conditional\n"; $$ = new astConditional($3); }
+  TWHEN '{' conditions '}' { std::cout << "conditional\n"; $$ = new astConditional($3); }
 
 conditions:
-  condition '}'        { std::cout << "conditions(1)\n"; $$ = new std::vector<astCondition>{*$1}; }
-| '}'                  { std::cout << "conditions(2)\n"; $$ = new std::vector<astCondition>(); }
+  /* empty */          { std::cout << "conditions(1)\n"; $$ = new std::vector<astCondition>(); }
+| condition            { std::cout << "conditions(2)\n"; $$ = new std::vector<astCondition>{*$1}; }
 | condition conditions { std::cout << "conditions(3)\n"; ($2)->push_back(*$1); $$ = $2; }
 
 condition:
@@ -154,7 +152,7 @@ test:
 
 %%
 
-void yyerror(const char *s) {
+void yyerror(const char* s) {
   std::cout << "Parse error on line " << line << ":\n" << *s;
   exit(-1);
 }

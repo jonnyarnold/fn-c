@@ -14,6 +14,8 @@ int main(int argc, char **argv)
 {
   yyparse();
 
+  std::cout << "\n\n\n";
+
   // Make the module, which holds all the code.
   programBlock->codegen();
 
