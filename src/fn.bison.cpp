@@ -2,23 +2,43 @@
   #include <string>
   #include <iostream>
 
-  // #include "node.h"
   #include "../tmp/lex.h"
+  #include "../src/fn.ast.h"
 
   // stuff from flex that bison needs to know about:
   extern int yylex();
   extern int line;
    
   void yyerror(const char *s);
+
+  // Here we go!
+  astBlock* programBlock;
 %}
 
 /* Represents the many different ways we can access our data */
-%union {
+%union V {
   // Literals
   std::string *v_string;
   double      v_double;
   int         v_int;
   bool        v_bool;
+
+  // AST
+  astBlock* v_block;
+  astStatement* v_statement;
+  astId* v_id;
+  astValue* v_value;
+  astConditional* v_conditional;
+  astCondition* v_condition;
+  astAssignment* v_assignment;
+  astFnCall* v_fncall;
+  astFnDef* v_fndef;
+
+  // Intermediaries
+  std::vector<astStatement>* v_statements;
+  std::vector<astValue>* v_values;
+  std::vector<astId>* v_ids;
+  std::vector<astCondition>* v_conditions;
 }
 
 // Terminal symbols.
@@ -28,8 +48,20 @@
 %token <v_bool>   TBOOL
 %token <void>     TWHEN
 
-// Non-terminal types.
-// FIXME
+// Non-terminal symbols.
+%type <v_block> program block
+%type <v_statements> statements
+%type <v_statement> statement
+%type <v_id> identifier
+%type <v_value> value literal test
+%type <v_values> args argList
+%type <v_ids> params paramList
+%type <v_conditional> conditional
+%type <v_conditions> conditions
+%type <v_condition> condition
+%type <v_assignment> assignment
+%type <v_fndef> functionDef
+%type <v_fncall> functionCall infixOperation
 
 // Infix operators
 %left TINFIX
@@ -39,20 +71,20 @@
 
 %%
 
-program: statements;
+program: statements { std::cout << "program\n"; programBlock = new astBlock(*$1); }
 
 statements:
-  statement
-| statement statements
+  statement            { std::cout << "statement(1)\n"; $$ = new std::vector<astStatement>{*$1}; }
+| statement statements { std::cout << "statement(2)\n"; ($2)->push_back(*$1); $$ = $2; }
   ;
 
 statement: 
   assignment 
-| value
+| value      
   ;
 
 assignment: 
-  identifier '=' value
+  identifier '=' value { std::cout << "assignment\n"; $$ = new astAssignment($1, $3); }
 
 value:
   literal
@@ -65,65 +97,62 @@ value:
   ;
 
 literal:
-  TINT    
-| TDOUBLE 
-| TSTRING 
-| TBOOL   
+  TINT    { std::cout << "int\n"; $$ = new astInt($1); }
+| TDOUBLE { std::cout << "double\n"; $$ = new astDouble($1); }
+| TSTRING { std::cout << "string\n"; $$ = new astString($1); }
+| TBOOL   { std::cout << "bool\n"; $$ = new astBool($1); }
   ;
 
 infixOperation: 
-  value TINFIX value
+  value TINFIX value { std::cout << "infix\n"; astId* id = new astId($2); $$ = new astFnCall(id, new std::vector<astValue>{$1, $3}); }
 
 identifier:
-  TID
-| TID '.' identifier
+  TID                { std::cout << "id(1)\n"; $$ = new astId($1); }
+| TID '.' identifier { std::cout << "id(2)\n"; $$ = new astId($1, $3); }
 
 functionCall:
-  identifier argList
+  identifier argList { std::cout << "fnCall\n"; $$ = new astFnCall($1, $2); }
 
 argList:
-  '(' arg ')'
+  '(' args
 
-arg:
-  // empty
-| value ',' arg
-| value
+args:
+  ')'            { std::cout << "args(1)\n"; $$ = new std::vector<astValue>{}; }
+| value ')'      { std::cout << "args(2)\n"; $$ = new std::vector<astValue>{*$1}; }
+| value ',' args { std::cout << "args(3)\n"; ($3)->push_back(*$1); $$ = $3; }
 
 functionDef:
-  paramList block
+  paramList block { $$ = new astFnDef($1, $2); }
 
 paramList:
-  '(' param ')'
+  '(' params
 
-param:
-  // empty
-| TID ',' param
-| TID
+params:
+  ')'            { std::cout << "params(1)\n"; $$ = new std::vector<astId>(); }
+| TID ')'        { std::cout << "params(2)\n"; astId* id = new astId($1); $$ = new std::vector<astId>{*id}; }
+| TID ',' params { std::cout << "params(3)\n"; astId* id = new astId($1); ($3)->push_back(*id), $$ = $3; }
 
 block:
-  '{' statements '}'
+  '{' statements '}' { std::cout << "block\n"; $$ = new astBlock(*$2); }
 
 conditional:
-  TWHEN '{' conditions '}'
+  TWHEN '{' conditions { std::cout << "conditional\n"; $$ = new astConditional($3); }
 
 conditions:
-  condition
-| condition conditions
+  condition '}'        { std::cout << "conditions(1)\n"; $$ = new std::vector<astCondition>{*$1}; }
+| '}'                  { std::cout << "conditions(2)\n"; $$ = new std::vector<astCondition>(); }
+| condition conditions { std::cout << "conditions(3)\n"; ($2)->push_back(*$1); $$ = $2; }
 
 condition:
-  test block
+  test block { std::cout << "condition\n"; $$ = new astCondition($1, $2); }
 
 test:
-  TBOOL
+  TBOOL { std::cout << "bool\n"; $$ = new astBool($1); }
 | infixOperation
 | identifier
 | functionCall
 
 %%
-
-int main(int, char**) {
-  yyparse();
-}
 
 void yyerror(const char *s) {
   std::cout << "Parse error on line " << line << ":\n" << *s;

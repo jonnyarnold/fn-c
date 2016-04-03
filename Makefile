@@ -1,5 +1,10 @@
 all: build run
 
+LLVMCONFIG = /usr/local/opt/llvm/bin/llvm-config
+CPPFLAGS = `$(LLVMCONFIG) --cppflags` -std=c++11 -Wno-deprecated-register
+LDFLAGS = `$(LLVMCONFIG) --ldflags` -lpthread -ldl -lz -lncurses -rdynamic
+LIBS = `$(LLVMCONFIG) --libs` 
+
 clean:
 	rm -f tmp/*
 
@@ -12,7 +17,7 @@ parse:
 	bison -o tmp/parse.cpp --defines=tmp/parse.h src/fn.bison.cpp
 
 compile:
-	g++ tmp/parse.cpp tmp/lex.cpp -ll -o bin/fn
+	g++ -o bin/fn $(CPPFLAGS) $(LIBS) $(LDFLAGS) tmp/*.cpp src/fn.ast.cpp src/main.cpp
 
 run:
 	./bin/fn

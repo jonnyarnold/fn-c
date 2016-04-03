@@ -2,12 +2,14 @@
   #include <string>
   #include <iostream>
 
-  // #include "../tmp/node.h"
+  #include "../src/fn.ast.h"
   #include "../tmp/parse.h"
 
   // Keep track of the line number.
   int line = 1;
 %}
+
+%option noyywrap 
 
 %%
 
