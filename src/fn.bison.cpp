@@ -74,7 +74,7 @@
 
 program: 
   /* empty */ { std::cout << "program(1)\n"; std::vector<astStatement*>* stmts = new std::vector<astStatement*>{}; programBlock = new astBlock(*stmts); }
-| statements  { std::cout << "program(2)\n"; programBlock = new astBlock(*$1); std::cout << programBlock->size(); }
+| statements  { std::cout << "program(2)\n"; programBlock = new astBlock(*$1); }
 
 statements:
   statement            { std::cout << "statement(1)\n"; $$ = new std::vector<astStatement*>{$1}; }

@@ -16,6 +16,7 @@ class astValue : public astStatement {
 public:
   virtual ~astValue() {};
   virtual llvm::Value* codegen() = 0;
+  virtual llvm::Type* type() = 0;
 };
 
 class astId : public astValue {
@@ -25,7 +26,9 @@ class astId : public astValue {
 public:
   astId(std::string* name, astId* child) { this->name = name; this->child = child; }
   astId(std::string* name) : astId(name, NULL) {}
+  std::string fullyQualifiedName();
   virtual llvm::Value* codegen() override;
+  virtual llvm::Type* type() override;
 };
 
 class astBlock : public astValue {
@@ -35,6 +38,7 @@ public:
   astBlock(std::vector<astStatement*> statements) { this->statements = statements; }
   astBlock() {}
   virtual llvm::Value* codegen() override;
+  virtual llvm::Type* type() override;
 
   uint size() { return statements.size(); }
 };
@@ -54,6 +58,7 @@ class astInt : public astValue {
 public:
   astInt(int value) { this->value = value; }
   virtual llvm::Value* codegen() override;
+  virtual llvm::Type* type() override;
 };
 
 class astDouble : public astValue {
@@ -62,6 +67,7 @@ class astDouble : public astValue {
 public:
   astDouble(double value) { this->value = value; }
   virtual llvm::Value* codegen() override;
+  virtual llvm::Type* type() override;
 };
 
 class astString : public astValue {
@@ -70,6 +76,7 @@ class astString : public astValue {
 public:
   astString(std::string* value) { this->value = value; }
   virtual llvm::Value* codegen() override;
+  virtual llvm::Type* type() override;
 };
 
 class astBool : public astValue {
@@ -78,6 +85,7 @@ class astBool : public astValue {
 public:
   astBool(bool value) { this->value = value; }
   virtual llvm::Value* codegen() override;
+  virtual llvm::Type* type() override;
 };
 
 class astFnCall : public astValue {
@@ -87,6 +95,7 @@ class astFnCall : public astValue {
 public:
   astFnCall(astId* name, std::vector<astValue*>* args) { this->name = name; this->args = args; }
   virtual llvm::Value* codegen() override;
+  virtual llvm::Type* type() override;
 };
 
 class astFnDef : public astValue {
@@ -95,7 +104,8 @@ class astFnDef : public astValue {
 
 public:
   astFnDef(std::vector<astId>* params, astBlock* body) { this->params = params; this->body = body; }
-  virtual llvm::Value* codegen() override; 
+  virtual llvm::Value* codegen() override;
+  virtual llvm::Type* type() override; 
 };
 
 class astCondition : public astStatement {
@@ -113,6 +123,7 @@ class astConditional : public astValue {
 public:
   astConditional(std::vector<astCondition>* conditions) { this->conditions = conditions; }
   llvm::Value* codegen() override;
+  virtual llvm::Type* type() override;
 };
 
 #endif
