@@ -3,6 +3,7 @@
 #include <map>
 #include <stack>
 #include <iostream>
+#include <algorithm>
 
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/Analysis/Passes.h"
@@ -16,18 +17,32 @@
 using namespace llvm;
 
 #define INT_SIZE (sizeof(int)*8)
-#define CHAR_SIZE 8
+#define CHAR_SIZE (sizeof(char)*8)
 
 std::unique_ptr<Module> TheModule = make_unique<Module>("MAIN", getGlobalContext());
 IRBuilder<> Builder(getGlobalContext());
 
-std::vector<Type *> argTypes;
+std::vector<Type*> argTypes;
 FunctionType* mainFnType =
   FunctionType::get(Type::getVoidTy(getGlobalContext()), argTypes, false);
 Function* mainFn =
   Function::Create(mainFnType, Function::ExternalLinkage, "main", TheModule.get());
 
-std::map<std::string, Value*> DefinedIds{};
+// Created to hold information
+// about an assignment operation like
+// x = 1
+class assignment {
+public:
+  Value* value;
+  Type* type;
+
+  assignment(Value* value, Type* type) {
+    this->value = value;
+    this->type = type;
+  }
+};
+
+std::map<std::string, assignment*> DefinedIds{};
 
 #include "../src/fn.ast.h"
 
@@ -38,6 +53,11 @@ Value* astBlock::codegen() {
   Builder.SetInsertPoint(block);
 
   Value* lastValue;
+
+  // Statements are added to blocks in reverse order
+  // by Flex/Bison.
+  std::reverse(statements.begin(), statements.end());
+
   for(auto statement: statements) {
     lastValue = statement->codegen();
   }
@@ -62,11 +82,19 @@ std::string astId::fullyQualifiedName() {
 
 Value* astId::codegen() {
   std::cout << "astId\n";
-  return NULL;
+
+  auto id = DefinedIds.find(fullyQualifiedName().c_str());
+  if(id == DefinedIds.end()) {
+    std::cout << "Uh oh.";
+    return NULL;
+  }
+
+  return Builder.CreateLoad(id->second->value, "");
 }
 
 Type* astId::type() {
-  return Type::getVoidTy(getGlobalContext());
+  auto id = DefinedIds[fullyQualifiedName().c_str()];
+  return id->type;
 }
 
 Value* astAssignment::codegen() {
@@ -74,9 +102,9 @@ Value* astAssignment::codegen() {
 
   auto name = key->fullyQualifiedName().c_str();
   AllocaInst* alloc = Builder.CreateAlloca(value->type(), NULL, name);
-  DefinedIds[name] = alloc;
-
   Value* valueCode = value->codegen();
+
+  DefinedIds[name] = new assignment(alloc, value->type());
   Builder.CreateStore(valueCode, alloc);
 
   return valueCode;
