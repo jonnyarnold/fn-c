@@ -17,7 +17,7 @@ parse:
 	bison -o tmp/parse.cpp --defines=tmp/parse.h src/fn.bison.cpp
 
 compile:
-	g++ -o bin/fn $(CPPFLAGS) $(LIBS) $(LDFLAGS) tmp/*.cpp src/fn.ast.cpp src/main.cpp
+	g++ -g -o bin/fn $(CPPFLAGS) $(LIBS) $(LDFLAGS) tmp/*.cpp src/fn.ast.cpp src/fn.runtime.cpp src/main.cpp
 
 run:
 	./bin/fn

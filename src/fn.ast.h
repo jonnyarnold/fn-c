@@ -4,31 +4,27 @@
 #include <string>
 #include <vector>
 
-#include <llvm/IR/Value.h>
+#include "fn.runtime.h"
 
 class astStatement {
 public:
   virtual ~astStatement() {};
-  virtual llvm::Value* codegen() = 0;
+  virtual fnValue* execute(fnExecution*) = 0;
 };
 
 class astValue : public astStatement {
 public:
   virtual ~astValue() {};
-  virtual llvm::Value* codegen() = 0;
-  virtual llvm::Type* type() = 0;
+  virtual fnValue* execute(fnExecution*) = 0;
 };
 
 class astId : public astValue {
+public:
   std::string* name;
   astId* child;
-
-public:
   astId(std::string* name, astId* child) { this->name = name; this->child = child; }
   astId(std::string* name) : astId(name, NULL) {}
-  std::string fullyQualifiedName();
-  virtual llvm::Value* codegen() override;
-  virtual llvm::Type* type() override;
+  fnValue* execute(fnExecution*) override;
 };
 
 class astBlock : public astValue {
@@ -37,19 +33,17 @@ class astBlock : public astValue {
 public:
   astBlock(std::vector<astStatement*> statements) { this->statements = statements; }
   astBlock() {}
-  virtual llvm::Value* codegen() override;
-  virtual llvm::Type* type() override;
+  virtual fnValue* execute(fnExecution*) override;
 
-  uint size() { return statements.size(); }
+  int size() { return statements.size(); }
 };
 
 class astAssignment : public astStatement {
+public:
   astId* key;
   astValue* value;
-
-public:
   astAssignment(astId* key, astValue* value) { this->key = key; this->value = value; }
-  virtual llvm::Value* codegen() override;
+  virtual fnValue* execute(fnExecution*) override;
 };
 
 class astInt : public astValue {
@@ -57,8 +51,7 @@ class astInt : public astValue {
 
 public:
   astInt(int value) { this->value = value; }
-  virtual llvm::Value* codegen() override;
-  virtual llvm::Type* type() override;
+  virtual fnValue* execute(fnExecution*) override;
 };
 
 class astDouble : public astValue {
@@ -66,8 +59,7 @@ class astDouble : public astValue {
 
 public:
   astDouble(double value) { this->value = value; }
-  virtual llvm::Value* codegen() override;
-  virtual llvm::Type* type() override;
+  virtual fnValue* execute(fnExecution*) override;
 };
 
 class astString : public astValue {
@@ -75,8 +67,7 @@ class astString : public astValue {
 
 public:
   astString(std::string* value) { this->value = value; }
-  virtual llvm::Value* codegen() override;
-  virtual llvm::Type* type() override;
+  virtual fnValue* execute(fnExecution*) override;
 };
 
 class astBool : public astValue {
@@ -84,8 +75,7 @@ class astBool : public astValue {
 
 public:
   astBool(bool value) { this->value = value; }
-  virtual llvm::Value* codegen() override;
-  virtual llvm::Type* type() override;
+  virtual fnValue* execute(fnExecution*) override;
 };
 
 class astFnCall : public astValue {
@@ -94,8 +84,7 @@ class astFnCall : public astValue {
 
 public:
   astFnCall(astId* name, std::vector<astValue*>* args) { this->name = name; this->args = args; }
-  virtual llvm::Value* codegen() override;
-  virtual llvm::Type* type() override;
+  virtual fnValue* execute(fnExecution*) override;
 };
 
 class astFnDef : public astValue {
@@ -104,8 +93,7 @@ class astFnDef : public astValue {
 
 public:
   astFnDef(std::vector<astId>* params, astBlock* body) { this->params = params; this->body = body; }
-  virtual llvm::Value* codegen() override;
-  virtual llvm::Type* type() override; 
+  virtual fnValue* execute(fnExecution*) override;
 };
 
 class astCondition : public astStatement {
@@ -114,7 +102,7 @@ class astCondition : public astStatement {
 
 public:
   astCondition(astValue* test, astBlock* body) { this->test = test; this->body = body; }
-  virtual llvm::Value* codegen() override;
+  virtual fnValue* execute(fnExecution*) override;
 };
 
 class astConditional : public astValue {
@@ -122,8 +110,7 @@ class astConditional : public astValue {
 
 public:
   astConditional(std::vector<astCondition>* conditions) { this->conditions = conditions; }
-  llvm::Value* codegen() override;
-  virtual llvm::Type* type() override;
+  fnValue* execute(fnExecution*) override;
 };
 
 #endif

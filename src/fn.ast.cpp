@@ -1,182 +1,121 @@
-#include <string>
-#include <vector>
-#include <map>
-#include <stack>
 #include <iostream>
-#include <algorithm>
 
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/Analysis/Passes.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/LegacyPassManager.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Verifier.h"
-#include "llvm/Support/TargetSelect.h"
+#include "fn.ast.h"
+#include "fn.runtime.h"
 
-using namespace llvm;
+fnValue* astId::execute(fnExecution* context) {
+  fnValue* value;
 
-#define INT_SIZE (sizeof(int)*8)
-#define CHAR_SIZE (sizeof(char)*8)
+  if(this->child != NULL) {
+    
+    // If the identifier has a child,
+    // we need to run in the block of the child.
+    std::cout << "PUSH_BLOCK " << (*this->name) << "\n";
 
-std::unique_ptr<Module> TheModule = make_unique<Module>("MAIN", getGlobalContext());
-IRBuilder<> Builder(getGlobalContext());
+    fnBlock* block = context->currentBlock()->getBlockById(this->name);
+    context->blockStack->push(block);
 
-std::vector<Type*> argTypes;
-FunctionType* mainFnType =
-  FunctionType::get(Type::getVoidTy(getGlobalContext()), argTypes, false);
-Function* mainFn =
-  Function::Create(mainFnType, Function::ExternalLinkage, "main", TheModule.get());
+    value = this->child->execute(context);
 
-// Created to hold information
-// about an assignment operation like
-// x = 1
-class assignment {
-public:
-  Value* value;
-  Type* type;
+    std::cout << "POP_BLOCK\n";
+    context->blockStack->pop();
 
-  assignment(Value* value, Type* type) {
-    this->value = value;
-    this->type = type;
+  } else {
+    std::cout << "GET " << (*this->name) << "\n";
+    value = context->currentBlock()->get(this->name);
   }
-};
 
-std::map<std::string, assignment*> DefinedIds{};
+  return value;
+}
 
-#include "../src/fn.ast.h"
+fnValue* astBlock::execute(fnExecution* context) {
+  std::cout << "PUSH_NEW_BLOCK\n";
 
-Value* astBlock::codegen() {
-  std::cout << "astBlock\n";
-
-  BasicBlock* block = BasicBlock::Create(getGlobalContext(), "block", mainFn);
-  Builder.SetInsertPoint(block);
-
-  Value* lastValue;
+  fnBlock* block = new fnBlock(context->currentBlock());
+  context->blockStack->push(block);
 
   // Statements are added to blocks in reverse order
-  // by Flex/Bison.
+  // by Flex/Bison. 
+  fnValue* lastValue; 
   std::reverse(statements.begin(), statements.end());
-
   for(auto statement: statements) {
-    lastValue = statement->codegen();
+    lastValue = statement->execute(context);
   }
 
-  Builder.CreateRet(lastValue);
+  context->blockStack->pop();
 
-  return block;
+  // If we have an assignment as the last statement,
+  // return the block...
+
+  if(lastValue == NULL) {
+    std::cout << "POP_BLOCK_AS_VALUE\n";
+    return block;
+  } else {
+    std::cout << "RETURN\n";
+    return lastValue;
+  }
 }
 
-Type* astBlock::type() {
-  // CHECKME!
-  return Type::getVoidTy(getGlobalContext());
-}
+fnValue* astAssignment::execute(fnExecution* context) {
+  fnValue* computedValue;
 
-std::string astId::fullyQualifiedName() {
-  if(child == NULL) {
-    return *name;
+  if(this->key->child != NULL) {
+    
+    // If the identifier has a child,
+    // we need to run in the block of the child.
+    std::cout << "PUSH_BLOCK " << (*this->key->name) << "\n";
+    fnBlock* block = context->currentBlock()->getBlockById(this->key->name);
+    context->blockStack->push(block);
+    computedValue = this->key->child->execute(context);
+    
+    std::cout << "POP_BLOCK\n";
+    context->blockStack->pop();
+
+  } else {
+    
+    // Otherwise, get the value and assign it.
+    computedValue = this->value->execute(context);
+    
+    std::cout << "SET " << (*this->key->name) << "\n";
+    context->currentBlock()->set(this->key->name, computedValue);
   }
 
-  return *name + child->fullyQualifiedName();
-}
-
-Value* astId::codegen() {
-  std::cout << "astId\n";
-
-  auto id = DefinedIds.find(fullyQualifiedName().c_str());
-  if(id == DefinedIds.end()) {
-    std::cout << "Uh oh.";
-    return NULL;
-  }
-
-  return Builder.CreateLoad(id->second->value, "");
-}
-
-Type* astId::type() {
-  auto id = DefinedIds[fullyQualifiedName().c_str()];
-  return id->type;
-}
-
-Value* astAssignment::codegen() {
-  std::cout << "astAssignment\n";
-
-  auto name = key->fullyQualifiedName().c_str();
-  AllocaInst* alloc = Builder.CreateAlloca(value->type(), NULL, name);
-  Value* valueCode = value->codegen();
-
-  DefinedIds[name] = new assignment(alloc, value->type());
-  Builder.CreateStore(valueCode, alloc);
-
-  return valueCode;
-}
-
-Value* astInt::codegen() {
-  std::cout << "astInt\n";
-  return ConstantInt::get(getGlobalContext(), APInt(INT_SIZE, value));
-}
-
-Type* astInt::type() {
-  return Type::getIntNTy(getGlobalContext(), INT_SIZE);
-}
-
-Value* astDouble::codegen() {
-  std::cout << "astDouble\n";
-  return ConstantFP::get(getGlobalContext(), APFloat(value));
-}
-
-Type* astDouble::type() {
-  return Type::getDoubleTy(getGlobalContext());
-}
-
-Value* astString::codegen() {
-  std::cout << "astString\n";
-  return ConstantDataArray::getString(getGlobalContext(), value->c_str());
-}
-
-Type* astString::type() {
-  return ArrayType::get(Type::getIntNTy(getGlobalContext(), CHAR_SIZE), strlen(value->c_str())+1);
-}
-
-Value* astBool::codegen() {
-  std::cout << "astBool\n";
-  return ConstantInt::get(getGlobalContext(), APInt(1, value));;
-}
-
-Type* astBool::type() {
-  return Type::getInt1Ty(getGlobalContext());
-}
-
-Value* astFnCall::codegen() {
-  std::cout << "astFnCall\n";
   return NULL;
 }
 
-Type* astFnCall::type() {
-  // CHECKME!
-  return Type::getVoidTy(getGlobalContext());
+fnValue* astInt::execute(fnExecution* context) {
+  std::cout << "INT " << this->value << "\n";
+  return dynamic_cast<fnValue*>(new fnInt(this->value));
 }
 
-Value* astFnDef::codegen() {
-  std::cout << "astFnDef\n";
+fnValue* astDouble::execute(fnExecution* context) {
+  std::cout << "DOUBLE " << this->value << "\n";
+  return dynamic_cast<fnValue*>(new fnDouble(this->value));
+}
+
+fnValue* astString::execute(fnExecution* context) {
+    std::cout << "STRING " << (*this->value) << "\n";
+  return dynamic_cast<fnValue*>(new fnString(this->value));
+}
+
+fnValue* astBool::execute(fnExecution* context) {
+    std::cout << "BOOL " << this->value << "\n";
+  return dynamic_cast<fnValue*>(new fnBool(this->value));
+}
+
+fnValue* astFnCall::execute(fnExecution* context) {
   return NULL;
 }
 
-Type* astFnDef::type() {
-  // CHECKME!
-  return Type::getVoidTy(getGlobalContext());
-}
-
-Value* astCondition::codegen() {
-  std::cout << "astCondition\n";
+fnValue* astFnDef::execute(fnExecution* context) {
   return NULL;
 }
 
-Value* astConditional::codegen() {
-  std::cout << "astConditional\n";
+fnValue* astCondition::execute(fnExecution* context) {
   return NULL;
 }
 
-Type* astConditional::type() {
-  // CHECKME!
-  return Type::getVoidTy(getGlobalContext());
+fnValue* astConditional::execute(fnExecution* context) {
+  return NULL;
 }
+
