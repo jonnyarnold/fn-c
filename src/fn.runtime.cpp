@@ -7,15 +7,26 @@ void fnBlock::set(std::string* name, fnValue* value) {
 }
 
 fnValue* fnBlock::get(std::string* name) {
-  return this->locals[(*name)];
+  fnValue* value = this->locals[(*name)];
+  if(value != NULL) {
+    std::cout << "Found @ " << value << "\n";
+    return value;
+  }
+
+  if(this->parent != NULL) {
+    return this->parent->get(name);
+  }
+
+  std::cout << "Undefined " << name << "\n";
+  return NULL;
 }
 
 fnBlock* fnBlock::getBlockById(std::string* id) {
-  return static_cast<fnBlock*>(this->locals[(*id)]);
+  return static_cast<fnBlock*>(this->get(id));
 }
 
 fnDef* fnBlock::getDefById(std::string* id) {
-  return static_cast<fnDef*>(this->locals[(*id)]);
+  return static_cast<fnDef*>(this->get(id));
 }
 
 fnValue* fnDef::call(fnExecution* context, std::vector<fnValue*> args) {
@@ -25,11 +36,11 @@ fnValue* fnDef::call(fnExecution* context, std::vector<fnValue*> args) {
 
   // Set the arguments in the FnDef block.
   for(int i = 0; i < this->params->size(); i++) {
-    std::string* paramName = (*this->params)[i];
+    std::string paramName = (*this->params)[i];
     fnValue* paramValue = args[i];
 
-    std::cout << "SET " << (*paramName) << "\n";
-    context->currentBlock()->set(paramName, paramValue);
+    std::cout << "SET " << paramName << "\n";
+    context->currentBlock()->set(&paramName, paramValue);
   }
 
   // Execute the FnDef instructions.

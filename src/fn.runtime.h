@@ -12,6 +12,12 @@ class fnValue {};
 // The style of function used by Fn.
 typedef fnValue* (*fnFunc)(std::vector<fnValue*>);
 
+// A vector of strings.
+typedef std::vector<std::string> Strings;
+
+// A dictionary of values.
+typedef std::unordered_map<std::string, fnValue*> ValueDict;
+
 // Represents any constant value in Fn.
 // The type T is the C-type that the value
 // belongs to.
@@ -42,8 +48,9 @@ class fnDef;
 // At runtime, an aggregate structure
 // storing values.
 class fnBlock : public fnValue {
+protected:
   fnBlock* parent;
-  std::unordered_map<std::string, fnValue*> locals;
+  ValueDict locals;
 
 public:
   fnBlock(fnBlock* parent) { this->parent = parent; }
@@ -60,15 +67,15 @@ class fnExecution;
 // Represents a function definition.
 class fnDef : public fnConstant<fnFunc> { 
   fnBlock* parentBlock;
-  std::vector<std::string*>* params;
+  Strings* params;
   
-  fnDef(fnFunc instructions, fnBlock* parentBlock, std::vector<std::string*>* params) 
+public:
+  fnDef(fnFunc instructions, fnBlock* parentBlock, Strings* params) 
     : fnConstant<fnFunc>(instructions) {
       this->parentBlock = parentBlock;
       this->params = params;
     }
 
-public:
   fnValue* call(fnExecution*, std::vector<fnValue*>);
 };
 

@@ -3,6 +3,7 @@
 
 #include "../src/fn.ast.h"
 #include "../src/fn.runtime.h"
+#include "../src/fn.builtins.h"
 
 extern int yyparse();
 
@@ -14,9 +15,11 @@ int main(int argc, char **argv)
   std::cout << "\n\n\n";
 
   fnExecution* context = new fnExecution();
+  context->blockStack->push(new fnTopBlock());
+
   fnValue* returnValue = programBlock->execute(context);
 
-  static_cast<fnString*>(returnValue)->dump();
+  std::cout << static_cast<fnInt*>(returnValue)->value;
 
   return 0;
 }
