@@ -29,7 +29,7 @@ fnValue* astId::execute(fnExecution* context) {
 }
 
 fnValue* astBlock::execute(fnExecution* context) {
-  std::cout << "PUSH_NEW_BLOCK\n";
+  std::cout << "PUSH_NEW_BLOCK " << context->currentBlock() << "\n";
 
   fnBlock* block = new fnBlock(context->currentBlock());
   context->blockStack->push(block);
@@ -80,6 +80,9 @@ fnValue* astAssignment::execute(fnExecution* context) {
     context->currentBlock()->set(this->key->name, computedValue);
   }
 
+  // Assignments do not return a value.
+  // There's a NULL check in astBlock::execute,
+  // to decide whether to return a value or a block.
   return NULL;
 }
 
@@ -94,17 +97,48 @@ fnValue* astDouble::execute(fnExecution* context) {
 }
 
 fnValue* astString::execute(fnExecution* context) {
-    std::cout << "STRING " << (*this->value) << "\n";
+  std::cout << "STRING " << (*this->value) << "\n";
   return dynamic_cast<fnValue*>(new fnString(this->value));
 }
 
 fnValue* astBool::execute(fnExecution* context) {
-    std::cout << "BOOL " << this->value << "\n";
+  std::cout << "BOOL " << this->value << "\n";
   return dynamic_cast<fnValue*>(new fnBool(this->value));
 }
 
 fnValue* astFnCall::execute(fnExecution* context) {
-  return NULL;
+  fnValue* value;
+
+  if(this->name->child != NULL) {
+    
+    // If the identifier has a child,
+    // we need to run in the block of the child.
+    std::cout << "PUSH_BLOCK " << (*this->name->name) << "\n";
+
+    fnBlock* block = context->currentBlock()->getBlockById(this->name->name);
+    context->blockStack->push(block);
+
+    value = this->name->child->execute(context);
+
+    std::cout << "POP_BLOCK\n";
+    context->blockStack->pop();
+
+  } else {
+    // Execute the arguments...
+    std::vector<fnValue*>* executedArgs = new std::vector<fnValue*>();
+    for(auto arg: (*this->args)) {
+      executedArgs->push_back(arg->execute(context));
+    }
+
+    std::cout << "CALL " << (*this->name->name) << "\n";
+
+    // Get the definition...
+    fnDef* def = context->currentBlock()->getDefById(this->name->name);
+
+    value = def->call(context, *executedArgs);
+  }
+
+  return value;
 }
 
 fnValue* astFnDef::execute(fnExecution* context) {

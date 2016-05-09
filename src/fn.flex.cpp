@@ -29,7 +29,7 @@ when                            { return TWHEN; }
 "("|")"|"{"|"}"|"\."|"="|","    { return yytext[0]; }
 "+"|"-"|"*"|"/"|"and"|"or"|"eq" { yylval.v_string = new std::string(yytext); return TINFIX; }
 
-[^ \t\n+\-*/\(\)\{\}\.,]+       { yylval.v_string = new std::string(yytext); return TID; }
+[^ \t\n\+\-\*\/\(\)\{\}\.\,]+   { yylval.v_string = new std::string(yytext); return TID; }
 
 .                               { std::cout << "Uh oh: " << yytext; yyterminate(); }
 

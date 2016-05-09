@@ -10,7 +10,7 @@
 class fnValue {};
 
 // The style of function used by Fn.
-typedef fnValue (*fnFunc)(std::vector<fnValue>);
+typedef fnValue* (*fnFunc)(std::vector<fnValue*>);
 
 // Represents any constant value in Fn.
 // The type T is the C-type that the value
@@ -36,7 +36,8 @@ class fnDouble : public fnConstant<double> { using fnConstant::fnConstant; };
 class fnString : public fnConstant<std::string*> { using fnConstant::fnConstant; };
 
 // Represents a function definition.
-class fnDef : public fnConstant<fnFunc> { using fnConstant::fnConstant; };
+// (FORWARD DECLARATION)
+class fnDef;
 
 // At runtime, an aggregate structure
 // storing values.
@@ -49,10 +50,29 @@ public:
   void set(std::string* name, fnValue* value);
   fnValue* get(std::string* name);
   fnBlock* getBlockById(std::string* id);
+  fnDef* getDefById(std::string* id);
 };
 
-// A class holding contextual information
-// about an execution.
+// A class holding contextual information about an execution.
+// (FORWARD DECLARATION)
+class fnExecution;
+
+// Represents a function definition.
+class fnDef : public fnConstant<fnFunc> { 
+  fnBlock* parentBlock;
+  std::vector<std::string*>* params;
+  
+  fnDef(fnFunc instructions, fnBlock* parentBlock, std::vector<std::string*>* params) 
+    : fnConstant<fnFunc>(instructions) {
+      this->parentBlock = parentBlock;
+      this->params = params;
+    }
+
+public:
+  fnValue* call(fnExecution*, std::vector<fnValue*>);
+};
+
+// A class holding contextual information about an execution.
 class fnExecution {
 public:
   std::stack<fnBlock*>* blockStack;
