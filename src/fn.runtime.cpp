@@ -40,12 +40,12 @@ fnValue* fnDef::call(fnExecution* context, std::vector<fnValue*> args) {
     std::string paramName = (*this->params)[i];
     fnValue* paramValue = args[i];
 
-    std::cout << "SET_VALUE(name " << paramName << ", value" << paramValue << ")\n";
+    std::cout << "SET_VALUE(name " << paramName << ", value " << paramValue << ")\n";
     context->currentBlock()->set(&paramName, paramValue);
   }
 
   // Execute the FnDef instructions.
-  fnValue* result = this->value(args);
+  fnValue* result = this->func(context, args);
 
   context->blockStack->pop();
 

@@ -2,6 +2,9 @@
 #include <unordered_map>
 #include <stack>
 #include <vector>
+#include <functional>
+
+#include "fn.ast.h"
 
 #ifndef FN_RUNTIME
 #define FN_RUNTIME
@@ -9,8 +12,13 @@
 // Base class for all Fn values.
 class fnValue {};
 
+// A class holding contextual information about an execution.
+// (FORWARD DECLARATION)
+class fnExecution;
+
 // The style of function used by Fn.
-typedef fnValue* (*fnFunc)(std::vector<fnValue*>);
+// typedef fnValue* (*fnFunc)(std::vector<fnValue*>);
+typedef std::function<fnValue*(fnExecution*, std::vector<fnValue*>)> fnFunc;
 
 // A vector of strings.
 typedef std::vector<std::string> Strings;
@@ -60,21 +68,24 @@ public:
   fnDef* getDefById(std::string* id);
 };
 
-// A class holding contextual information about an execution.
-// (FORWARD DECLARATION)
-class fnExecution;
-
 // Represents a function definition.
-class fnDef : public fnConstant<fnFunc> { 
+class fnDef : public fnValue {
   fnBlock* parentBlock;
   Strings* params;
-  
+  fnFunc func;
+
 public:
-  fnDef(fnFunc instructions, fnBlock* parentBlock, Strings* params) 
-    : fnConstant<fnFunc>(instructions) {
-      this->parentBlock = parentBlock;
-      this->params = params;
-    }
+  fnDef(fnFunc instructions, fnBlock* parentBlock, Strings* params) {
+    this->parentBlock = parentBlock;
+    this->params = params;
+    this->func = instructions;
+  }
+
+  fnDef(astBlock* block, fnBlock* parentBlock, Strings* params) {
+    this->parentBlock = parentBlock;
+    this->params = params;
+    this->func = [block](fnExecution* context, std::vector<fnValue*> values) { return block->execute(context); };
+  }
 
   fnValue* call(fnExecution*, std::vector<fnValue*>);
 };

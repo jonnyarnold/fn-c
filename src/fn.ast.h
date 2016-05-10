@@ -4,7 +4,10 @@
 #include <string>
 #include <vector>
 
-#include "fn.runtime.h"
+// FORWARD DECLARATIONS
+// See fn.runtime.h
+class fnExecution;
+class fnValue;
 
 class astStatement {
 public:
@@ -88,11 +91,11 @@ public:
 };
 
 class astFnDef : public astValue {
-  std::vector<astId>* params;
+  std::vector<std::string>* params;
   astBlock* body;
 
 public:
-  astFnDef(std::vector<astId>* params, astBlock* body) { this->params = params; this->body = body; }
+  astFnDef(std::vector<std::string>* params, astBlock* body) { this->params = params; this->body = body; }
   virtual fnValue* execute(fnExecution*) override;
 };
 

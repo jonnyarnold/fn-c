@@ -4,7 +4,8 @@
 #include "fn.runtime.h"
 
 // Adds two integers together.
-fnValue* add(std::vector<fnValue*> values) {
+fnValue* add(fnExecution* context, std::vector<fnValue*> values) {
+  std::cout << "ADD(first " << values[0] << ", second " << values[1] << ")\n";
   int sum = 
     static_cast<fnInt*>(values[0])->value + 
     static_cast<fnInt*>(values[1])->value;
@@ -13,7 +14,8 @@ fnValue* add(std::vector<fnValue*> values) {
 }
 
 // Subtracts two integers.
-fnValue* subtract(std::vector<fnValue*> values) {
+fnValue* subtract(fnExecution* context, std::vector<fnValue*> values) {
+  std::cout << "SUBTRACT(first " << values[0] << ", second " << values[1] << ")\n";
   int diff = 
     static_cast<fnInt*>(values[0])->value - 
     static_cast<fnInt*>(values[1])->value;
@@ -22,7 +24,8 @@ fnValue* subtract(std::vector<fnValue*> values) {
 }
 
 // Multiplies two integers.
-fnValue* multiply(std::vector<fnValue*> values) {
+fnValue* multiply(fnExecution* context, std::vector<fnValue*> values) {
+  std::cout << "MULTIPLY(first " << values[0] << ", second " << values[1] << ")\n";
   int product = 
     static_cast<fnInt*>(values[0])->value * 
     static_cast<fnInt*>(values[1])->value;
@@ -31,7 +34,8 @@ fnValue* multiply(std::vector<fnValue*> values) {
 }
 
 // Divides two integers.
-fnValue* divide(std::vector<fnValue*> values) {
+fnValue* divide(fnExecution* context, std::vector<fnValue*> values) {
+  std::cout << "DIVIDE(first " << values[0] << ", second " << values[1] << ")\n";
   int quotient = 
     static_cast<fnInt*>(values[0])->value / 
     static_cast<fnInt*>(values[1])->value;

@@ -36,6 +36,7 @@
 
   // Intermediaries
   std::vector<astStatement*>* v_statements;
+  std::vector<std::string>* v_strings;
   std::vector<astValue*>* v_values;
   std::vector<astId>* v_ids;
   std::vector<astCondition>* v_conditions;
@@ -55,7 +56,7 @@
 %type <v_id> identifier
 %type <v_value> value literal test
 %type <v_values> args
-%type <v_ids> params
+%type <v_strings> params
 %type <v_conditional> conditional
 %type <v_conditions> conditions
 %type <v_condition> condition
@@ -125,9 +126,9 @@ functionDef:
   '(' params ')' block { $$ = new astFnDef($2, $4); }
 
 params:
-  /* empty */    { std::cout << "params(1)\n"; $$ = new std::vector<astId>(); }
-| TID            { std::cout << "params(2)\n"; astId* id = new astId($1); $$ = new std::vector<astId>{*id}; }
-| TID ',' params { std::cout << "params(3)\n"; astId* id = new astId($1); ($3)->push_back(*id); $$ = $3; }
+  /* empty */    { std::cout << "params(1)\n"; $$ = new std::vector<std::string>(); }
+| TID            { std::cout << "params(2)\n"; $$ = new std::vector<std::string>{*$1}; }
+| TID ',' params { std::cout << "params(3)\n"; std::string* str = new std::string(*$1); ($3)->push_back(*str); $$ = $3; }
 
 block:
   '{' '}'            { std::cout << "block(1)\n"; std::vector<astStatement*>* stmts = new std::vector<astStatement*>{}; $$ = new astBlock(*stmts); }

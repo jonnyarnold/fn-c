@@ -88,23 +88,31 @@ fnValue* astAssignment::execute(fnExecution* context) {
 }
 
 fnValue* astInt::execute(fnExecution* context) {
-  std::cout << "CONST_INT(" << this->value << ")\n";
-  return dynamic_cast<fnValue*>(new fnInt(this->value));
+  std::cout << "CONST_INT(" << this->value << ")";
+  fnValue* value = dynamic_cast<fnValue*>(new fnInt(this->value));
+  std::cout << " = " << value << "\n";
+  return value;
 }
 
 fnValue* astDouble::execute(fnExecution* context) {
   std::cout << "CONST_DOUBLE(" << this->value << "\n";
-  return dynamic_cast<fnValue*>(new fnDouble(this->value));
+  fnValue* value = dynamic_cast<fnValue*>(new fnDouble(this->value));
+  std::cout << " = " << value << "\n";
+  return value;
 }
 
 fnValue* astString::execute(fnExecution* context) {
   std::cout << "CONST_STRING(" << (*this->value) << ")\n";
-  return dynamic_cast<fnValue*>(new fnString(this->value));
+  fnValue* value = dynamic_cast<fnValue*>(new fnString(this->value));
+  std::cout << " = " << value << "\n";
+  return value;
 }
 
 fnValue* astBool::execute(fnExecution* context) {
   std::cout << "CONST_BOOL(" << this->value << ")\n";
-  return dynamic_cast<fnValue*>(new fnBool(this->value));
+  fnValue* value = dynamic_cast<fnValue*>(new fnBool(this->value));
+  std::cout << " = " << value << "\n";
+  return value;
 }
 
 fnValue* astFnCall::execute(fnExecution* context) {
@@ -145,7 +153,11 @@ fnValue* astFnCall::execute(fnExecution* context) {
 }
 
 fnValue* astFnDef::execute(fnExecution* context) {
-  return NULL;
+  std::cout << "CONST_FN(" << this->body << ")";
+
+  fnDef* def = new fnDef(this->body, context->currentBlock(), this->params);
+  std::cout << " = " << def << "\n";
+  return def;
 }
 
 fnValue* astCondition::execute(fnExecution* context) {
