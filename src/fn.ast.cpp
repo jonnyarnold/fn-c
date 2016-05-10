@@ -10,8 +10,7 @@ fnValue* astId::execute(fnExecution* context) {
     
     // If the identifier has a child,
     // we need to run in the block of the child.
-    std::cout << "PUSH_BLOCK " << (*this->name) << "\n";
-
+    std::cout << "PUSH_BLOCK(parent " << (*this->name) << ")\n";
     fnBlock* block = context->currentBlock()->getBlockById(this->name);
     context->blockStack->push(block);
 
@@ -21,18 +20,20 @@ fnValue* astId::execute(fnExecution* context) {
     context->blockStack->pop();
 
   } else {
-    std::cout << "GET " << (*this->name) << "\n";
+    std::cout << "GET_VALUE(" << (*this->name) << ")";
     value = context->currentBlock()->get(this->name);
+    std::cout << " = " << value << "\n";
   }
 
   return value;
 }
 
 fnValue* astBlock::execute(fnExecution* context) {
-  std::cout << "PUSH_NEW_BLOCK " << context->currentBlock() << "\n";
+  std::cout << "PUSH_NEW_BLOCK(parent " << context->currentBlock() << ")";
 
   fnBlock* block = new fnBlock(context->currentBlock());
   context->blockStack->push(block);
+  std::cout << " = " << block << "\n";
 
   // Statements are added to blocks in reverse order
   // by Flex/Bison. 
@@ -48,10 +49,10 @@ fnValue* astBlock::execute(fnExecution* context) {
   // return the block...
 
   if(lastValue == NULL) {
-    std::cout << "POP_BLOCK_AS_VALUE\n";
+    std::cout << "POP_BLOCK_AS_VALUE(" << block << ")\n";
     return block;
   } else {
-    std::cout << "RETURN\n";
+    std::cout << "RETURN_VALUE(" << lastValue << ")\n";
     return lastValue;
   }
 }
@@ -63,12 +64,12 @@ fnValue* astAssignment::execute(fnExecution* context) {
     
     // If the identifier has a child,
     // we need to run in the block of the child.
-    std::cout << "PUSH_BLOCK " << (*this->key->name) << "\n";
+    std::cout << "PUSH_BLOCK(" << (*this->key->name) << ")\n";
     fnBlock* block = context->currentBlock()->getBlockById(this->key->name);
     context->blockStack->push(block);
     computedValue = this->key->child->execute(context);
     
-    std::cout << "POP_BLOCK\n";
+    std::cout << "POP_BLOCK(" << context->currentBlock() << ")\n";
     context->blockStack->pop();
 
   } else {
@@ -76,7 +77,7 @@ fnValue* astAssignment::execute(fnExecution* context) {
     // Otherwise, get the value and assign it.
     computedValue = this->value->execute(context);
     
-    std::cout << "SET " << (*this->key->name) << "\n";
+    std::cout << "SET_VALUE(name " << (*this->key->name) << ", value " << computedValue << ")\n";
     context->currentBlock()->set(this->key->name, computedValue);
   }
 
@@ -87,22 +88,22 @@ fnValue* astAssignment::execute(fnExecution* context) {
 }
 
 fnValue* astInt::execute(fnExecution* context) {
-  std::cout << "INT " << this->value << "\n";
+  std::cout << "CONST_INT(" << this->value << ")\n";
   return dynamic_cast<fnValue*>(new fnInt(this->value));
 }
 
 fnValue* astDouble::execute(fnExecution* context) {
-  std::cout << "DOUBLE " << this->value << "\n";
+  std::cout << "CONST_DOUBLE(" << this->value << "\n";
   return dynamic_cast<fnValue*>(new fnDouble(this->value));
 }
 
 fnValue* astString::execute(fnExecution* context) {
-  std::cout << "STRING " << (*this->value) << "\n";
+  std::cout << "CONST_STRING(" << (*this->value) << ")\n";
   return dynamic_cast<fnValue*>(new fnString(this->value));
 }
 
 fnValue* astBool::execute(fnExecution* context) {
-  std::cout << "BOOL " << this->value << "\n";
+  std::cout << "CONST_BOOL(" << this->value << ")\n";
   return dynamic_cast<fnValue*>(new fnBool(this->value));
 }
 
@@ -113,14 +114,16 @@ fnValue* astFnCall::execute(fnExecution* context) {
     
     // If the identifier has a child,
     // we need to run in the block of the child.
-    std::cout << "PUSH_BLOCK " << (*this->name->name) << "\n";
+    std::cout << "PUSH_BLOCK(" << (*this->name->name) << ")";
 
     fnBlock* block = context->currentBlock()->getBlockById(this->name->name);
     context->blockStack->push(block);
 
+    std::cout << " = " << block << "\n";
+
     value = this->name->child->execute(context);
 
-    std::cout << "POP_BLOCK\n";
+    std::cout << "POP_BLOCK(" << context->currentBlock() << ")\n";
     context->blockStack->pop();
 
   } else {
@@ -130,7 +133,7 @@ fnValue* astFnCall::execute(fnExecution* context) {
       executedArgs->push_back(arg->execute(context));
     }
 
-    std::cout << "CALL " << (*this->name->name) << "\n";
+    std::cout << "CALL(" << (*this->name->name) << ")\n";
 
     // Get the definition...
     fnDef* def = context->currentBlock()->getDefById(this->name->name);
