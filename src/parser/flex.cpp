@@ -2,8 +2,8 @@
   #include <string>
   #include <iostream>
 
-  #include "../src/fn.ast.h"
-  #include "../tmp/parse.h"
+  #include "ast.h"
+  #include "parse.h"
 
   // Keep track of the line number.
   int line = 1;

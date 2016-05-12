@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "fn.runtime.h"
+#include "interpreter/runtime.h"
 
 void fnBlock::set(std::string* name, fnValue* value) {
   this->locals[(*name)] = value;

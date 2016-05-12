@@ -7,7 +7,7 @@
 #include <vector>
 #include <functional>
 
-#include "fn.ast.h"
+#include "ast.h"
 
 // Base class for all Fn values.
 class fnValue {};

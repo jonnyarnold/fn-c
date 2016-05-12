@@ -1,7 +1,7 @@
 #ifndef FN_BUILTINS
 #define FN_BUILTINS
 
-#include "fn.runtime.h"
+#include "interpreter/runtime.h"
 
 // Adds two integers together.
 fnValue* add(fnExecution* context, std::vector<fnValue*> values) {

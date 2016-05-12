@@ -1,9 +1,9 @@
 #include <iostream>
 #include <stack>
 
-#include "../src/fn.ast.h"
-#include "../src/fn.runtime.h"
-#include "../src/fn.builtins.h"
+#include "ast.h"
+#include "interpreter/runtime.h"
+#include "interpreter/builtins.h"
 
 extern int yyparse();
 

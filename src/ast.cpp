@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "fn.ast.h"
-#include "fn.runtime.h"
+#include "ast.h"
+#include "interpreter/runtime.h"
 
 fnValue* astId::execute(fnExecution* context) {
   fnValue* value;

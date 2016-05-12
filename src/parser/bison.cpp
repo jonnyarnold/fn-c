@@ -2,8 +2,8 @@
   #include <string>
   #include <iostream>
 
-  #include "../tmp/lex.h"
-  #include "../src/fn.ast.h"
+  #include "lex.h"
+  #include "ast.h"
 
   // stuff from flex that bison needs to know about:
   extern int yylex();
@@ -112,7 +112,9 @@ infixOperation:
 
 identifier:
   TID                { std::cout << "id(1)\n"; $$ = new astId($1); }
-| TID '.' identifier { std::cout << "id(2)\n"; $$ = new astId($1, $3); }
+| TINFIX             { std::cout << "id(2)\n"; $$ = new astId($1); }
+| TID '.' identifier { std::cout << "id(3)\n"; $$ = new astId($1, $3); }
+
 
 functionCall:
   identifier '(' args ')' { std::cout << "fnCall\n"; $$ = new astFnCall($1, $3); }
