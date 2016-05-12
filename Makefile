@@ -3,6 +3,9 @@
 all: build spec run
 
 CPPFLAGS = -std=c++11 -Wno-deprecated-register
+INCLUDES = -I. -Isrc -Itmp
+
+PROGRAM = tmp/*.cpp src/interpreter/*.cpp src/ast.cpp
 
 clean:
 	rm -f tmp/*
@@ -16,10 +19,13 @@ parse:
 	bison -o tmp/parse.cpp --defines=tmp/parse.h src/parser/bison.cpp
 
 compile:
-	g++ -g -Isrc -Itmp -o bin/fn $(CPPFLAGS) tmp/*.cpp src/interpreter/*.cpp src/*.cpp
+	g++ -g $(INCLUDES) -o bin/fn $(CPPFLAGS) $(PROGRAM) src/main.cpp
 
 run:
-	./bin/fn < test.fn
+	./bin/fn
 
 spec:
-	g++ -o tmp/spec spec/main.cpp && ./tmp/spec
+	g++ -o tmp/spec $(INCLUDES) $(CPPFLAGS) $(PROGRAM) spec/main.cpp && ./tmp/spec
+
+watch:
+	fswatch -or src spec | xargs -I{} make spec
