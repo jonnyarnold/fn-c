@@ -1,3 +1,6 @@
+#ifndef FN_RUNTIME
+#define FN_RUNTIME
+
 #include <string>
 #include <unordered_map>
 #include <stack>
@@ -5,9 +8,6 @@
 #include <functional>
 
 #include "fn.ast.h"
-
-#ifndef FN_RUNTIME
-#define FN_RUNTIME
 
 // Base class for all Fn values.
 class fnValue {};
