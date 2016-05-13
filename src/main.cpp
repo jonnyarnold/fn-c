@@ -1,4 +1,4 @@
-#include "cli.cpp"
+#include "src/cli.cpp"
 
 int main(int argc, char **argv)
 {

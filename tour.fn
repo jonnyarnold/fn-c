@@ -139,9 +139,9 @@ print(guessMyNumber(42)) # => "You win!"
 # There are two ways of importing:
 #
 # 1. Use import!() to import all of the file's scope into the current one
-import!("tour-import.fn")
+include "tour-import.fn"
 print(importedX) # => 1
 
 # 2. Use import() to import all of the file's scope into a variable
-i = import("tour-import.fn")
+i = include "tour-import.fn"
 print(i.importedY) # => 2

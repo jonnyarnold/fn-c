@@ -1,22 +1,14 @@
-#ifndef FN_CLI
-#define FN_CLI
-
 #include <iostream>
 #include <vector>
 #include "vendor/cxxopts.h"
 
-#include "ast.h"
-#include "interpreter/runtime.h"
-#include "interpreter/builtins.h"
+#include "src/ast.h"
+#include "src/interpreter/runtime.h"
+#include "src/interpreter/builtins.h"
 
 extern FILE* yyin;
 extern int yyparse();
 extern astBlock* programBlock;
-
-void printHelp() {
-  std::cout << "This is fn, a fun-ctional programming language!\n\n";
-  std::cout << "To run a file, use `fn run <file>`.\n";
-}
 
 int run(const char fileName[]) {
   // Lex file.
@@ -66,5 +58,3 @@ int parseCli(int argc, char* argv[])
   // We did nothing. That's bad.
   return -1;
 }
-
-#endif

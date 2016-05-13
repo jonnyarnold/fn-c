@@ -1,4 +1,4 @@
-#include "cli.cpp"
+#include "src/cli.h"
 
 TEST_CASE("parseCli") {
 

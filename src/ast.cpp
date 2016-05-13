@@ -1,7 +1,8 @@
 #include <iostream>
+#include <algorithm>
 
-#include "ast.h"
-#include "interpreter/runtime.h"
+#include "src/ast.h"
+#include "src/interpreter/runtime.h"
 
 fnValue* astId::execute(fnExecution* context) {
   fnValue* value;
@@ -95,21 +96,21 @@ fnValue* astInt::execute(fnExecution* context) {
 }
 
 fnValue* astDouble::execute(fnExecution* context) {
-  std::cout << "CONST_DOUBLE(" << this->value << "\n";
+  std::cout << "CONST_DOUBLE(" << this->value << ")";
   fnValue* value = dynamic_cast<fnValue*>(new fnDouble(this->value));
   std::cout << " = " << value << "\n";
   return value;
 }
 
 fnValue* astString::execute(fnExecution* context) {
-  std::cout << "CONST_STRING(" << (*this->value) << ")\n";
+  std::cout << "CONST_STRING(" << (*this->value) << ")";
   fnValue* value = dynamic_cast<fnValue*>(new fnString(this->value));
   std::cout << " = " << value << "\n";
   return value;
 }
 
 fnValue* astBool::execute(fnExecution* context) {
-  std::cout << "CONST_BOOL(" << this->value << ")\n";
+  std::cout << "CONST_BOOL(" << this->value << ")";
   fnValue* value = dynamic_cast<fnValue*>(new fnBool(this->value));
   std::cout << " = " << value << "\n";
   return value;

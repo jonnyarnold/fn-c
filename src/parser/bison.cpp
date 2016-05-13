@@ -2,8 +2,8 @@
   #include <string>
   #include <iostream>
 
-  #include "lex.h"
-  #include "ast.h"
+  #include "tmp/lex.h"
+  #include "src/ast.h"
 
   // stuff from flex that bison needs to know about:
   extern int yylex();
@@ -16,7 +16,7 @@
 %}
 
 /* Represents the many different ways we can access our data */
-%union V {
+%union {
   // Literals
   std::string *v_string;
   double      v_double;

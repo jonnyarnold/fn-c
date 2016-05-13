@@ -3,7 +3,7 @@
 
 #include <stack>
 
-#include "interpreter/runtime.h"
+#include "src/interpreter/runtime.h"
 
 // A class holding contextual information about an execution.
 class fnExecution {

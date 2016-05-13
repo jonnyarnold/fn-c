@@ -1,0 +1,100 @@
+# Built-in object zoo.
+# This is the ideal case...
+
+# The Global object is created at the start of any execution
+# and is the parent object for all objects.
+Global = () {
+
+  # Alias of Bool.flip().
+  not = (obj) { obj.flip() }
+  
+}
+
+# In Fn, any custom value is automatically an Object.
+Object = (obj) {
+
+  # Returns a reference to itself.
+  this = <builtin>
+
+  # Returns true if two objects have the same value.
+  eq = (other) { <builtin> }
+
+  # Returns a string representation of the object.
+  asString = () { <builtin> }
+
+  # This function is run when the object is referenced like:
+  # obj(1)
+  # By default, it returns the property given by the argument.
+  call = (propertyName) { <builtin> }
+
+  # Returns the number of arguments the object will take when call()ed.
+  arity = () { <builtin> }
+
+  # Iterates over the properties of the object,
+  # calling the given function for each one.
+  each = (f) { <builtin> }
+
+}
+
+# A Bool represents either a true or false value.
+Bool = (value) {
+  # Include Object and override.
+  include Object {
+    eq = (other) { <builtin> }
+    asString = () { <builtin> }
+  }
+
+  # Returns true if both this and the other are true.
+  and = (other) { <builtin> }
+
+  # Returns true if either this or the other are true.
+  or = (other) { <builtin> }
+
+  # Returns the opposite of the value:
+  # (true).flip() = false
+  # (false).flip() = true
+  flip = () { <builtin> }
+}
+
+# A Number represents a numeric value.
+Number = (value) {
+  include Object {
+    eq = (other) { <builtin> }
+    asString = () { <builtin> }
+  })
+
+  # Arithmetic operations.
+  + = (other) { <builtin> }
+  - = (other) { <builtin> }
+  * = (other) { <builtin> }
+  / = (other) { <builtin> }
+
+  # Comparison operations.
+  lessThan = (other) { <builtin> }
+  moreThan = (other) { <builtin> }
+}
+
+# A String represents a collection of characters.
+String = (value) {
+  include Object {
+    eq = (other) { <builtin> }
+    asString = () { <builtin> }
+  }
+}
+
+# A Def is a function definition:
+# a set of instructions that can be called.
+Def = (value) {
+  include Object {
+    asString = () { <builtin> }
+  }
+}
+
+# A List is a collection of objects.
+List = (...values) {
+  include Object {
+    eq = (other) { <builtin> }
+    asString = () { <builtin> }
+    each = (f) { <builtin> }
+  }
+}
