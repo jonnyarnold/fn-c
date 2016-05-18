@@ -17,7 +17,7 @@ fnValue* fnBlock::get(std::string* name) {
     return this->parent->get(name);
   }
 
-  std::cout << "!!! undefined: " << name << "\n";
+  std::cout << "!!! undefined: " << *name << "\n";
   return NULL;
 }
 

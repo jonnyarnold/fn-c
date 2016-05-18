@@ -1,5 +1,4 @@
-#ifndef FN_RUNTIME
-#define FN_RUNTIME
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -9,6 +8,8 @@
 
 #include "src/ast.h"
 
+const int INDENT_SIZE = 2;
+
 // Base class for all Fn values.
 class fnValue {
 public:
@@ -16,7 +17,10 @@ public:
   virtual std::size_t hash() = 0;
 
   // Returns a string representing the value.
-  virtual std::string asString() = 0;
+  virtual std::string asString(int indentationLevel) = 0;
+  std::string asString() {
+    return this->asString(0);
+  };
 };
 
 // A class holding contextual information about an execution.
@@ -46,14 +50,14 @@ public:
     return (std::size_t)this->value;
   }
 
-  virtual std::string asString() = 0;
+  virtual std::string asString(int indentationLevel) = 0;
 };
 
 // Represents a bool.
 class fnBool : public fnConstant<bool> {
   using fnConstant::fnConstant;
 
-  virtual std::string asString() {
+  virtual std::string asString(int indentationLevel) {
     return this->value ? "true" : "false";
   }
 };
@@ -62,7 +66,7 @@ class fnBool : public fnConstant<bool> {
 class fnInt : public fnConstant<int> {
   using fnConstant::fnConstant;
 
-  virtual std::string asString() {
+  virtual std::string asString(int indentationLevel) {
     return std::to_string(this->value);
   }
 };
@@ -71,7 +75,7 @@ class fnInt : public fnConstant<int> {
 class fnDouble : public fnConstant<double> {
   using fnConstant::fnConstant;
 
-  virtual std::string asString() {
+  virtual std::string asString(int indentationLevel) {
     return std::to_string(this->value);
   }
 };
@@ -85,8 +89,8 @@ public:
     return std::hash<std::string>()(*this->value);
   }
 
-  virtual std::string asString() {
-    return "\"" + *this->value + "\"";
+  virtual std::string asString(int indentationLevel) {
+    return *this->value;
   }
 };
 
@@ -123,13 +127,13 @@ public:
     return workingHash;
   }
 
-  virtual std::string asString() {
+  virtual std::string asString(int indentationLevel) {
     std::string result = "{\n";
     for(auto local: locals) {
-      result += "  " + local.first + " = " + local.second->asString() + "\n";
+      result += std::string(indentationLevel+INDENT_SIZE, ' ') + local.first + " = " + local.second->asString(indentationLevel + INDENT_SIZE) + "\n";
     }
 
-    result += "}";
+    result += std::string(indentationLevel, ' ') + "}";
     return result;
   }
 };
@@ -159,7 +163,7 @@ public:
     return (std::size_t)(this);
   }
 
-  virtual std::string asString() {
+  virtual std::string asString(int indentationLevel) {
     std::string result = "(";
     for(auto param: (*this->params)) {
       result += param;
@@ -173,5 +177,3 @@ public:
     return result;
   }
 };
-
-#endif

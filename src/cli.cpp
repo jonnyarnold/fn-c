@@ -4,7 +4,6 @@
 
 #include "src/ast.h"
 #include "src/interpreter/runtime.h"
-#include "src/interpreter/builtins.h"
 #include "src/interpreter/machine.h"
 
 extern FILE* yyin;
@@ -18,9 +17,8 @@ int run(const char fileName[]) {
   fclose(yyin);
 
   fnMachine* context = new fnMachine(true);
-  context->blockStack->push(new fnTopBlock());
-
   fnValue* returnValue = programBlock->execute(context);
+
   return 0;
 }
 

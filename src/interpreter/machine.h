@@ -1,8 +1,8 @@
-#ifndef FN_MACHINE
-#define FN_MACHINE
+#pragma once
 
 #include <stack>
 
+#include "src/interpreter/builtins.h"
 #include "src/interpreter/runtime.h"
 
 // A class holding contextual information about an execution.
@@ -14,6 +14,7 @@ public:
   fnMachine(bool debug) {
     this->debug = debug;
     this->blockStack = new std::stack<fnBlock*>();
+    this->blockStack->push(new fnTopBlock());
   }
 
   fnMachine() : fnMachine(false) {}
@@ -55,5 +56,3 @@ public:
   fnValue* callByName(std::string* name, std::vector<fnValue*> args);
 
 };
-
-#endif
