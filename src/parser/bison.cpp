@@ -2,13 +2,16 @@
   #include <string>
   #include <iostream>
 
+  #define IS_DEBUG false
+  #define DEBUG(msg) if(IS_DEBUG) { std::cout << msg << std::endl; }
+
   #include "tmp/lex.h"
   #include "src/ast.h"
 
   // stuff from flex that bison needs to know about:
   extern int yylex();
   extern int line;
-   
+
   void yyerror(const char *s);
 
   // Here we go!
@@ -73,22 +76,22 @@
 
 %%
 
-program: 
-  /* empty */ { std::cout << "program(1)\n"; std::vector<astStatement*>* stmts = new std::vector<astStatement*>{}; programBlock = new astBlock(*stmts); }
-| statements  { std::cout << "program(2)\n"; programBlock = new astBlock(*$1); }
+program:
+  /* empty */ { DEBUG("program(1)"); std::vector<astStatement*>* stmts = new std::vector<astStatement*>{}; programBlock = new astBlock(*stmts); }
+| statements  { DEBUG("program(2)"); programBlock = new astBlock(*$1); }
 
 statements:
-  statement            { std::cout << "statement(1)\n"; $$ = new std::vector<astStatement*>{$1}; }
-| statement statements { std::cout << "statement(2)\n"; ($2)->push_back($1); $$ = $2; }
+  statement            { DEBUG("statement(1)"); $$ = new std::vector<astStatement*>{$1}; }
+| statement statements { DEBUG("statement(2)"); ($2)->push_back($1); $$ = $2; }
   ;
 
-statement: 
-  assignment 
-| value      
+statement:
+  assignment
+| value
   ;
 
-assignment: 
-  identifier '=' value { std::cout << "assignment\n"; $$ = new astAssignment($1, $3); }
+assignment:
+  identifier '=' value { DEBUG("assignment"); $$ = new astAssignment($1, $3); }
 
 value:
   literal
@@ -101,54 +104,54 @@ value:
   ;
 
 literal:
-  TINT    { std::cout << "int\n"; $$ = new astInt($1); }
-| TDOUBLE { std::cout << "double\n"; $$ = new astDouble($1); }
-| TSTRING { std::cout << "string\n"; $$ = new astString($1); }
-| TBOOL   { std::cout << "bool\n"; $$ = new astBool($1); }
+  TINT    { DEBUG("int"); $$ = new astInt($1); }
+| TDOUBLE { DEBUG("double"); $$ = new astDouble($1); }
+| TSTRING { DEBUG("string"); $$ = new astString($1); }
+| TBOOL   { DEBUG("bool"); $$ = new astBool($1); }
   ;
 
-infixOperation: 
-  value TINFIX value { std::cout << "infix\n"; astId* id = new astId($2); $$ = new astFnCall(id, new std::vector<astValue*>{$1, $3}); }
+infixOperation:
+  value TINFIX value { DEBUG("infix"); astId* id = new astId($2); $$ = new astFnCall(id, new std::vector<astValue*>{$1, $3}); }
 
 identifier:
-  TID                { std::cout << "id(1)\n"; $$ = new astId($1); }
-| TINFIX             { std::cout << "id(2)\n"; $$ = new astId($1); }
-| TID '.' identifier { std::cout << "id(3)\n"; $$ = new astId($1, $3); }
+  TID                { DEBUG("id(1)"); $$ = new astId($1); }
+| TINFIX             { DEBUG("id(2)"); $$ = new astId($1); }
+| TID '.' identifier { DEBUG("id(3)"); $$ = new astId($1, $3); }
 
 
 functionCall:
-  identifier '(' args ')' { std::cout << "fnCall\n"; $$ = new astFnCall($1, $3); }
+  identifier '(' args ')' { DEBUG("fnCall"); $$ = new astFnCall($1, $3); }
 
 args:
-  /* empty */    { std::cout << "args(1)\n"; $$ = new std::vector<astValue*>{}; }
-| value          { std::cout << "args(2)\n"; $$ = new std::vector<astValue*>{$1}; }
-| value ',' args { std::cout << "args(3)\n"; ($3)->push_back($1); $$ = $3; }
+  /* empty */    { DEBUG("args(1)"); $$ = new std::vector<astValue*>{}; }
+| value          { DEBUG("args(2)"); $$ = new std::vector<astValue*>{$1}; }
+| value ',' args { DEBUG("args(3)"); ($3)->push_back($1); $$ = $3; }
 
 functionDef:
   '(' params ')' block { $$ = new astFnDef($2, $4); }
 
 params:
-  /* empty */    { std::cout << "params(1)\n"; $$ = new std::vector<std::string>(); }
-| TID            { std::cout << "params(2)\n"; $$ = new std::vector<std::string>{*$1}; }
-| TID ',' params { std::cout << "params(3)\n"; std::string* str = new std::string(*$1); ($3)->push_back(*str); $$ = $3; }
+  /* empty */    { DEBUG("params(1)"); $$ = new std::vector<std::string>(); }
+| TID            { DEBUG("params(2)"); $$ = new std::vector<std::string>{*$1}; }
+| TID ',' params { DEBUG("params(3)"); std::string* str = new std::string(*$1); ($3)->push_back(*str); $$ = $3; }
 
 block:
-  '{' '}'            { std::cout << "block(1)\n"; std::vector<astStatement*>* stmts = new std::vector<astStatement*>{}; $$ = new astBlock(*stmts); }
-| '{' statements '}' { std::cout << "block(2)\n"; std::cout << ($2)->size(); $$ = new astBlock(*$2); }
+  '{' '}'            { DEBUG("block(1)"); std::vector<astStatement*>* stmts = new std::vector<astStatement*>{}; $$ = new astBlock(*stmts); }
+| '{' statements '}' { DEBUG("block(2)"); $$ = new astBlock(*$2); }
 
 conditional:
-  TWHEN '{' conditions '}' { std::cout << "conditional\n"; $$ = new astConditional($3); }
+  TWHEN '{' conditions '}' { DEBUG("conditional"); $$ = new astConditional($3); }
 
 conditions:
-  /* empty */          { std::cout << "conditions(1)\n"; $$ = new std::vector<astCondition>(); }
-| condition            { std::cout << "conditions(2)\n"; $$ = new std::vector<astCondition>{*$1}; }
-| condition conditions { std::cout << "conditions(3)\n"; ($2)->push_back(*$1); $$ = $2; }
+  /* empty */          { DEBUG("conditions(1)"); $$ = new std::vector<astCondition>(); }
+| condition            { DEBUG("conditions(2)"); $$ = new std::vector<astCondition>{*$1}; }
+| condition conditions { DEBUG("conditions(3)"); ($2)->push_back(*$1); $$ = $2; }
 
 condition:
-  test block { std::cout << "condition\n"; $$ = new astCondition($1, $2); }
+  test block { DEBUG("condition"); $$ = new astCondition($1, $2); }
 
 test:
-  TBOOL { std::cout << "bool\n"; $$ = new astBool($1); }
+  TBOOL { DEBUG("bool"); $$ = new astBool($1); }
 | infixOperation
 | identifier
 | functionCall
@@ -156,6 +159,6 @@ test:
 %%
 
 void yyerror(const char* s) {
-  std::cout << "Parse error on line " << line << ":\n" << *s;
+  std::cout << "Parse error on line " << line << ":" << *s;
   exit(-1);
 }

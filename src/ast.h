@@ -6,19 +6,19 @@
 
 // FORWARD DECLARATIONS
 // See fn.runtime.h
-class fnExecution;
+class fnMachine;
 class fnValue;
 
 class astStatement {
 public:
   virtual ~astStatement() {};
-  virtual fnValue* execute(fnExecution*) = 0;
+  virtual fnValue* execute(fnMachine*) = 0;
 };
 
 class astValue : public astStatement {
 public:
   virtual ~astValue() {};
-  virtual fnValue* execute(fnExecution*) = 0;
+  virtual fnValue* execute(fnMachine*) = 0;
 };
 
 class astId : public astValue {
@@ -27,7 +27,7 @@ public:
   astId* child;
   astId(std::string* name, astId* child) { this->name = name; this->child = child; }
   astId(std::string* name) : astId(name, NULL) {}
-  fnValue* execute(fnExecution*) override;
+  fnValue* execute(fnMachine*) override;
 };
 
 class astBlock : public astValue {
@@ -36,7 +36,7 @@ class astBlock : public astValue {
 public:
   astBlock(std::vector<astStatement*> statements) { this->statements = statements; }
   astBlock() {}
-  virtual fnValue* execute(fnExecution*) override;
+  virtual fnValue* execute(fnMachine*) override;
 
   int size() { return statements.size(); }
 };
@@ -46,7 +46,7 @@ public:
   astId* key;
   astValue* value;
   astAssignment(astId* key, astValue* value) { this->key = key; this->value = value; }
-  virtual fnValue* execute(fnExecution*) override;
+  virtual fnValue* execute(fnMachine*) override;
 };
 
 class astInt : public astValue {
@@ -54,7 +54,7 @@ class astInt : public astValue {
 
 public:
   astInt(int value) { this->value = value; }
-  virtual fnValue* execute(fnExecution*) override;
+  virtual fnValue* execute(fnMachine*) override;
 };
 
 class astDouble : public astValue {
@@ -62,7 +62,7 @@ class astDouble : public astValue {
 
 public:
   astDouble(double value) { this->value = value; }
-  virtual fnValue* execute(fnExecution*) override;
+  virtual fnValue* execute(fnMachine*) override;
 };
 
 class astString : public astValue {
@@ -70,7 +70,7 @@ class astString : public astValue {
 
 public:
   astString(std::string* value) { this->value = value; }
-  virtual fnValue* execute(fnExecution*) override;
+  virtual fnValue* execute(fnMachine*) override;
 };
 
 class astBool : public astValue {
@@ -78,7 +78,7 @@ class astBool : public astValue {
 
 public:
   astBool(bool value) { this->value = value; }
-  virtual fnValue* execute(fnExecution*) override;
+  virtual fnValue* execute(fnMachine*) override;
 };
 
 class astFnCall : public astValue {
@@ -87,7 +87,7 @@ class astFnCall : public astValue {
 
 public:
   astFnCall(astId* name, std::vector<astValue*>* args) { this->name = name; this->args = args; }
-  virtual fnValue* execute(fnExecution*) override;
+  virtual fnValue* execute(fnMachine*) override;
 };
 
 class astFnDef : public astValue {
@@ -96,7 +96,7 @@ class astFnDef : public astValue {
 
 public:
   astFnDef(std::vector<std::string>* params, astBlock* body) { this->params = params; this->body = body; }
-  virtual fnValue* execute(fnExecution*) override;
+  virtual fnValue* execute(fnMachine*) override;
 };
 
 class astCondition : public astStatement {
@@ -105,7 +105,7 @@ class astCondition : public astStatement {
 
 public:
   astCondition(astValue* test, astBlock* body) { this->test = test; this->body = body; }
-  virtual fnValue* execute(fnExecution*) override;
+  virtual fnValue* execute(fnMachine*) override;
 };
 
 class astConditional : public astValue {
@@ -113,7 +113,7 @@ class astConditional : public astValue {
 
 public:
   astConditional(std::vector<astCondition>* conditions) { this->conditions = conditions; }
-  fnValue* execute(fnExecution*) override;
+  fnValue* execute(fnMachine*) override;
 };
 
 #endif

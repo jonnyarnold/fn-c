@@ -5,6 +5,7 @@
 #include "src/ast.h"
 #include "src/interpreter/runtime.h"
 #include "src/interpreter/builtins.h"
+#include "src/interpreter/machine.h"
 
 extern FILE* yyin;
 extern int yyparse();
@@ -12,17 +13,14 @@ extern astBlock* programBlock;
 
 int run(const char fileName[]) {
   // Lex file.
-  yyin = fopen(fileName,"r"); 
+  yyin = fopen(fileName,"r");
   yyparse();
   fclose(yyin);
 
-  fnExecution* context = new fnExecution();
+  fnMachine* context = new fnMachine(true);
   context->blockStack->push(new fnTopBlock());
 
   fnValue* returnValue = programBlock->execute(context);
-
-  std::cout << static_cast<fnInt*>(returnValue)->value;
-
   return 0;
 }
 
@@ -42,7 +40,7 @@ int parseCli(int argc, char* argv[])
   std::string command = options["command"].as<std::string>();
 
   if(command == "help" || command == "") {
-    
+
     std::cout << options.help();
     return 0;
 
@@ -52,7 +50,7 @@ int parseCli(int argc, char* argv[])
     std::string fileName = args[0];
 
     return run(fileName.c_str());
-    
+
   }
 
   // We did nothing. That's bad.

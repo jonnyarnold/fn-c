@@ -9,7 +9,7 @@
   int line = 1;
 %}
 
-%option noyywrap 
+%option noyywrap
 
 %%
 
@@ -20,7 +20,15 @@
 
 [0-9]+\.[0-9]*                  { yylval.v_double = atof(yytext); return TDOUBLE; }
 [0-9]+                          { yylval.v_int = atoi(yytext); return TINT; }
-\"(\\.|[^"])*\"                 { yylval.v_string = new std::string(yytext); return TSTRING; }
+
+\"(\\.|[^"])*\"                 {
+  std::string* workingString = new std::string(yytext);
+  workingString->erase(0, 1);
+  workingString->erase(workingString->size() - 1);
+
+  return TSTRING;
+}
+
 true                            { yylval.v_bool = true; return TBOOL; }
 false                           { yylval.v_bool = false; return TBOOL; }
 

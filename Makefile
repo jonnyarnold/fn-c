@@ -10,10 +10,10 @@ CPP_FILES = `find ./src -name "*.cpp" | sed 's/\.\/src\///g'`
 OBJ_FILES = $(CPP_FILES:.cpp=.o)
 
 OBJ_DIR = obj
-OBJ_FILENAMES = lex.o parse.o runtime.o ast.o main.o
+OBJ_FILENAMES = lex.o parse.o runtime.o ast.o machine.o main.o
 OBJS = $(patsubst %,$(OBJ_DIR)/%,$(OBJ_FILENAMES))
 
-SPEC_OBJ_FILENAMES = lex.o parse.o runtime.o ast.o cli.o spec.o
+SPEC_OBJ_FILENAMES = lex.o parse.o runtime.o ast.o machine.o cli.o spec.o
 SPEC_OBJS = $(patsubst %,$(OBJ_DIR)/%,$(SPEC_OBJ_FILENAMES))
 
 ### MAIN ###
@@ -36,8 +36,12 @@ $(OBJ_DIR)/parse.o: tmp/parse.cpp tmp/lex.cpp
 $(OBJ_DIR)/runtime.o: src/interpreter/runtime.cpp
 	g++ -c -o $@ src/interpreter/runtime.cpp $(CPP_FLAGS) $(INCLUDES)
 
+$(OBJ_DIR)/machine.o: src/interpreter/machine.cpp
+	g++ -c -o $@ src/interpreter/machine.cpp $(CPP_FLAGS) $(INCLUDES)
+
 $(OBJ_DIR)/ast.o: src/ast.cpp
 	g++ -c -o $@ src/ast.cpp $(CPP_FLAGS) $(INCLUDES)
+
 
 $(OBJ_DIR)/cli.o: src/cli.cpp
 	g++ -c -o $@ src/cli.cpp $(CPP_FLAGS) $(INCLUDES)

@@ -21,11 +21,11 @@ public:
 
 // A class holding contextual information about an execution.
 // (FORWARD DECLARATION)
-class fnExecution;
+class fnMachine;
 
 // The style of function used by Fn.
 // typedef fnValue* (*fnFunc)(std::vector<fnValue*>);
-typedef std::function<fnValue*(fnExecution*, std::vector<fnValue*>)> fnFunc;
+typedef std::function<fnValue*(fnMachine*, std::vector<fnValue*>)> fnFunc;
 
 // A vector of strings.
 typedef std::vector<std::string> Strings;
@@ -41,7 +41,7 @@ class fnConstant : public fnValue {
 public:
   T value;
   fnConstant(T value) { this->value = value; }
-  
+
   virtual std::size_t hash() {
     return (std::size_t)this->value;
   }
@@ -50,26 +50,26 @@ public:
 };
 
 // Represents a bool.
-class fnBool : public fnConstant<bool> { 
+class fnBool : public fnConstant<bool> {
   using fnConstant::fnConstant;
 
   virtual std::string asString() {
     return this->value ? "true" : "false";
-  } 
+  }
 };
 
 // Represents an int.
-class fnInt : public fnConstant<int> { 
-  using fnConstant::fnConstant; 
+class fnInt : public fnConstant<int> {
+  using fnConstant::fnConstant;
 
   virtual std::string asString() {
     return std::to_string(this->value);
-  } 
+  }
 };
 
 // Represents a double.
-class fnDouble : public fnConstant<double> { 
-  using fnConstant::fnConstant; 
+class fnDouble : public fnConstant<double> {
+  using fnConstant::fnConstant;
 
   virtual std::string asString() {
     return std::to_string(this->value);
@@ -77,8 +77,8 @@ class fnDouble : public fnConstant<double> {
 };
 
 // Represents a string.
-class fnString : public fnConstant<std::string*> { 
-  using fnConstant::fnConstant; 
+class fnString : public fnConstant<std::string*> {
+  using fnConstant::fnConstant;
 
 public:
   virtual std::size_t hash() {
@@ -86,7 +86,7 @@ public:
   }
 
   virtual std::string asString() {
-    return *this->value;
+    return "\"" + *this->value + "\"";
   }
 };
 
@@ -150,10 +150,10 @@ public:
   fnDef(astBlock* block, fnBlock* parentBlock, Strings* params) {
     this->parentBlock = parentBlock;
     this->params = params;
-    this->func = [block](fnExecution* context, std::vector<fnValue*> values) { return block->execute(context); };
+    this->func = [block](fnMachine* context, std::vector<fnValue*> values) { return block->execute(context); };
   }
 
-  fnValue* call(fnExecution*, std::vector<fnValue*>);
+  fnValue* call(fnMachine*, std::vector<fnValue*>);
 
   virtual std::size_t hash() {
     return (std::size_t)(this);
@@ -171,18 +171,6 @@ public:
     result += ") { ... }";
 
     return result;
-  }
-};
-
-// A class holding contextual information about an execution.
-class fnExecution {
-public:
-  std::stack<fnBlock*>* blockStack;
-  fnExecution() { this->blockStack = new std::stack<fnBlock*>(); }
-
-  fnBlock* currentBlock() { 
-    if(this->blockStack->empty()) { return NULL; }
-    return this->blockStack->top(); 
   }
 };
 
