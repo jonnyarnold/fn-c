@@ -13,12 +13,17 @@ class astStatement {
 public:
   virtual ~astStatement() {};
   virtual fnValue* execute(fnMachine*) = 0;
+  virtual std::string asString(int indent) = 0;
+  std::string asString() {
+    return this->asString(0);
+  }
 };
 
 class astValue : public astStatement {
 public:
   virtual ~astValue() {};
   virtual fnValue* execute(fnMachine*) = 0;
+  virtual std::string asString(int indent) = 0;
 };
 
 class astId : public astValue {
@@ -28,6 +33,14 @@ public:
   astId(std::string* name, astId* child) { this->name = name; this->child = child; }
   astId(std::string* name) : astId(name, NULL) {}
   fnValue* execute(fnMachine*) override;
+
+  virtual std::string asString(int indent) {
+    if (this->child == NULL) {
+      return "(ID name:" + *this->name + ")";
+    }
+
+    return "(ID name:" + *this->name + " child:" + this->child->asString(indent) + ")";
+  }
 };
 
 class astBlock : public astValue {
@@ -39,6 +52,18 @@ public:
   virtual fnValue* execute(fnMachine*) override;
 
   int size() { return statements.size(); }
+
+  virtual std::string asString(int indent) {
+    std::string result = "(BLOCK [\n";
+
+    for(auto statement: this->statements) {
+      result += std::string(indent + 2, ' ') + statement->asString(indent + 2) + "\n";
+    }
+
+    result += std::string(indent, ' ') + "])";
+
+    return result;
+  }
 };
 
 class astAssignment : public astStatement {
@@ -47,6 +72,10 @@ public:
   astValue* value;
   astAssignment(astId* key, astValue* value) { this->key = key; this->value = value; }
   virtual fnValue* execute(fnMachine*) override;
+
+  virtual std::string asString(int indent) {
+    return "(ASSIGNMENT id:" + this->key->asString(indent) + " value:" + this->value->asString(indent) + ")";
+  }
 };
 
 class astInt : public astValue {
@@ -55,6 +84,10 @@ class astInt : public astValue {
 public:
   astInt(int value) { this->value = value; }
   virtual fnValue* execute(fnMachine*) override;
+
+  virtual std::string asString(int indent) {
+    return "(INT " + std::to_string(this->value) + ")";
+  }
 };
 
 class astDouble : public astValue {
@@ -63,6 +96,10 @@ class astDouble : public astValue {
 public:
   astDouble(double value) { this->value = value; }
   virtual fnValue* execute(fnMachine*) override;
+
+  virtual std::string asString(int indent) {
+    return "(DOUBLE " + std::to_string(this->value) + ")";
+  }
 };
 
 class astString : public astValue {
@@ -71,6 +108,10 @@ class astString : public astValue {
 public:
   astString(std::string* value) { this->value = value; }
   virtual fnValue* execute(fnMachine*) override;
+
+  virtual std::string asString(int indent) {
+    return "(STRING " + *this->value + ")";
+  }
 };
 
 class astBool : public astValue {
@@ -79,6 +120,10 @@ class astBool : public astValue {
 public:
   astBool(bool value) { this->value = value; }
   virtual fnValue* execute(fnMachine*) override;
+
+  virtual std::string asString(int indent) {
+    return "(BOOL " + std::to_string(this->value) + ")";
+  }
 };
 
 class astFnCall : public astValue {
@@ -88,6 +133,18 @@ class astFnCall : public astValue {
 public:
   astFnCall(astId* name, std::vector<astValue*>* args) { this->name = name; this->args = args; }
   virtual fnValue* execute(fnMachine*) override;
+
+  virtual std::string asString(int indent) {
+    std::string result = "(CALL name:" + this->name->asString(indent) + " args:[\n";
+
+    for(auto arg: *this->args) {
+      result += std::string(indent + 2, ' ') + arg->asString(indent + 2) + "\n";
+    }
+
+    result += std::string(indent, ' ') + "])";
+
+    return result;
+  }
 };
 
 class astFnDef : public astValue {
@@ -97,6 +154,18 @@ class astFnDef : public astValue {
 public:
   astFnDef(std::vector<std::string>* params, astBlock* body) { this->params = params; this->body = body; }
   virtual fnValue* execute(fnMachine*) override;
+
+  virtual std::string asString(int indent) {
+    std::string result = "(DEF params:[\n";
+
+    for(auto param: *this->params) {
+      result += std::string(indent + 2, ' ') + param + "\n";
+    }
+
+    result += std::string(indent, ' ') + "] body:" + this->body->asString(indent) + ")";
+
+    return result;
+  }
 };
 
 class astCondition : public astStatement {
@@ -106,14 +175,33 @@ class astCondition : public astStatement {
 public:
   astCondition(astValue* test, astBlock* body) { this->test = test; this->body = body; }
   virtual fnValue* execute(fnMachine*) override;
+
+  virtual std::string asString(int indent) {
+    return "(COND test:" + 
+      this->test->asString(indent) + 
+      " body:" + 
+      this->body->asString(indent) + ")";
+  }
 };
 
 class astConditional : public astValue {
-  std::vector<astCondition>* conditions;
+  std::vector<astCondition*>* conditions;
 
 public:
-  astConditional(std::vector<astCondition>* conditions) { this->conditions = conditions; }
+  astConditional(std::vector<astCondition*>* conditions) { this->conditions = conditions; }
   fnValue* execute(fnMachine*) override;
+
+  virtual std::string asString(int indent) {
+    std::string result = "(WHEN [\n";
+
+    for(auto condition: *this->conditions) {
+      result += std::string(indent + 2, ' ') + condition->asString(indent + 2) + "\n";
+    }
+
+    result += std::string(indent, ' ') + "])";
+
+    return result;
+  }
 };
 
 #endif

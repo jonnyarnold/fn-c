@@ -34,6 +34,7 @@ true                             { yylval.v_bool = true; return TBOOL; }
 false                            { yylval.v_bool = false; return TBOOL; }
 
 when                             { return TWHEN; }
+fn                               { return TFN; }
 
 "("|")"|"{"|"}"|"\."|"="|","|";" { return yytext[0]; }
 

@@ -10,13 +10,16 @@ extern FILE* yyin;
 extern int yyparse();
 extern astBlock* programBlock;
 
-int run(const char fileName[]) {
+int run(const char fileName[], bool debug) {
   // Lex file.
   yyin = fopen(fileName,"r");
   yyparse();
   fclose(yyin);
 
-  fnMachine* context = new fnMachine(true);
+  // Whoosh.
+  if(debug) { std::cout << programBlock->asString(0) << "\n\n"; }
+
+  fnMachine* context = new fnMachine(debug);
   fnValue* returnValue = programBlock->execute(context);
 
   return 0;
@@ -46,8 +49,9 @@ int parseCli(int argc, char* argv[])
 
     std::vector<std::string> args = options["args"].as<std::vector<std::string>>();
     std::string fileName = args[0];
+    bool debug = options.count("debug");
 
-    return run(fileName.c_str());
+    return run(fileName.c_str(), debug);
 
   }
 

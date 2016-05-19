@@ -39,7 +39,7 @@
   std::vector<std::string>* v_strings;
   std::vector<astValue*>* v_values;
   std::vector<astId>* v_ids;
-  std::vector<astCondition>* v_conditions;
+  std::vector<astCondition*>* v_conditions;
 }
 
 // Terminal symbols.
@@ -47,7 +47,7 @@
 %token <v_double> TDOUBLE
 %token <v_int>    TINT
 %token <v_bool>   TBOOL
-%token <void>     TWHEN
+%token <void>     TWHEN TFN
 
 // Non-terminal symbols.
 %type <v_block> program block
@@ -68,10 +68,9 @@
 %start program
 
 // Operator precedence
-%precedence '='
-%precedence '('
+%left ';'
+%left '='
 %left TINFIX
-%precedence TDOUBLE TINT TBOOL TSTRING TID
 %left '.'
 
 %%
@@ -80,13 +79,10 @@ program:
   statements { programBlock = new astBlock(*$1); }
 
 statements:
-  /* empty */              { $$ = new std::vector<astStatement*>{}; }
-| statements statement terminator { ($1)->push_back($2); $$ = $1; }
+  /* empty */                     { $$ = new std::vector<astStatement*>{}; }
+| statements statement            { ($1)->push_back($2); $$ = $1; }
+| statements statement ';'        { ($1)->push_back($2); $$ = $1; }
   ;
-
-terminator:
-  /* empty */
-| ';'
 
 statement:
   assignment
@@ -134,7 +130,7 @@ args:
 | value ',' args { ($3)->push_back($1); $$ = $3; }
 
 functionDef:
-  '(' params ')' block { $$ = new astFnDef($2, $4); }
+  TFN '(' params ')' block { $$ = new astFnDef($3, $5); }
 
 params:
   /* empty */    { $$ = new std::vector<std::string>(); }
@@ -148,8 +144,8 @@ conditional:
   TWHEN '{' conditions '}' { $$ = new astConditional($3); }
 
 conditions:
-  /* empty */          { $$ = new std::vector<astCondition>(); }
-| conditions condition { ($1)->push_back(*$2); $$ = $1; }
+  /* empty */          { $$ = new std::vector<astCondition*>(); }
+| conditions condition { ($1)->push_back($2); $$ = $1; }
 
 condition:
   test block { $$ = new astCondition($1, $2); }

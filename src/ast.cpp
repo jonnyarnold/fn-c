@@ -90,7 +90,7 @@ fnValue* astFnCall::execute(fnMachine* context) {
     // If the identifier has a child,
     // we need to run in the block of the child.
     context->pushBlockByName(this->name->name);
-    value = this->name->child->execute(context);
+    value = (new astFnCall(this->name->child, this->args))->execute(context);
     context->popBlock();
 
   } else {

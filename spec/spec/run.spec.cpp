@@ -19,6 +19,9 @@ std::string execute(const char code[]) {
   yyparse();
   yy_delete_buffer(buffer);
 
+  // Output AST
+  std::cout << programBlock->asString(0);
+
   // Execute
   fnMachine* context = new fnMachine();
   fnValue* returnValue = programBlock->execute(context);
@@ -74,11 +77,22 @@ TEST_CASE("Block set/get") {
   REQUIRE(result == "1");
 }
 
-TEST_CASE("Fn set/get") {
+TEST_CASE("Fn set/call") {
   std::string result = execute(
-    "x = (a) { a + 1 }; x(1)"
+    "x = fn (a) { a + 1 }; x(1)"
   );
 
   REQUIRE(result == "2");
 }
 
+TEST_CASE("Fn set/call in block") {
+  std::string result = execute(R"(
+    x = {
+      y = fn (a) { a + 1 }
+    }
+
+    x.y(1)
+  )");
+
+  REQUIRE(result == "2");
+}
