@@ -26,10 +26,7 @@ fnValue* astId::execute(fnMachine* context) {
 fnValue* astBlock::execute(fnMachine* context) {
   fnBlock* block = context->pushNewBlock();
 
-  // Statements are added to blocks in reverse order
-  // by Flex/Bison.
   fnValue* lastValue;
-  std::reverse(statements.begin(), statements.end());
   for(auto statement: statements) {
     lastValue = statement->execute(context);
   }

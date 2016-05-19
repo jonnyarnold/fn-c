@@ -2,9 +2,6 @@
   #include <string>
   #include <iostream>
 
-  #define IS_DEBUG false
-  #define DEBUG(msg) if(IS_DEBUG) { std::cout << msg << std::endl; }
-
   #include "tmp/lex.h"
   #include "src/ast.h"
 
@@ -67,23 +64,29 @@
 %type <v_fndef> functionDef
 %type <v_fncall> functionCall infixOperation
 
-// Infix operators
-// FIXME: All operators have the same precedence.
-%left TINFIX
-
 // The starting rule.
 %start program
+
+// Operator precedence
+%precedence '='
+%precedence '('
+%left TINFIX
+%precedence TDOUBLE TINT TBOOL TSTRING TID
+%left '.'
 
 %%
 
 program:
-  /* empty */ { DEBUG("program(1)"); std::vector<astStatement*>* stmts = new std::vector<astStatement*>{}; programBlock = new astBlock(*stmts); }
-| statements  { DEBUG("program(2)"); programBlock = new astBlock(*$1); }
+  statements { programBlock = new astBlock(*$1); }
 
 statements:
-  statement            { DEBUG("statement(1)"); $$ = new std::vector<astStatement*>{$1}; }
-| statement statements { DEBUG("statement(2)"); ($2)->push_back($1); $$ = $2; }
+  /* empty */              { $$ = new std::vector<astStatement*>{}; }
+| statements statement terminator { ($1)->push_back($2); $$ = $1; }
   ;
+
+terminator:
+  /* empty */
+| ';'
 
 statement:
   assignment
@@ -91,10 +94,11 @@ statement:
   ;
 
 assignment:
-  identifier '=' value { DEBUG("assignment"); $$ = new astAssignment($1, $3); }
+  identifier '=' value { $$ = new astAssignment($1, $3); }
 
 value:
-  literal
+  brackets
+| literal
 | infixOperation
 | identifier
 | functionCall
@@ -103,55 +107,55 @@ value:
 | conditional
   ;
 
+brackets:
+  '(' value ')'
+
 literal:
-  TINT    { DEBUG("int"); $$ = new astInt($1); }
-| TDOUBLE { DEBUG("double"); $$ = new astDouble($1); }
-| TSTRING { DEBUG("string"); $$ = new astString($1); }
-| TBOOL   { DEBUG("bool"); $$ = new astBool($1); }
+  TINT    { $$ = new astInt($1); }
+| TDOUBLE { $$ = new astDouble($1); }
+| TSTRING { $$ = new astString($1); }
+| TBOOL   { $$ = new astBool($1); }
   ;
 
 infixOperation:
-  value TINFIX value { DEBUG("infix"); astId* id = new astId($2); $$ = new astFnCall(id, new std::vector<astValue*>{$1, $3}); }
+  value TINFIX value { astId* id = new astId($2); $$ = new astFnCall(id, new std::vector<astValue*>{$1, $3}); }
 
 identifier:
-  TID                { DEBUG("id(1)"); $$ = new astId($1); }
-| TINFIX             { DEBUG("id(2)"); $$ = new astId($1); }
-| TID '.' identifier { DEBUG("id(3)"); $$ = new astId($1, $3); }
-
+  TID                { $$ = new astId($1); }
+| TINFIX             { $$ = new astId($1); }
+| TID '.' identifier { $$ = new astId($1, $3); }
 
 functionCall:
-  identifier '(' args ')' { DEBUG("fnCall"); $$ = new astFnCall($1, $3); }
+  identifier '(' args ')' { $$ = new astFnCall($1, $3); }
 
 args:
-  /* empty */    { DEBUG("args(1)"); $$ = new std::vector<astValue*>{}; }
-| value          { DEBUG("args(2)"); $$ = new std::vector<astValue*>{$1}; }
-| value ',' args { DEBUG("args(3)"); ($3)->push_back($1); $$ = $3; }
+  /* empty */    { $$ = new std::vector<astValue*>{}; }
+| value          { $$ = new std::vector<astValue*>{$1}; }
+| value ',' args { ($3)->push_back($1); $$ = $3; }
 
 functionDef:
   '(' params ')' block { $$ = new astFnDef($2, $4); }
 
 params:
-  /* empty */    { DEBUG("params(1)"); $$ = new std::vector<std::string>(); }
-| TID            { DEBUG("params(2)"); $$ = new std::vector<std::string>{*$1}; }
-| TID ',' params { DEBUG("params(3)"); std::string* str = new std::string(*$1); ($3)->push_back(*str); $$ = $3; }
+  /* empty */    { $$ = new std::vector<std::string>(); }
+| TID            { $$ = new std::vector<std::string>{*$1}; }
+| TID ',' params { std::string* str = new std::string(*$1); ($3)->push_back(*str); $$ = $3; }
 
 block:
-  '{' '}'            { DEBUG("block(1)"); std::vector<astStatement*>* stmts = new std::vector<astStatement*>{}; $$ = new astBlock(*stmts); }
-| '{' statements '}' { DEBUG("block(2)"); $$ = new astBlock(*$2); }
+  '{' statements '}' { $$ = new astBlock(*$2); }
 
 conditional:
-  TWHEN '{' conditions '}' { DEBUG("conditional"); $$ = new astConditional($3); }
+  TWHEN '{' conditions '}' { $$ = new astConditional($3); }
 
 conditions:
-  /* empty */          { DEBUG("conditions(1)"); $$ = new std::vector<astCondition>(); }
-| condition            { DEBUG("conditions(2)"); $$ = new std::vector<astCondition>{*$1}; }
-| condition conditions { DEBUG("conditions(3)"); ($2)->push_back(*$1); $$ = $2; }
+  /* empty */          { $$ = new std::vector<astCondition>(); }
+| conditions condition { ($1)->push_back(*$2); $$ = $1; }
 
 condition:
-  test block { DEBUG("condition"); $$ = new astCondition($1, $2); }
+  test block { $$ = new astCondition($1, $2); }
 
 test:
-  TBOOL { DEBUG("bool"); $$ = new astBool($1); }
+  TBOOL { $$ = new astBool($1); }
 | infixOperation
 | identifier
 | functionCall

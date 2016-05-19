@@ -28,7 +28,8 @@ $(OBJ_DIR)/lex.o: tmp/lex.cpp tmp/parse.cpp
 	g++ -c -o $@ tmp/lex.cpp $(CPP_FLAGS) $(INCLUDES)
 
 tmp/parse.cpp: src/parser/bison.cpp
-	bison -o tmp/parse.cpp --defines=tmp/parse.h src/parser/bison.cpp
+	bison --graph -o tmp/parse.cpp --defines=tmp/parse.h src/parser/bison.cpp
+	dot -Tpng tmp/parse.dot > tmp/parse.png
 
 $(OBJ_DIR)/parse.o: tmp/parse.cpp tmp/lex.cpp
 	g++ -c -o $@ tmp/parse.cpp $(CPP_FLAGS) $(INCLUDES)

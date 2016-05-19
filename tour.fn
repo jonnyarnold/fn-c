@@ -55,7 +55,7 @@ x eq z # => true
 ### Functions
 # Functions are assigned to variables.
 # Function prototypes are values.
-add = (a,b) { a + b } 
+add = (a,b) { a + b }
 add(2,3) # => 5
 
 
@@ -90,7 +90,7 @@ Utils = {
   }
 }
 
-Utils.Math.area(3) # => 9
+print(Utils.Math.area(3)) # => 9
 
 ### Infix Operators
 # The following infix operators are defined (in order of precedence):

@@ -16,29 +16,33 @@
 [ \t]                           ;
 #[^\n]*                         ;
 
-\n                              { line++; }
+\n                               { line++; }
 
-[0-9]+\.[0-9]*                  { yylval.v_double = atof(yytext); return TDOUBLE; }
-[0-9]+                          { yylval.v_int = atoi(yytext); return TINT; }
+[0-9]+\.[0-9]*                   { yylval.v_double = atof(yytext); return TDOUBLE; }
+[0-9]+                           { yylval.v_int = atoi(yytext); return TINT; }
 
-\"(\\.|[^"])*\"                 {
+\"[^\"]*\"                       {
   std::string* workingString = new std::string(yytext);
   workingString->erase(0, 1);
   workingString->erase(workingString->size() - 1);
 
+  yylval.v_string = workingString;
   return TSTRING;
 }
 
-true                            { yylval.v_bool = true; return TBOOL; }
-false                           { yylval.v_bool = false; return TBOOL; }
+true                             { yylval.v_bool = true; return TBOOL; }
+false                            { yylval.v_bool = false; return TBOOL; }
 
-when                            { return TWHEN; }
+when                             { return TWHEN; }
 
-"("|")"|"{"|"}"|"\."|"="|","    { return yytext[0]; }
-"+"|"-"|"*"|"/"|"and"|"or"|"eq" { yylval.v_string = new std::string(yytext); return TINFIX; }
+"("|")"|"{"|"}"|"\."|"="|","|";" { return yytext[0]; }
 
-[^ \t\n\+\-\*\/\(\)\{\}\.\,]+   { yylval.v_string = new std::string(yytext); return TID; }
+"+"|"-"|"*"|"/"|"and"|"or"|"eq"  { yylval.v_string = new std::string(yytext); return TINFIX; }
 
-.                               { std::cout << "Uh oh: " << yytext; yyterminate(); }
+[^ \t\n\+\-\*\/\(\)\{\}\.\,\;]+  { yylval.v_string = new std::string(yytext); return TID; }
+
+.                                { std::cout << "Uh oh: " << yytext; yyterminate(); }
 
 %%
+
+

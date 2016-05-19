@@ -2,3 +2,4 @@
 #include "vendor/catch.h"
 
 #include "spec/main.spec.cpp"
+#include "spec/run.spec.cpp"
