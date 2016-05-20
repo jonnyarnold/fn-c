@@ -70,3 +70,7 @@ fnValue* print(fnMachine* context, std::vector<fnValue*> values) {
   std::cout << values[0]->asString() << "\n";
   return new fnString(new std::string(values[0]->asString()));
 }
+
+fnValue* list(fnMachine* context, std::vector<fnValue*> values) {
+  return new fnList(values);
+}

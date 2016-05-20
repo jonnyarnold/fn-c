@@ -11,6 +11,7 @@ fnValue* fnOr(fnMachine* context, std::vector<fnValue*> values);
 fnValue* fnNot(fnMachine* context, std::vector<fnValue*> values);
 fnValue* fnEq(fnMachine* context, std::vector<fnValue*> values);
 fnValue* print(fnMachine* context, std::vector<fnValue*> values);
+fnValue* list(fnMachine* context, std::vector<fnValue*> values);
 
 // The top-level block.
 class fnTopBlock : public fnBlock {
@@ -27,6 +28,7 @@ public:
       {"not", new fnDef(&fnNot, this, new Strings{"first"})},
       {"eq", new fnDef(&fnNot, this, new Strings{"first", "second"})},
       {"print", new fnDef(&print, this, new Strings{"first"})},
+      {"List", new fnDef(&list, this, new Strings{"...args"})},
     };
 
     this->locals = (*values);

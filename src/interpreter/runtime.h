@@ -46,18 +46,18 @@ public:
   T value;
   fnConstant(T value) { this->value = value; }
 
-  virtual std::size_t hash() {
+  virtual std::size_t hash() override {
     return (std::size_t)this->value;
   }
 
-  virtual std::string asString(int indentationLevel) = 0;
+  virtual std::string asString(int indentationLevel) override = 0;
 };
 
 // Represents a bool.
 class fnBool : public fnConstant<bool> {
   using fnConstant::fnConstant;
 
-  virtual std::string asString(int indentationLevel) {
+  virtual std::string asString(int indentationLevel) override {
     return this->value ? "true" : "false";
   }
 };
@@ -66,7 +66,7 @@ class fnBool : public fnConstant<bool> {
 class fnInt : public fnConstant<int> {
   using fnConstant::fnConstant;
 
-  virtual std::string asString(int indentationLevel) {
+  virtual std::string asString(int indentationLevel) override {
     return std::to_string(this->value);
   }
 };
@@ -75,7 +75,7 @@ class fnInt : public fnConstant<int> {
 class fnDouble : public fnConstant<double> {
   using fnConstant::fnConstant;
 
-  virtual std::string asString(int indentationLevel) {
+  virtual std::string asString(int indentationLevel) override {
     return std::to_string(this->value);
   }
 };
@@ -85,18 +85,18 @@ class fnString : public fnConstant<std::string*> {
   using fnConstant::fnConstant;
 
 public:
-  virtual std::size_t hash() {
+  virtual std::size_t hash() override {
     return std::hash<std::string>()(*this->value);
   }
 
-  virtual std::string asString(int indentationLevel) {
+  virtual std::string asString(int indentationLevel) override {
     return *this->value;
   }
 };
 
 // Represents a function definition.
 // (FORWARD DECLARATION)
-class fnDef;
+class fnCallable;
 
 // At runtime, an aggregate structure
 // storing values.
@@ -110,9 +110,9 @@ public:
   void set(std::string* name, fnValue* value);
   fnValue* get(std::string* name);
   fnBlock* getBlockById(std::string* id);
-  fnDef* getDefById(std::string* id);
+  fnCallable* getDefById(std::string* id);
 
-  virtual std::size_t hash() {
+  virtual std::size_t hash() override {
     std::size_t workingHash = (std::size_t)parent;
 
     for(auto local: locals) {
@@ -127,7 +127,7 @@ public:
     return workingHash;
   }
 
-  virtual std::string asString(int indentationLevel) {
+  virtual std::string asString(int indentationLevel) override {
     std::string result = "{\n";
     for(auto local: locals) {
       result += std::string(indentationLevel+INDENT_SIZE, ' ') + local.first + " = " + local.second->asString(indentationLevel + INDENT_SIZE) + "\n";
@@ -138,8 +138,14 @@ public:
   }
 };
 
+// Abstract class to denote callable objects.
+class fnCallable : public fnValue {
+public:
+  virtual fnValue* call(fnMachine*, std::vector<fnValue*>) = 0;
+};
+
 // Represents a function definition.
-class fnDef : public fnValue {
+class fnDef : public fnCallable {
   fnBlock* parentBlock;
   Strings* params;
   fnFunc func;
@@ -157,13 +163,13 @@ public:
     this->func = [block](fnMachine* context, std::vector<fnValue*> values) { return block->execute(context); };
   }
 
-  fnValue* call(fnMachine*, std::vector<fnValue*>);
+  fnValue* call(fnMachine*, std::vector<fnValue*>) override;
 
-  virtual std::size_t hash() {
+  virtual std::size_t hash() override {
     return (std::size_t)(this);
   }
 
-  virtual std::string asString(int indentationLevel) {
+  virtual std::string asString(int indentationLevel) override {
     std::string result = "(";
     for(auto param: (*this->params)) {
       result += param;
@@ -173,6 +179,49 @@ public:
     }
 
     result += ") { ... }";
+
+    return result;
+  }
+};
+
+// Represents an array of values.
+class fnList : public fnCallable {
+  std::vector<fnValue*> values;
+
+public:
+  fnList(std::vector<fnValue*> values) {
+    this->values = values;
+  }
+
+  virtual std::size_t hash() override {
+    std::size_t workingHash;
+
+    for(auto value: values) {
+      std::size_t valueHash = value->hash();
+
+      // From http://en.cppreference.com/w/cpp/utility/hash
+      workingHash = workingHash ^ (valueHash << 1);
+    }
+
+    return workingHash;
+  }
+
+  fnValue* call(fnMachine* context, std::vector<fnValue*> values) override {
+    int index = static_cast<fnInt*>(values[0])->value;
+
+    return this->values[index];
+  }
+
+  virtual std::string asString(int indentationLevel) override {
+    std::string result = "List(";
+    for(auto value: this->values) {
+      result += value->asString();
+      if(value != this->values.back()) {
+        result += ", ";
+      }
+    }
+
+    result += ")";
 
     return result;
   }

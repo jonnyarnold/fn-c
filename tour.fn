@@ -55,7 +55,7 @@ x eq z # => true
 ### Functions
 # Functions are assigned to variables.
 # Function prototypes are values.
-add = (a,b) { a + b }
+add = fn (a,b) { a + b }
 add(2,3) # => 5
 
 
@@ -78,15 +78,15 @@ block.foo
 block.bar
 
 # A block can be extended from outside.
-block.baz = "baz"
-block.baz
+# block.baz = "baz"
+# block.baz
 
 # A block can nest other blocks.
 
 Utils = {
   Math = {
     pi = 3
-    area = (diameter) { pi * diameter }
+    area = fn (diameter) { pi * diameter }
   }
 }
 
@@ -106,13 +106,12 @@ print(Utils.Math.area(3)) # => 9
 list = List(1, "two", true)
 
 # Lists are accessed by calling it as if it were a function.
-list(1) # => "two"
+print(list(1)) # => "two"
 
 # Lists can be iterated over with the each() function.
-list.each((item) {
+list.each(fn (item) {
   print(item)
 })
-
 
 
 ### Conditions
@@ -124,7 +123,7 @@ list.each((item) {
 #
 # It is useful to add a `true` clause at the end to catch the case
 # where no branches are matched.
-guessMyNumber = (guess) {
+guessMyNumber = fn (guess) {
   when {
     guess eq 42 { "You win!" }
     true        { "Sorry, try again" }

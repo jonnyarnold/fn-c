@@ -51,7 +51,7 @@ fnValue* fnMachine::getValueByName(std::string* name) {
 }
 
 fnValue* fnMachine::callByName(std::string* name, std::vector<fnValue*> args) {
-  fnDef* def = this->currentBlock()->getDefById(name);
+  fnCallable* def = this->currentBlock()->getDefById(name);
   fnValue* value = def->call(this, args);
 
   DEBUG("CALL(name: " << *name << ", args: ...) = " << value->asString());

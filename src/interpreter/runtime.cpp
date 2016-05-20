@@ -25,14 +25,16 @@ fnBlock* fnBlock::getBlockById(std::string* id) {
   return static_cast<fnBlock*>(this->get(id));
 }
 
-fnDef* fnBlock::getDefById(std::string* id) {
-  return static_cast<fnDef*>(this->get(id));
+fnCallable* fnBlock::getDefById(std::string* id) {
+  return static_cast<fnCallable*>(this->get(id));
 }
 
 fnValue* fnDef::call(fnMachine* context, std::vector<fnValue*> args) {
   fnBlock* block = context->pushNewBlock(this->parentBlock);
 
   // Set the arguments in the FnDef block.
+  // Note that args are given to us in reverse!
+  std::reverse(args.begin(), args.end());
   for(int i = 0; i < this->params->size(); i++) {
     std::string paramName = (*this->params)[i];
     fnValue* paramValue = args[i];
