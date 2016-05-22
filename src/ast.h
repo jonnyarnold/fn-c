@@ -50,6 +50,7 @@ public:
   astBlock(std::vector<astStatement*> statements) { this->statements = statements; }
   astBlock() {}
   virtual fnValue* execute(fnMachine*) override;
+  fnValue* executeStatements(fnMachine*);
 
   int size() { return statements.size(); }
 

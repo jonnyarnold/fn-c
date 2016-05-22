@@ -26,17 +26,23 @@ fnValue* astId::execute(fnMachine* context) {
 fnValue* astBlock::execute(fnMachine* context) {
   fnBlock* block = context->pushNewBlock();
 
+  fnValue* value = this->executeStatements(context);
+
+  context->popBlock();
+
+  return value;
+}
+
+fnValue* astBlock::executeStatements(fnMachine* context) {
   fnValue* lastValue;
   for(auto statement: statements) {
     lastValue = statement->execute(context);
   }
 
-  context->popBlock();
-
   // If we have an assignment as the last statement,
   // return the block...
   if(lastValue == NULL) {
-    return block;
+    return context->currentBlock();
   } else {
     return lastValue;
   }

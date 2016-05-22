@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 
 #include "src/interpreter/runtime.h"
 #include "src/interpreter/machine.h"
