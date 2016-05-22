@@ -128,12 +128,16 @@ public:
   }
 
   virtual std::string asString(int indentationLevel) override {
-    std::string result = "{\n";
+    std::string result = "{";
+
+    bool putEndingBraceOnNewLine = false;
     for(auto local: locals) {
-      result += std::string(indentationLevel+INDENT_SIZE, ' ') + local.first + " = " + local.second->asString(indentationLevel + INDENT_SIZE) + "\n";
+      result += "\n" + std::string(indentationLevel+INDENT_SIZE, ' ') + local.first + " = " + local.second->asString(indentationLevel + INDENT_SIZE);
+      putEndingBraceOnNewLine = true;
     }
 
-    result += std::string(indentationLevel, ' ') + "}";
+    if(putEndingBraceOnNewLine) { result += "\n" + std::string(indentationLevel, ' '); }
+    result += "}";
     return result;
   }
 };

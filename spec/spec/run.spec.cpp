@@ -6,7 +6,14 @@
 
 std::string value(const char code[]) {
   astBlock* program = (new fnParser())->parseCode(code);
-  return program->execute(new fnMachine())->asString();
+  fnMachine* context = new fnMachine();
+  fnValue* value = program->execute(context);
+
+  return value->asString();
+}
+
+TEST_CASE("Empty programs compile") {
+  REQUIRE(value("") == "{}");
 }
 
 TEST_CASE("Semicolons") {
@@ -30,6 +37,7 @@ TEST_CASE("Boolean set/get") {
 }
 
 TEST_CASE("Block set/get") {
+  REQUIRE(value("x = {}; x") == "{}");
   REQUIRE(value("x = { a = 1 }; x.a") == "1");
 }
 

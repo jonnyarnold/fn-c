@@ -5,7 +5,7 @@
 #define DEBUG(msg) if (this->debug) { std::cout << msg << std::endl; }
 
 fnBlock* fnMachine::pushNewBlock(fnBlock* parent) {
-  fnBlock* block = new fnBlock(this->currentBlock());
+  fnBlock* block = new fnBlock(parent);
   this->blockStack->push(block);
 
   DEBUG("PUSH_NEW_BLOCK(parent: " << parent << ") = " << block);
@@ -21,19 +21,24 @@ void fnMachine::pushBlockByName(std::string* name) {
 }
 
 fnBlock* fnMachine::currentBlock() {
-  fnBlock* block;
 
-  if(this->blockStack->empty()) { block = NULL; }
-  else { block = this->blockStack->top(); }
+  // This guard should never happen.
+  // We always have a fnTopBlock on the stack to start with,
+  // and all other operations push and pop their own blocks
+  // onto the top of the stack.
+  if(this->blockStack->empty()) { 
+    std::cout << "!!! Block stack is empty!";
+    return NULL;
+  }
 
-  // This isn't really an operation. Should we output it?
-  // DEBUG("CURRENT_BLOCK() = " << block);
-
-  return block;
+  return this->blockStack->top();
 }
 
 void fnMachine::popBlock() {
   this->blockStack->pop();
+
+  // TODO: Garbage collection?
+
   DEBUG("POP_BLOCK()");
 }
 

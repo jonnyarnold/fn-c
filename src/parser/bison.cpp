@@ -79,7 +79,7 @@ program:
   statements { programBlock = new astBlock(*$1); }
 
 statements:
-  /* empty */                     { $$ = new std::vector<astStatement*>{}; }
+  /* empty */                     { $$ = new std::vector<astStatement*>(); }
 | statements statement            { ($1)->push_back($2); $$ = $1; }
 | statements statement ';'        { ($1)->push_back($2); $$ = $1; }
   ;

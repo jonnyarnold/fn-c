@@ -34,18 +34,16 @@ fnValue* astBlock::execute(fnMachine* context) {
 }
 
 fnValue* astBlock::executeStatements(fnMachine* context) {
-  fnValue* lastValue;
+  // By default, we set the return value to the current block.
+  // This ensures that we return the current block if there
+  // are no statements in the block.
+  fnValue* lastValue = context->currentBlock();
+  
   for(auto statement: statements) {
     lastValue = statement->execute(context);
   }
 
-  // If we have an assignment as the last statement,
-  // return the block...
-  if(lastValue == NULL) {
-    return context->currentBlock();
-  } else {
-    return lastValue;
-  }
+  return lastValue;
 }
 
 fnValue* astAssignment::execute(fnMachine* context) {
@@ -66,10 +64,8 @@ fnValue* astAssignment::execute(fnMachine* context) {
     context->setValue(this->key->name, computedValue);
   }
 
-  // Assignments do not return a value.
-  // There's a NULL check in astBlock::execute,
-  // to decide whether to return a value or a block.
-  return NULL;
+  // Assignments return the block they have been assigned to.
+  return context->currentBlock();
 }
 
 fnValue* astInt::execute(fnMachine* context) {

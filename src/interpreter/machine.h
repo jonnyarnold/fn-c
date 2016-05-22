@@ -14,7 +14,10 @@ public:
   fnMachine(bool debug) {
     this->debug = debug;
     this->blockStack = new std::stack<fnBlock*>();
-    this->blockStack->push(new fnTopBlock());
+    fnBlock* topBlock = new fnTopBlock();
+    this->blockStack->push(topBlock);
+
+    if(this->debug) { std::cout << "CREATE_MACHINE() = " << topBlock << std::endl; }
   }
 
   fnMachine() : fnMachine(false) {}
