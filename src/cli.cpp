@@ -2,36 +2,20 @@
 #include <vector>
 #include "vendor/cxxopts.h"
 
-#include "src/ast.h"
-#include "src/interpreter/runtime.h"
+#include "src/parser.h"
 #include "src/interpreter/machine.h"
 
-extern FILE* yyin;
-extern int yyparse();
-extern astBlock* programBlock;
-
-typedef struct yy_buffer_state * YY_BUFFER_STATE;
-extern int yyparse();
-extern YY_BUFFER_STATE yy_scan_string(const char* str);
-extern void yy_delete_buffer(YY_BUFFER_STATE buffer);
-
 int run(const char fileName[], bool debug) {
-  // Lex file.
-  yyin = fopen(fileName,"r");
-  yyparse();
-  fclose(yyin);
-
-  // Whoosh.
-  if(debug) { std::cout << programBlock->asString(0) << "\n\n"; }
+  astBlock* program = (new fnParser(debug))->parseFile(fileName);
 
   fnMachine* context = new fnMachine(debug);
-  fnValue* returnValue = programBlock->execute(context);
+  fnValue* returnValue = program->execute(context);
 
   return 0;
 }
 
 int repl(bool debug) {
-
+  fnParser* parser = new fnParser(debug);
   fnMachine* context = new fnMachine(debug);
 
   std::string currentLine;
@@ -44,14 +28,12 @@ int repl(bool debug) {
     std::getline(std::cin, currentLine);
 
     // Parse
-    YY_BUFFER_STATE buffer = yy_scan_string(currentLine.c_str());
-    yyparse();
-    yy_delete_buffer(buffer);
+    astBlock* command = parser->parseCode(currentLine);
 
     // If we used astBlock::execute, we'd run our code in
     // an isolated block, which we don't want to do in the REPL.
     // So we run it manually!
-    lastReturnValue = programBlock->executeStatements(context);
+    lastReturnValue = command->executeStatements(context);
 
     std::cout << lastReturnValue->asString() << std::endl;
   }

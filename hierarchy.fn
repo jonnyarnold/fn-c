@@ -5,8 +5,8 @@
 # and is the parent object for all objects.
 Global = () {
 
-  # Alias of Bool.flip().
-  not = (obj) { obj.flip() }
+  # Alias of Bool.not().
+  not = (obj) { obj.not() }
   
 }
 
@@ -53,7 +53,7 @@ Bool = (value) {
   # Returns the opposite of the value:
   # (true).flip() = false
   # (false).flip() = true
-  flip = () { <builtin> }
+  not = () { <builtin> }
 }
 
 # A Number represents a numeric value.

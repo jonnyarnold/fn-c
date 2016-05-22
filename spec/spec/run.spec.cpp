@@ -1,98 +1,48 @@
 // Specs that test the system:
 // Parser + Execution.
 
-#include "src/ast.h"
-#include "src/interpreter/runtime.h"
+#include "src/parser.h"
 #include "src/interpreter/machine.h"
 
-typedef struct yy_buffer_state * YY_BUFFER_STATE;
-extern int yyparse();
-extern YY_BUFFER_STATE yy_scan_string(const char* str);
-extern void yy_delete_buffer(YY_BUFFER_STATE buffer);
-
-extern astBlock* programBlock;
-
-std::string execute(const char code[]) {
-  // Parse
-  std::cout << code << std::endl;
-  YY_BUFFER_STATE buffer = yy_scan_string(code);
-  yyparse();
-  yy_delete_buffer(buffer);
-
-  // Output AST
-  std::cout << programBlock->asString(0);
-
-  // Execute
-  fnMachine* context = new fnMachine();
-  fnValue* returnValue = programBlock->execute(context);
-
-  return returnValue->asString();
+std::string value(const char code[]) {
+  astBlock* program = (new fnParser())->parseCode(code);
+  return program->execute(new fnMachine())->asString();
 }
 
 TEST_CASE("Semicolons") {
-  std::string result = execute(
-    "x = 1; x"
-  );
-
-  REQUIRE(result == "1");
+  REQUIRE(value("x = 1; x") == "1");
 }
 
 TEST_CASE("Integer set/get") {
-  std::string result = execute(
-    "x = 1; x"
-  );
-
-  REQUIRE(result == "1");
+  REQUIRE(value("x = 1; x") == "1");
 }
 
 TEST_CASE("Double set/get") {
-  std::string result = execute(
-    "x = 1.23; x"
-  );
-
-  REQUIRE(result == "1.230000");
+  REQUIRE(value("x = 1.23; x") == "1.230000");
 }
 
 TEST_CASE("String set/get") {
-  std::string result = execute(
-    "x = \"foo\"; x"
-  );
-
-  REQUIRE(result == "foo");
+  REQUIRE(value("x = \"foo\"; x") == "foo");
 }
 
 TEST_CASE("Boolean set/get") {
-  std::string result = execute(
-    "x = true; x"
-  );
-
-  REQUIRE(result == "true");
+  REQUIRE(value("x = true; x") == "true");
 }
 
 TEST_CASE("Block set/get") {
-  std::string result = execute(
-    "x = { a = 1 }; x.a"
-  );
-
-  REQUIRE(result == "1");
+  REQUIRE(value("x = { a = 1 }; x.a") == "1");
 }
 
 TEST_CASE("Fn set/call") {
-  std::string result = execute(
-    "x = fn (a) { a + 1 }; x(1)"
-  );
-
-  REQUIRE(result == "2");
+  REQUIRE(value("x = fn (a) { a + 1 }; x(1)") == "2");
 }
 
 TEST_CASE("Fn set/call in block") {
-  std::string result = execute(R"(
+  REQUIRE(value(R"(
     x = {
       y = fn (a) { a + 1 }
     }
 
     x.y(1)
-  )");
-
-  REQUIRE(result == "2");
+  )") == "2");
 }
