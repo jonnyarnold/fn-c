@@ -65,7 +65,7 @@ spec: tmp/spec
 tmp/spec: $(SPEC_OBJS)
 	g++ $(CPP_FLAGS) -o $@ $(SPEC_OBJS)
 
-$(OBJ_DIR)/spec.o:
+$(OBJ_DIR)/spec.o: spec/spec.cpp spec/spec/run.spec.cpp
 	g++ -c -o $@ spec/spec.cpp $(CPP_FLAGS) $(INCLUDES)
 
 
