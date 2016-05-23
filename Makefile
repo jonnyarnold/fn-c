@@ -73,7 +73,7 @@ $(OBJ_DIR)/spec.o: spec/spec.cpp spec/spec/run.spec.cpp
 ### DEV TOOLS ###
 
 clean:
-	rm -f tmp/* obj/*
+	rm -f tmp/* obj/* bin/*
 
 watch: # Mac-specific!
 	fswatch -or src spec | xargs -I{} make spec

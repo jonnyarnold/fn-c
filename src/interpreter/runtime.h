@@ -21,6 +21,9 @@ public:
   std::string asString() {
     return this->asString(0);
   };
+
+  // In fn, all values (except for false) are true.
+  virtual bool asBool() { return true; }
 };
 
 // A class holding contextual information about an execution.
@@ -60,6 +63,8 @@ class fnBool : public fnConstant<bool> {
   virtual std::string asString(int indentationLevel) override {
     return this->value ? "true" : "false";
   }
+
+  virtual bool asBool() override { return this->value; }
 };
 
 // Represents an int.

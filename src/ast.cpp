@@ -7,22 +7,6 @@
 
 fnValue* astId::execute(fnMachine* context) {
   return context->getValueByName(this->name);
-
-  // fnValue* value;
-
-  // if(this->child != NULL) {
-
-  //   // If the identifier has a child,
-  //   // we need to run in the block of the child.
-  //   context->pushBlockByName(this->name);
-  //   value = this->child->execute(context);
-  //   context->popBlock();
-
-  // } else {
-  //   value = context->getValueByName(this->name);
-  // }
-
-  // return value;
 }
 
 fnValue* astDeref::execute(fnMachine* context) {
@@ -112,11 +96,27 @@ fnValue* astFnDef::execute(fnMachine* context) {
   return new fnDef(this->body, context->currentBlock(), this->params);
 }
 
-fnValue* astCondition::execute(fnMachine* context) {
-  return NULL;
-}
-
 fnValue* astConditional::execute(fnMachine* context) {
-  return NULL;
+  
+  fnValue* returnValue;
+  for(auto condition: (*this->conditions)) {
+    returnValue = condition->execute(context);
+    if (returnValue != NULL) { break; }
+  }
+
+  // The conditional will return false if
+  // no conditions match.
+  if (returnValue == NULL) { return new fnBool(false); }
+  return returnValue;
 }
 
+fnValue* astCondition::execute(fnMachine* context) {
+  
+  fnValue* testResult = this->test->execute(context);
+  if(testResult->asBool()) {
+    return this->body->execute(context);
+  }
+
+  // NULL shows that the condition failed.
+  return NULL;
+}

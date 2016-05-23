@@ -26,7 +26,7 @@ public:
       {"and", new fnDef(&fnAnd, this, new Strings{"first", "second"})},
       {"or", new fnDef(&fnOr, this, new Strings{"first", "second"})},
       {"not", new fnDef(&fnNot, this, new Strings{"first"})},
-      {"eq", new fnDef(&fnNot, this, new Strings{"first", "second"})},
+      {"eq", new fnDef(&fnEq, this, new Strings{"first", "second"})},
       {"print", new fnDef(&print, this, new Strings{"first"})},
       {"List", new fnDef(&list, this, new Strings{"...args"})},
     };
