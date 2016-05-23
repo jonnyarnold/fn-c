@@ -1,6 +1,7 @@
 %{
   #include <string>
   #include <iostream>
+  #include <algorithm>
 
   #include "tmp/lex.h"
   #include "src/ast.h"
@@ -138,7 +139,13 @@ deref:
   value '.' value { $$ = new astDeref($1, $3); }
 
 functionCall:
-  reference '(' args ')' { $$ = new astFnCall($1, $3); }
+  reference '(' args ')' {
+
+    // args are parsed in reverse order...
+    std::reverse(($3)->begin(), ($3)->end());
+
+    $$ = new astFnCall($1, $3); 
+  }
 
 args:
   /* empty */    { $$ = new std::vector<astValue*>{}; }
@@ -146,7 +153,13 @@ args:
 | value ',' args { ($3)->push_back($1); $$ = $3; }
 
 functionDef:
-  TFN '(' params ')' block { $$ = new astFnDef($3, $5); }
+  TFN '(' params ')' block { 
+
+    // params are parsed in reverse order...
+    std::reverse(($3)->begin(), ($3)->end());
+
+    $$ = new astFnDef($3, $5); 
+  }
 
 params:
   /* empty */    { $$ = new std::vector<std::string>(); }

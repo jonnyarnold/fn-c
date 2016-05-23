@@ -72,3 +72,18 @@ TEST_CASE("Fn call within block") {
 TEST_CASE("Brackets") {
   REQUIRE(value("2 * (1 + 2)") == "6");
 }
+
+TEST_CASE("Param ordering is correct every call") {
+  REQUIRE(value(R"(
+    A = fn(a,b) {
+      when {
+        a eq 0 { false }
+        a eq 5 { true }
+        true { A(a+1, b) }
+      }
+    }
+
+    A(1, 0)
+  )") == "true");
+}
+
