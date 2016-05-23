@@ -13,11 +13,10 @@ fnBlock* fnMachine::pushNewBlock(fnBlock* parent) {
   return block;
 }
 
-void fnMachine::pushBlockByName(std::string* name) {
-  fnBlock* block = this->currentBlock()->getBlockById(name);
+void fnMachine::pushBlockByValue(fnBlock* block) {
   this->blockStack->push(block);
 
-  DEBUG("PUSH_BLOCK(name: " << *name << ")");
+  DEBUG("PUSH_BLOCK(" << block << ")");
 }
 
 fnBlock* fnMachine::currentBlock() {
@@ -55,11 +54,10 @@ fnValue* fnMachine::getValueByName(std::string* name) {
   return value;
 }
 
-fnValue* fnMachine::callByName(std::string* name, std::vector<fnValue*> args) {
-  fnCallable* def = this->currentBlock()->getDefById(name);
+fnValue* fnMachine::callByValue(fnDef* def, std::vector<fnValue*> args) {
   fnValue* value = def->call(this, args);
 
-  DEBUG("CALL(name: " << *name << ", args: ...) = " << value->asString());
+  DEBUG("CALL(def: " << def << ", args: ...) = " << value->asString());
 
   return value;
 }

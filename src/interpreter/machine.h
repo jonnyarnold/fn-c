@@ -34,7 +34,7 @@ public:
 
   // Gets a value by name in the current block
   // and pushes it onto the top of the block stack.
-  void pushBlockByName(std::string*);
+  void pushBlockByValue(fnBlock*);
 
   // Gets the block at the top of the block stack.
   fnBlock* currentBlock();
@@ -56,6 +56,6 @@ public:
 
   // Gets a value from the current block
   // and calls it with the given arguments.
-  fnValue* callByName(std::string* name, std::vector<fnValue*> args);
+  fnValue* callByValue(fnDef* def, std::vector<fnValue*> args);
 
 };

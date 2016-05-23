@@ -26,20 +26,33 @@ public:
   virtual std::string asString(int indent) = 0;
 };
 
-class astId : public astValue {
+class astReference : public astValue {
+public:
+  virtual ~astReference() {};
+  virtual fnValue* execute(fnMachine*) = 0;
+  virtual std::string asString(int indent) = 0;
+};
+
+class astId : public astReference {
 public:
   std::string* name;
-  astId* child;
-  astId(std::string* name, astId* child) { this->name = name; this->child = child; }
-  astId(std::string* name) : astId(name, NULL) {}
+  astId(std::string* name) { this->name = name; }
   fnValue* execute(fnMachine*) override;
 
   virtual std::string asString(int indent) override {
-    if (this->child == NULL) {
-      return "(ID name:" + *this->name + ")";
-    }
+    return *this->name;
+  }
+};
 
-    return "(ID name:" + *this->name + " child:" + this->child->asString(indent) + ")";
+class astDeref : public astReference {
+public:
+  astValue* parent;
+  astValue* child;
+  astDeref(astValue* parent, astValue* child) { this->parent = parent; this->child = child; }
+  fnValue* execute(fnMachine*) override;
+
+  virtual std::string asString(int indent) override {
+    return "(DEREF parent:" + this->parent->asString(indent) + " child:" + this->child->asString(indent) + ")";
   }
 };
 
@@ -69,9 +82,9 @@ public:
 
 class astAssignment : public astStatement {
 public:
-  astId* key;
+  astReference* key;
   astValue* value;
-  astAssignment(astId* key, astValue* value) { this->key = key; this->value = value; }
+  astAssignment(astReference* key, astValue* value) { this->key = key; this->value = value; }
   virtual fnValue* execute(fnMachine*) override;
 
   virtual std::string asString(int indent) override {
@@ -128,15 +141,15 @@ public:
 };
 
 class astFnCall : public astValue {
-  astId* name;
+  astReference* target;
   std::vector<astValue*>* args;
 
 public:
-  astFnCall(astId* name, std::vector<astValue*>* args) { this->name = name; this->args = args; }
+  astFnCall(astReference* target, std::vector<astValue*>* args) { this->target = target; this->args = args; }
   virtual fnValue* execute(fnMachine*) override;
 
   virtual std::string asString(int indent) override {
-    std::string result = "(CALL name:" + this->name->asString(indent) + " args:[\n";
+    std::string result = "(CALL target:" + this->target->asString(indent) + " args:[\n";
 
     for(auto arg: *this->args) {
       result += std::string(indent + 2, ' ') + arg->asString(indent + 2) + "\n";

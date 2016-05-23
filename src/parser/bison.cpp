@@ -15,6 +15,9 @@
   astBlock* programBlock;
 %}
 
+// Get more detailed error messages.
+%define parse.error verbose
+
 /* Represents the many different ways we can access our data */
 %union {
   // Literals
@@ -26,7 +29,9 @@
   // AST
   astBlock* v_block;
   astStatement* v_statement;
+  astReference* v_reference;
   astId* v_id;
+  astDeref* v_deref;
   astValue* v_value;
   astConditional* v_conditional;
   astCondition* v_condition;
@@ -53,7 +58,9 @@
 %type <v_block> program block
 %type <v_statements> statements
 %type <v_statement> statement
+%type <v_reference> reference
 %type <v_id> identifier
+%type <v_deref> deref
 %type <v_value> value literal test
 %type <v_values> args
 %type <v_strings> params
@@ -90,13 +97,13 @@ statement:
   ;
 
 assignment:
-  identifier '=' value { $$ = new astAssignment($1, $3); }
+  reference '=' value { $$ = new astAssignment($1, $3); }
+  ;
 
 value:
-  brackets
-| literal
+  literal
 | infixOperation
-| identifier
+| reference
 | functionCall
 | block
 | functionDef
@@ -105,6 +112,7 @@ value:
 
 brackets:
   '(' value ')'
+  ;
 
 literal:
   TINT    { $$ = new astInt($1); }
@@ -114,15 +122,23 @@ literal:
   ;
 
 infixOperation:
-  value TINFIX value { astId* id = new astId($2); $$ = new astFnCall(id, new std::vector<astValue*>{$1, $3}); }
+  value TINFIX value { astId* id = new astId($2); $$ = new astFnCall(id, new std::vector<astValue*>{$1, $3}); } 
+
+reference:
+  identifier
+| deref
+| brackets
 
 identifier:
-  TID                { $$ = new astId($1); }
-| TINFIX             { $$ = new astId($1); }
-| TID '.' identifier { $$ = new astId($1, $3); }
+  TID    { $$ = new astId($1); }
+| TINFIX { $$ = new astId($1); }
+  ;
+
+deref:
+  value '.' value { $$ = new astDeref($1, $3); }
 
 functionCall:
-  identifier '(' args ')' { $$ = new astFnCall($1, $3); }
+  reference '(' args ')' { $$ = new astFnCall($1, $3); }
 
 args:
   /* empty */    { $$ = new std::vector<astValue*>{}; }
@@ -153,12 +169,12 @@ condition:
 test:
   TBOOL { $$ = new astBool($1); }
 | infixOperation
-| identifier
+| reference
 | functionCall
 
 %%
 
-void yyerror(const char* s) {
-  std::cout << "Parse error on line " << line << ":" << *s;
+void yyerror(char const* s) {
+  std::cout << "Parse error on line " << line << ": " << s;
   exit(-1);
 }

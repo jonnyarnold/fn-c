@@ -54,3 +54,7 @@ TEST_CASE("Fn set/call in block") {
     x.y(1)
   )") == "2");
 }
+
+TEST_CASE("Assignment outside of block") {
+  REQUIRE(value("x = {}; x.y = 1; x.y") == "1");
+}
