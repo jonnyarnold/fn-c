@@ -58,3 +58,17 @@ TEST_CASE("Fn set/call in block") {
 TEST_CASE("Assignment outside of block") {
   REQUIRE(value("x = {}; x.y = 1; x.y") == "1");
 }
+
+TEST_CASE("Fn call within block") {
+  REQUIRE(value(R"(
+    x = fn(a) { 
+      foo = fn(b) { a + b }
+    }
+    
+    x(1).foo(1)
+  )") == "2");
+}
+
+TEST_CASE("Brackets") {
+  REQUIRE(value("2 * (1 + 2)") == "6");
+}

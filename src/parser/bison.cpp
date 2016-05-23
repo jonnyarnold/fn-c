@@ -61,7 +61,7 @@
 %type <v_reference> reference
 %type <v_id> identifier
 %type <v_deref> deref
-%type <v_value> value literal test
+%type <v_value> value literal test brackets
 %type <v_values> args
 %type <v_strings> params
 %type <v_conditional> conditional
@@ -74,7 +74,7 @@
 // The starting rule.
 %start program
 
-// Operator precedence
+// Operator precedence, lowest-to-highest
 %left ';'
 %left '='
 %left TINFIX
@@ -111,7 +111,7 @@ value:
   ;
 
 brackets:
-  '(' value ')'
+  '(' value ')' { $$ = $2; }
   ;
 
 literal:
