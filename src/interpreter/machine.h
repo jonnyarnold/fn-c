@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <stack>
 
 #include "src/interpreter/builtins.h"
