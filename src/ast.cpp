@@ -81,7 +81,7 @@ fnValue* astBool::execute(fnMachine* context) {
 }
 
 fnValue* astFnCall::execute(fnMachine* context) {
-  fnDef* def = dynamic_cast<fnDef*>(this->target->execute(context));
+  fnValue* def = this->target->execute(context);
 
   // Execute the arguments...
   std::vector<fnValue*>* executedArgs = new std::vector<fnValue*>();

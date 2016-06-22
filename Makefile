@@ -2,7 +2,7 @@
 
 all: bin/fn spec
 
-CPP_FLAGS = -std=c++11 -Wno-deprecated-register
+CPP_FLAGS = -g -std=c++11 -Wno-deprecated-register
 INCLUDES = -I.
 
 # Find all .cpp files in src/ and strip the front.

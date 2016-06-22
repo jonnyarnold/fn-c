@@ -87,3 +87,6 @@ TEST_CASE("Param ordering is correct every call") {
   )") == "true");
 }
 
+TEST_CASE("List get/set") {
+  REQUIRE(value("x = List(1, \"two\", true); x(1)") == "two");
+}

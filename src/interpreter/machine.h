@@ -57,6 +57,6 @@ public:
 
   // Gets a value from the current block
   // and calls it with the given arguments.
-  fnValue* callByValue(fnDef* def, std::vector<fnValue*> args);
+  fnValue* callByValue(fnValue* def, std::vector<fnValue*> args);
 
 };
