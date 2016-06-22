@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -19,7 +20,7 @@ protected:
 
 public:
 
-  fnValue() { 
+  fnValue() {
     this->locals = ValueDict{};
   }
 

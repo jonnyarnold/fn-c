@@ -16,9 +16,6 @@
   astBlock* programBlock;
 %}
 
-// Get more detailed error messages.
-%define parse.error verbose
-
 /* Represents the many different ways we can access our data */
 %union {
   // Literals
@@ -123,7 +120,7 @@ literal:
   ;
 
 infixOperation:
-  value TINFIX value { astId* id = new astId($2); $$ = new astFnCall(id, new std::vector<astValue*>{$1, $3}); } 
+  value TINFIX value { astId* id = new astId($2); $$ = new astFnCall(id, new std::vector<astValue*>{$1, $3}); }
 
 reference:
   identifier
@@ -144,7 +141,7 @@ functionCall:
     // args are parsed in reverse order...
     std::reverse(($3)->begin(), ($3)->end());
 
-    $$ = new astFnCall($1, $3); 
+    $$ = new astFnCall($1, $3);
   }
 
 args:
@@ -153,12 +150,12 @@ args:
 | value ',' args { ($3)->push_back($1); $$ = $3; }
 
 functionDef:
-  TFN '(' params ')' block { 
+  TFN '(' params ')' block {
 
     // params are parsed in reverse order...
     std::reverse(($3)->begin(), ($3)->end());
 
-    $$ = new astFnDef($3, $5); 
+    $$ = new astFnDef($3, $5);
   }
 
 params:
