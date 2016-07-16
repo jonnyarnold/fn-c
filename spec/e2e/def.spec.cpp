@@ -9,6 +9,10 @@ TEST_CASE("Empty Fn") {
 }
 
 // TODO: Invalid number of arguments
+//
+// TEST_CASE("Error on invalid argument length") {
+//   REQUIRE(failure("x = fn () {}; x(1)"));
+// }
 
 TEST_CASE("Fn set/call in block") {
   REQUIRE(resultOf(R"(
@@ -54,4 +58,12 @@ TEST_CASE("Fns as arguments") {
 
     do(fn (x) { x + 1 }, 1)
   )") == "2");
+}
+
+TEST_CASE("Fn property get/set") {
+  REQUIRE(resultOf(R"(
+    x = fn (a) { a + 1 }
+    x.a = 1
+    x.a
+  )") == "1");
 }

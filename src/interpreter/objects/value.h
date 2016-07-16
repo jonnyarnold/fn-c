@@ -34,7 +34,7 @@ public:
   }
 
   // Return a value for comparison.
-  virtual std::size_t hash() ;
+  virtual std::size_t hash();
 
   // Returns a string representing the value.
   virtual std::string asString(int indentationLevel = 0);

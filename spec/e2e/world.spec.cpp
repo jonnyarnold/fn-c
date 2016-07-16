@@ -1,15 +1,19 @@
 #include "spec/spec.h"
 
-TEST_CASE("Empty programs compile") {
-  REQUIRE(resultOf("") == "{}");
+TEST_CASE("print exists") {
+  REQUIRE(resultOf("print") == "(out) { ... }");
 }
 
-TEST_CASE("Semicolons") {
-  REQUIRE(resultOf("x = 1; x") == "1");
-}
+// TODO: include
+//
+// TEST_CASE("include") {
 
-TEST_CASE("Brackets") {
-  REQUIRE(resultOf("2 * (1 + 2)") == "6");
-}
+//   SECTION("adds to current scope when not assigned") {
+//     REQUIRE(resultOf("include \"test-include.fn\"; imported") == "true");
+//   }
 
-// TODO: Mathematical operator precedence
+//   SECTION("creates block when assigned") {
+//     REQUIRE(resultOf("x = include \"test-include.fn\"; x.imported") == "true");
+//   }
+  
+// }

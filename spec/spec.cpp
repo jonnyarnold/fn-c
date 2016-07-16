@@ -15,3 +15,17 @@ std::string resultOf(const char code[]) {
 
   return value->asString();
 }
+
+bool failure(const char code[]) {
+  bool failed = false;
+
+  try {
+    astBlock* program = (new fnParser())->parseCode(code);
+    fnMachine* context = new fnMachine();
+    fnValue* value = program->execute(context);
+  } catch(...) {
+    failed = true;
+  }
+
+  return failed;
+}

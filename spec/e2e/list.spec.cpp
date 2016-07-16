@@ -10,3 +10,14 @@ TEST_CASE("List.map") {
     l.map(fn (i) { i + 1 })
   )") == "List(2, 3, 4)");
 }
+
+// TODO: List.reduce
+//
+// TEST_CASE("List.reduce") {
+//   REQUIRE(resultOf(R"(
+//     l = List(1, 2, 3)
+//     l.reduce(0, fn (memo, item) { memo + item })
+//   )") == "6");
+// }
+
+// TODO: A decent Enumerable method set!

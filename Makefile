@@ -14,7 +14,7 @@ OBJ_FILENAMES = lex.o parse.o parser.o value.o def.o list.o world.o ast.o machin
 MAIN_OBJ_FILENAMES = $(OBJ_FILENAMES) main.o
 MAIN_OBJS = $(patsubst %,$(OBJ_DIR)/%,$(MAIN_OBJ_FILENAMES))
 
-SPEC_OBJ_FILENAMES = $(OBJ_FILENAMES) spec.o world.spec.o bool.spec.o def.spec.o list.spec.o number.spec.o block.spec.o string.spec.o
+SPEC_OBJ_FILENAMES = $(OBJ_FILENAMES) spec.o language.spec.o world.spec.o bool.spec.o def.spec.o list.spec.o number.spec.o block.spec.o string.spec.o value.spec.o
 SPEC_OBJS = $(patsubst %,$(OBJ_DIR)/%,$(SPEC_OBJ_FILENAMES))
 
 ### MAIN ###
@@ -77,6 +77,9 @@ tmp/spec: $(SPEC_OBJS)
 $(OBJ_DIR)/spec.o: spec/spec.cpp
 	g++ -c -o $@ spec/spec.cpp $(CPP_FLAGS) $(INCLUDES)
 
+$(OBJ_DIR)/language.spec.o: spec/e2e/language.spec.cpp
+	g++ -c -o $@ spec/e2e/language.spec.cpp $(CPP_FLAGS) $(INCLUDES)
+
 $(OBJ_DIR)/world.spec.o: spec/e2e/world.spec.cpp
 	g++ -c -o $@ spec/e2e/world.spec.cpp $(CPP_FLAGS) $(INCLUDES)
 
@@ -98,11 +101,18 @@ $(OBJ_DIR)/block.spec.o: spec/e2e/block.spec.cpp
 $(OBJ_DIR)/string.spec.o: spec/e2e/string.spec.cpp
 	g++ -c -o $@ spec/e2e/string.spec.cpp $(CPP_FLAGS) $(INCLUDES)
 
+$(OBJ_DIR)/value.spec.o: spec/e2e/value.spec.cpp
+	g++ -c -o $@ spec/e2e/value.spec.cpp $(CPP_FLAGS) $(INCLUDES)
+
+
 
 ### DEV TOOLS ###
 
 clean:
 	rm -rf tmp/* obj/* bin/*
 
-watch: # Mac-specific!
+watch-mac: # Mac-specific!
 	fswatch -or src spec | xargs -I{} make spec
+
+watch-linux:
+	while inotifywait -qq -e close_write -r .; do make; done

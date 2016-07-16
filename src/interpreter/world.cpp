@@ -40,22 +40,22 @@ fnValue* divide(fnMachine* context, std::vector<fnValue*> values) {
 
 fnValue* fnAnd(fnMachine* context, std::vector<fnValue*> values) {
   bool result =
-    static_cast<fnBool*>(values[0])->value &&
-    static_cast<fnBool*>(values[1])->value;
+    values[0]->asBool() &&
+    values[1]->asBool();
 
   return new fnBool(result);
 }
 
 fnValue* fnOr(fnMachine* context, std::vector<fnValue*> values) {
   bool result =
-    static_cast<fnBool*>(values[0])->value ||
-    static_cast<fnBool*>(values[1])->value;
+    values[0]->asBool() ||
+    values[1]->asBool();
 
   return new fnBool(result);
 }
 
 fnValue* fnNot(fnMachine* context, std::vector<fnValue*> values) {
-  bool result = !(static_cast<fnBool*>(values[0])->value);
+  bool result = !(values[0]->asBool());
 
   return new fnBool(result);
 }

@@ -56,6 +56,10 @@ class fnInt : public fnConstant<int> {
   virtual std::string asString(int indentationLevel) override {
     return std::to_string(this->value);
   }
+
+  virtual std::size_t hash() override {
+    return this->value;
+  }
 };
 
 // Represents a double.
@@ -64,5 +68,9 @@ class fnDouble : public fnConstant<double> {
 
   virtual std::string asString(int indentationLevel) override {
     return std::to_string(this->value);
+  }
+
+  virtual std::size_t hash() override {
+    return this->value;
   }
 };

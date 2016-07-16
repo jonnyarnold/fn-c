@@ -22,3 +22,15 @@ TEST_CASE("not") {
   REQUIRE(resultOf("not(true)") == "false");
   REQUIRE(resultOf("not(false)") == "true");
 }
+
+TEST_CASE("Empty blocks are true") {
+  REQUIRE(resultOf("{} or false") == "true");
+}
+
+TEST_CASE("0 is true") {
+  REQUIRE(resultOf("0 or false") == "true");
+}
+
+TEST_CASE("Empty strings are true") {
+  REQUIRE(resultOf("\"\" or false") == "true");
+}

@@ -31,7 +31,7 @@ public:
       {"or", new fnDef(&fnOr, this, new Strings{"first", "second"})}, // move to fnValue
       {"not", new fnDef(&fnNot, this, new Strings{"first"})}, // move to fnValue
       {"eq", new fnDef(&fnEq, this, new Strings{"first", "second"})}, // move to fnValue
-      {"print", new fnDef(&print, this, new Strings{"first"})},
+      {"print", new fnDef(&print, this, new Strings{"out"})},
       {"dump", new fnDef(&dump, this, new Strings{})},
       {"List", new fnDef(&list, this, new Strings{"...args"})},
     };
