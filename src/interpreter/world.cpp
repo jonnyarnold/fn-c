@@ -74,3 +74,8 @@ fnValue* print(fnMachine* context, std::vector<fnValue*> values) {
 fnValue* list(fnMachine* context, std::vector<fnValue*> values) {
   return new fnList(values);
 }
+
+fnValue* dump(fnMachine* context, std::vector<fnValue*> values) {
+  context->printState();
+  return new fnBool(true);
+}

@@ -10,20 +10,21 @@ fnValue* astId::execute(fnMachine* context) {
 }
 
 fnValue* astDeref::execute(fnMachine* context) {
-  fnBlock* parentValue = dynamic_cast<fnBlock*>(this->parent->execute(context));
-  context->pushBlockByValue(parentValue);
+  fnValue* parentValue = dynamic_cast<fnValue*>(this->parent->execute(context));
+
+  context->pushScopeByValue(parentValue);
   fnValue* value = this->child->execute(context);
-  context->popBlock();
+  context->popScope();
 
   return value;
 }
 
 fnValue* astBlock::execute(fnMachine* context) {
-  fnBlock* block = context->pushNewBlock();
+  fnValue* block = context->pushNewScope();
 
   fnValue* value = this->executeStatements(context);
 
-  context->popBlock();
+  context->popScope();
 
   return value;
 }
@@ -32,7 +33,7 @@ fnValue* astBlock::executeStatements(fnMachine* context) {
   // By default, we set the return value to the current block.
   // This ensures that we return the current block if there
   // are no statements in the block.
-  fnValue* lastValue = context->currentBlock();
+  fnValue* lastValue = context->currentScope();
   
   for(auto statement: statements) {
     lastValue = statement->execute(context);
@@ -47,10 +48,10 @@ fnValue* astAssignment::execute(fnMachine* context) {
   // TODO: How can we avoid type checking here?
   astDeref* ref = dynamic_cast<astDeref*>(this->key);
   if(ref != NULL) {
-    fnBlock* parentValue = dynamic_cast<fnBlock*>(ref->parent->execute(context));
-    context->pushBlockByValue(parentValue);
+    fnValue* parentValue = ref->parent->execute(context);
+    context->pushScopeByValue(parentValue);
     computedValue = (new astAssignment((astReference*)ref->child, this->value))->execute(context);
-    context->popBlock();
+    context->popScope();
   } else {
 
     // If we don't have an astDeref, we have an astId.
@@ -61,7 +62,7 @@ fnValue* astAssignment::execute(fnMachine* context) {
   }
 
   // Assignments return the block they have been assigned to.
-  return context->currentBlock();
+  return context->currentScope();
 }
 
 fnValue* astInt::execute(fnMachine* context) {
@@ -81,19 +82,19 @@ fnValue* astBool::execute(fnMachine* context) {
 }
 
 fnValue* astFnCall::execute(fnMachine* context) {
-  fnValue* def = this->target->execute(context);
-
   // Execute the arguments...
   std::vector<fnValue*>* executedArgs = new std::vector<fnValue*>();
   for(auto arg: (*this->args)) {
     executedArgs->push_back(arg->execute(context));
   }
 
+  fnValue* def = this->target->execute(context);
+
   return context->callByValue(def, *executedArgs);
 }
 
 fnValue* astFnDef::execute(fnMachine* context) {
-  return new fnDef(this->body, context->currentBlock(), this->params);
+  return new fnDef(this->body, context->currentScope(), this->params);
 }
 
 fnValue* astConditional::execute(fnMachine* context) {

@@ -74,9 +74,14 @@
 
 // Operator precedence, lowest-to-highest
 %left ';'
-%left '='
+%nonassoc '='
+%nonassoc ','
 %left TINFIX
-%left '.'
+%right '.'
+%nonassoc TWHEN
+%nonassoc TFN
+%right '('
+%left ')'
 
 %%
 
@@ -124,8 +129,9 @@ infixOperation:
 
 reference:
   identifier
-| deref
 | brackets
+| deref
+  ;
 
 identifier:
   TID    { $$ = new astId($1); }
@@ -133,7 +139,7 @@ identifier:
   ;
 
 deref:
-  value '.' value { $$ = new astDeref($1, $3); }
+  reference '.' reference { $$ = new astDeref($1, $3); }
 
 functionCall:
   reference '(' args ')' {

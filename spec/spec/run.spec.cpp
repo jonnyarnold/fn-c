@@ -65,7 +65,7 @@ TEST_CASE("Fn call within block") {
       foo = fn(b) { a + b }
     }
     
-    x(1).foo(1)
+    (x(1)).foo(1)
   )") == "2");
 }
 
@@ -89,4 +89,21 @@ TEST_CASE("Param ordering is correct every call") {
 
 TEST_CASE("List get/set") {
   REQUIRE(value("x = List(1, \"two\", true); x(1)") == "two");
+}
+
+TEST_CASE("Function passing") {
+  REQUIRE(value(R"(
+    do = fn (func, x) {
+      func(x)
+    }
+
+    do(fn (x) { x + 1 }, 1)
+  )") == "2");
+}
+
+TEST_CASE("List.map") {
+  REQUIRE(value(R"(
+    l = List(1, 2, 3)
+    l.map(fn (i) { i + 1 })
+  )") == "List(2, 3, 4)");
 }

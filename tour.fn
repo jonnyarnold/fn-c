@@ -57,6 +57,7 @@ x eq z # => true
 # Function prototypes are values.
 add = fn (a,b) { a + b }
 add(2,3) # => 5
+add(4,5) # => 9
 
 
 
@@ -108,8 +109,8 @@ list = List(1, "two", true)
 # Lists are accessed by calling it as if it were a function.
 print(list(1)) # => "two"
 
-# Lists can be iterated over with the each() function.
-list.each(fn (item) {
+# Lists can be iterated over with the map() function.
+list.map(fn (item) {
   print(item)
 })
 
@@ -138,9 +139,9 @@ print(guessMyNumber(42)) # => "You win!"
 # There are two ways of importing:
 #
 # 1. Use import!() to import all of the file's scope into the current one
-include "tour-import.fn"
-print(importedX) # => 1
+# include "tour-import.fn"
+# print(importedX) # => 1
 
 # 2. Use import() to import all of the file's scope into a variable
-i = include "tour-import.fn"
-print(i.importedY) # => 2
+# i = include "tour-import.fn"
+# print(i.importedY) # => 2

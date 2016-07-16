@@ -10,10 +10,10 @@ CPP_FILES = `find ./src -name "*.cpp" | sed 's/\.\/src\///g'`
 OBJ_FILES = $(CPP_FILES:.cpp=.o)
 
 OBJ_DIR = obj
-OBJ_FILENAMES = lex.o parse.o parser.o value.o block.o def.o builtins.o ast.o machine.o main.o
+OBJ_FILENAMES = lex.o parse.o parser.o value.o def.o list.o world.o ast.o machine.o main.o
 OBJS = $(patsubst %,$(OBJ_DIR)/%,$(OBJ_FILENAMES))
 
-SPEC_OBJ_FILENAMES = lex.o parse.o parser.o value.o block.o def.o builtins.o ast.o machine.o cli.o spec.o
+SPEC_OBJ_FILENAMES = lex.o parse.o parser.o value.o def.o list.o world.o ast.o machine.o cli.o spec.o
 SPEC_OBJS = $(patsubst %,$(OBJ_DIR)/%,$(SPEC_OBJ_FILENAMES))
 
 ### MAIN ###
@@ -45,8 +45,11 @@ $(OBJ_DIR)/block.o: src/interpreter/objects/block.cpp
 $(OBJ_DIR)/def.o: src/interpreter/objects/def.cpp
 	g++ -c -o $@ src/interpreter/objects/def.cpp $(CPP_FLAGS) $(INCLUDES)
 
-$(OBJ_DIR)/builtins.o: src/interpreter/builtins.cpp
-	g++ -c -o $@ src/interpreter/builtins.cpp $(CPP_FLAGS) $(INCLUDES)
+$(OBJ_DIR)/list.o: src/interpreter/objects/list.cpp
+	g++ -c -o $@ src/interpreter/objects/list.cpp $(CPP_FLAGS) $(INCLUDES)
+
+$(OBJ_DIR)/world.o: src/interpreter/world.cpp
+	g++ -c -o $@ src/interpreter/world.cpp $(CPP_FLAGS) $(INCLUDES)
 
 $(OBJ_DIR)/machine.o: src/interpreter/machine.cpp
 	g++ -c -o $@ src/interpreter/machine.cpp $(CPP_FLAGS) $(INCLUDES)

@@ -3,9 +3,9 @@
 #include "src/interpreter/machine.h"
 
 fnValue* fnDef::call(fnMachine* context, std::vector<fnValue*> args) {
-  fnBlock* block = context->pushNewBlock(this->parentBlock);
+  fnValue* scope = context->pushNewScope(this->parentScope);
 
-  // Set the arguments in the FnDef block.
+  // Set the arguments in the FnDef scope.
   for(int i = 0; i < this->params->size(); i++) {
     std::string paramName = (*this->params)[i];
     fnValue* paramValue = args[i];
@@ -16,7 +16,7 @@ fnValue* fnDef::call(fnMachine* context, std::vector<fnValue*> args) {
   // Execute the FnDef instructions.
   fnValue* result = this->func(context, args);
 
-  context->popBlock();
+  context->popScope();
 
   return result;
 }
