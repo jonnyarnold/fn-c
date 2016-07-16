@@ -10,16 +10,17 @@ CPP_FILES = `find ./src -name "*.cpp" | sed 's/\.\/src\///g'`
 OBJ_FILES = $(CPP_FILES:.cpp=.o)
 
 OBJ_DIR = obj
-OBJ_FILENAMES = lex.o parse.o parser.o value.o def.o list.o world.o ast.o machine.o main.o
-OBJS = $(patsubst %,$(OBJ_DIR)/%,$(OBJ_FILENAMES))
+OBJ_FILENAMES = lex.o parse.o parser.o value.o def.o list.o world.o ast.o machine.o
+MAIN_OBJ_FILENAMES = $(OBJ_FILENAMES) main.o
+MAIN_OBJS = $(patsubst %,$(OBJ_DIR)/%,$(MAIN_OBJ_FILENAMES))
 
-SPEC_OBJ_FILENAMES = lex.o parse.o parser.o value.o def.o list.o world.o ast.o machine.o cli.o spec.o
+SPEC_OBJ_FILENAMES = $(OBJ_FILENAMES) spec.o world.spec.o bool.spec.o def.spec.o list.spec.o number.spec.o block.spec.o string.spec.o
 SPEC_OBJS = $(patsubst %,$(OBJ_DIR)/%,$(SPEC_OBJ_FILENAMES))
 
 ### MAIN ###
 
-bin/fn: $(OBJS)
-	g++ $(CPP_FLAGS) -o $@ $(OBJS)
+bin/fn: $(MAIN_OBJS)
+	g++ $(CPP_FLAGS) -o $@ $(MAIN_OBJS)
 
 tmp/lex.cpp: src/parser/flex.cpp
 	flex -o tmp/lex.cpp --header-file=tmp/lex.h src/parser/flex.cpp
@@ -57,7 +58,6 @@ $(OBJ_DIR)/machine.o: src/interpreter/machine.cpp
 $(OBJ_DIR)/ast.o: src/ast.cpp
 	g++ -c -o $@ src/ast.cpp $(CPP_FLAGS) $(INCLUDES)
 
-
 $(OBJ_DIR)/cli.o: src/cli.cpp
 	g++ -c -o $@ src/cli.cpp $(CPP_FLAGS) $(INCLUDES)
 
@@ -74,9 +74,29 @@ spec: tmp/spec
 tmp/spec: $(SPEC_OBJS)
 	g++ $(CPP_FLAGS) -o $@ $(SPEC_OBJS)
 
-$(OBJ_DIR)/spec.o: spec/spec.cpp spec/spec/run.spec.cpp
+$(OBJ_DIR)/spec.o: spec/spec.cpp
 	g++ -c -o $@ spec/spec.cpp $(CPP_FLAGS) $(INCLUDES)
 
+$(OBJ_DIR)/world.spec.o: spec/e2e/world.spec.cpp
+	g++ -c -o $@ spec/e2e/world.spec.cpp $(CPP_FLAGS) $(INCLUDES)
+
+$(OBJ_DIR)/bool.spec.o: spec/e2e/bool.spec.cpp
+	g++ -c -o $@ spec/e2e/bool.spec.cpp $(CPP_FLAGS) $(INCLUDES)
+
+$(OBJ_DIR)/def.spec.o: spec/e2e/def.spec.cpp
+	g++ -c -o $@ spec/e2e/def.spec.cpp $(CPP_FLAGS) $(INCLUDES)
+
+$(OBJ_DIR)/list.spec.o: spec/e2e/list.spec.cpp
+	g++ -c -o $@ spec/e2e/list.spec.cpp $(CPP_FLAGS) $(INCLUDES)
+
+$(OBJ_DIR)/number.spec.o: spec/e2e/number.spec.cpp
+	g++ -c -o $@ spec/e2e/number.spec.cpp $(CPP_FLAGS) $(INCLUDES)
+
+$(OBJ_DIR)/block.spec.o: spec/e2e/block.spec.cpp
+	g++ -c -o $@ spec/e2e/block.spec.cpp $(CPP_FLAGS) $(INCLUDES)
+
+$(OBJ_DIR)/string.spec.o: spec/e2e/string.spec.cpp
+	g++ -c -o $@ spec/e2e/string.spec.cpp $(CPP_FLAGS) $(INCLUDES)
 
 
 ### DEV TOOLS ###
