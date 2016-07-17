@@ -16,9 +16,6 @@ typedef std::unordered_map<std::string, fnValue*> ValueDict;
 class fnValue {
 protected:
 
-  // Stores attributes that are nested within the value.
-  ValueDict locals;
-
   // Stores builtin attributes that can be overwritten.
   ValueDict builtins;
 
@@ -37,6 +34,9 @@ protected:
   }
 
 public:
+
+  // Stores attributes that are nested within the value.
+  ValueDict locals;
 
   // If a value has a parent, the parent will be searched for a value
   // if this value does not have it in its locals.

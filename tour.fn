@@ -136,12 +136,10 @@ print(guessMyNumber(42)) # => "You win!"
 
 
 ### Importing Other Files
-# There are two ways of importing:
-#
-# 1. Use import!() to import all of the file's scope into the current one
-# include "tour-import.fn"
-# print(importedX) # => 1
+# Use load()!
+imported = load("tour-import.fn")
+print(imported.importedX) # 1
 
-# 2. Use import() to import all of the file's scope into a variable
-# i = include "tour-import.fn"
-# print(i.importedY) # => 2
+# Combine it with include() to add all attributes to the current namespace.
+include(load("tour-import.fn"))
+print(importedY) # 2

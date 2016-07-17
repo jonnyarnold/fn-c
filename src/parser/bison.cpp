@@ -50,7 +50,6 @@
 %token <v_double> TDOUBLE
 %token <v_int>    TINT
 %token <v_bool>   TBOOL
-%token <void>     TWHEN TFN
 
 // Non-terminal symbols.
 %type <v_block> program block
@@ -100,7 +99,7 @@ statement:
   ;
 
 assignment:
-  reference '=' value { $$ = new astAssignment($1, $3); }
+  reference '=' value   { $$ = new astAssignment($1, $3); }
   ;
 
 value:

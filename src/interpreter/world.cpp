@@ -1,7 +1,8 @@
 #include <iostream>
 
 #include "src/interpreter/runtime.h"
-
+#include "src/interpreter/objects/defs/include.h"
+#include "src/interpreter/objects/defs/load.h"
 
 class fnPrint : public fnDef {
   fnValue* execute(fnMachine* context, std::vector<fnValue*> values) {
@@ -46,6 +47,8 @@ fnWorld::fnWorld() : fnValue() {
   this->locals = ValueDict{
     {"print", new fnPrint()},
     {"not", new fnNot()},
-    {"List", new fnListConstructor()}
+    {"List", new fnListConstructor()},
+    {"include", new fnInclude(this)},
+    {"load", new fnLoad()},
   };
 }

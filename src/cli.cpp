@@ -5,12 +5,10 @@
 #include "src/parser.h"
 #include "src/interpreter/machine.h"
 
+#include "src/exec.h"
+
 int run(const char fileName[], bool debug) {
-  astBlock* program = (new fnParser(debug))->parseFile(fileName);
-
-  fnMachine* context = new fnMachine(debug);
-  fnValue* returnValue = program->execute(context);
-
+  exec(fileName, debug);
   return 0;
 }
 

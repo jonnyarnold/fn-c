@@ -2,6 +2,8 @@
 #include "src/interpreter/objects/defs/eq.h"
 #include "src/interpreter/objects/defs/and.h"
 #include "src/interpreter/objects/defs/or.h"
+#include "src/interpreter/objects/defs/include.h"
+#include "src/interpreter/objects/defs/load.h"
 #include "src/interpreter/machine.h"
 
 #include <iostream>
@@ -15,7 +17,9 @@ fnValue::fnValue(fnValue* parent) {
   this->builtins = ValueDict{
     {"eq", new fnEq(this)},
     {"and", new fnAnd(this)},
-    {"or", new fnOr(this)}
+    {"or", new fnOr(this)},
+    {"include", new fnInclude(this)},
+    {"load", new fnLoad()},
   };
 
   this->locals = ValueDict{};
