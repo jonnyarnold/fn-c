@@ -1,4 +1,4 @@
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#define CATCH_CONFIG_MAIN
 #include "vendor/catch.h"
 
 #include "src/parser.h"
@@ -9,6 +9,9 @@
 
 // Get the value of a code listing.
 std::string resultOf(const char code[]) {
+  // Useful for debugging!
+  // std::cout << code << std::endl;
+
   astBlock* program = (new fnParser())->parseCode(code);
   fnMachine* context = new fnMachine();
   fnValue* value = program->execute(context);

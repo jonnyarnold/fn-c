@@ -11,17 +11,25 @@ const int INDENT_SIZE = 2;
 
 fnValue::fnValue(fnValue* parent) {
   this->parent = parent;
-  this->locals = ValueDict{
+
+  this->builtins = ValueDict{
     {"eq", new fnEq(this)},
     {"and", new fnAnd(this)},
     {"or", new fnOr(this)}
   };
+
+  this->locals = ValueDict{};
 }
 
 fnValue* fnValue::get(std::string* name) {
   fnValue* value = this->locals[(*name)];
 
-  if(value == NULL) {
+  if (value == NULL) {
+    // Try the builtins
+    value = this->builtins[(*name)];
+  }
+
+  if (value == NULL) {
     if(this->parent != NULL) { return this->parent->get(name); }
     else {
       // TODO: fnError
@@ -46,8 +54,15 @@ void fnValue::set(std::string* name, fnValue* value) {
 std::size_t fnValue::hash() {
   std::size_t workingHash = (std::size_t)parent;
 
-  for(auto local: locals) {
+  for(auto local: locals) {   
     std::size_t keyHash = std::hash<std::string>()(local.first);
+
+    // TODO: Why is this happening?!
+    if (local.second == NULL) {
+      std::cout << "WARNING: Undefined attribute " << local.first << " in " << this->asString(0) << std::endl;
+      continue;
+    }
+
     std::size_t valueHash = local.second->hash();
 
     // From http://en.cppreference.com/w/cpp/utility/hash

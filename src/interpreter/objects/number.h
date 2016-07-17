@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 #include "src/interpreter/objects/constant.h"
 #include "src/interpreter/objects/def.h"
 
@@ -18,7 +20,17 @@ class Number {
 public:
 
   Number(int i) { this->active = INT; this->value.i = i; }
-  Number(double d) { this->active = DOUBLE; this->value.d = d; }
+  Number(double d) { 
+    // We check if the double could be an int;
+    // if it can, we store it as an int instead.
+    if (roundf(d) == d) { 
+      this->active = INT; 
+      this->value.i = (int)d;
+    } else {
+      this->active = DOUBLE; 
+      this->value.d = d; 
+    }
+  }
 
   // Returns the string
   std::string asString() {

@@ -19,6 +19,10 @@ protected:
   // Stores attributes that are nested within the value.
   ValueDict locals;
 
+  // Stores builtin attributes that can be overwritten.
+  ValueDict builtins;
+
+
   // Super-special constructor.
   // This is used for fnDefs attached to fnValue,
   // otherwise an infinite loop occurs because
@@ -29,6 +33,7 @@ protected:
   fnValue() {
     this->parent = NULL;
     this->locals = ValueDict{};
+    this->builtins = ValueDict{};
   }
 
 public:

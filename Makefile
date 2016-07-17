@@ -1,3 +1,6 @@
+# TODO: This is getting a little unruly.
+# Time to move to something a little more automated!
+
 .PHONY: spec
 
 all: bin/fn spec
