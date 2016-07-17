@@ -41,8 +41,11 @@ public:
   // Returns the stored value as a size_t.
   // Useful for hashing.
   std::size_t asSizeT() {
-    if(this->active == INT) { return (std::size_t)(this->value.i); }
-    else if(this->active == DOUBLE) { return (std::size_t)(this->value.d); }
+    if(this->active == INT) {
+      return std::hash<int>()(this->value.i); 
+    } else if(this->active == DOUBLE) {
+      return std::hash<double>()(this->value.d);
+    }
   }
 
   double asDouble() {

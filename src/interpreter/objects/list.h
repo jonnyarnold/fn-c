@@ -33,7 +33,7 @@ public:
   }
 
   virtual std::size_t hash() override {
-    std::size_t workingHash;
+    std::size_t workingHash = 0;
 
     for(auto value: values) {
       std::size_t valueHash = value->hash();

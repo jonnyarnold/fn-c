@@ -27,22 +27,17 @@ TEST_CASE("eq") {
     )") == "true");
   }
 
-  // TODO: Fix list equality
-  //
-  // SECTION("lists are value-equal") {
-  //   REQUIRE(resultOf("List(1) eq List(1)") == "true");
-  //   REQUIRE(resultOf("List(1) eq List(2)") == "false");
-  // }
+  SECTION("lists are value-equal") {
+    REQUIRE(resultOf("List(1) eq List(1)") == "true");
+    REQUIRE(resultOf("List(1) eq List(2)") == "false");
+  }
 
   SECTION("numbers are value-equal") {
     REQUIRE(resultOf("0 eq 0") == "true");
     REQUIRE(resultOf("0 eq 1") == "false");
 
     REQUIRE(resultOf("1 eq 1.0") == "true");
-
-    // TODO: Fix Integer/Double inequality
-    //
-    // REQUIRE(resultOf("1 eq 1.1") == "false");
+    REQUIRE(resultOf("1 eq 1.1") == "false");
   }
 
   SECTION("strings are value-equal") {
