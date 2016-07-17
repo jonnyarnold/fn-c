@@ -1,5 +1,7 @@
 #pragma once
 
+#include "src/interpreter/objects/value.h"
+
 // Represents any constant value in Fn.
 // The type T is the C-type that the value
 // belongs to.
@@ -10,7 +12,7 @@ public:
   // The C-value of the constant.
   T value;
 
-  fnConstant(T value) { this->value = value; }
+  fnConstant(T value) : fnValue(NULL) { this->value = value; }
 
   virtual std::size_t hash() override {
     return (std::size_t)this->value;

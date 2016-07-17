@@ -7,18 +7,28 @@
 // Number of spaces between indent levels when converting to string.
 const int INDENT_SIZE = 2;
 
-fnValue* map(fnMachine* context, std::vector<fnValue*> values);
+class fnList;
+
+class fnMap : public fnDef {
+  fnList* list;
+  fnValue* execute(fnMachine* context, std::vector<fnValue*> values);
+
+public:
+  fnMap(fnList* parentList) : fnDef(parent, new std::vector<std::string>{"fn"}) {
+    this->list = parentList;
+  }
+};
 
 // Represents an array of values.
 class fnList : public fnValue {
 public:
   std::vector<fnValue*> values;
 
-  fnList(std::vector<fnValue*> values) : fnValue(new fnWorld()) {
+  fnList(std::vector<fnValue*> values) : fnValue(NULL) {
     this->values = values;
 
     this->locals = ValueDict{
-      {"map", new fnDef(&map, this, new Strings{"func"})},
+      {"map", new fnMap(this)},
     };
   }
 
@@ -38,8 +48,7 @@ public:
   // The default call to fnList returns
   // the element at the given index.
   fnValue* call(fnMachine* context, std::vector<fnValue*> values) override {
-    int index = static_cast<fnInt*>(values[0])->value;
-
+    int index = static_cast<fnNumber*>(values[0])->asInt();
     return this->values[index];
   }
 

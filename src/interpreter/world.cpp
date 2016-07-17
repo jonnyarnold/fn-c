@@ -2,80 +2,50 @@
 
 #include "src/interpreter/runtime.h"
 
-// Adds two integers together.
-fnValue* add(fnMachine* context, std::vector<fnValue*> values) {
-  int sum =
-    static_cast<fnInt*>(values[0])->value +
-    static_cast<fnInt*>(values[1])->value;
 
-  return new fnInt(sum);
-}
+class fnPrint : public fnDef {
+  fnValue* execute(fnMachine* context, std::vector<fnValue*> values) {
+    std::string asString = values[0]->asString();
+    std::cout << asString << "\n";
+    return new fnString(&asString);
+  }
 
-// Subtracts two integers.
-fnValue* subtract(fnMachine* context, std::vector<fnValue*> values) {
-  int diff =
-    static_cast<fnInt*>(values[0])->value -
-    static_cast<fnInt*>(values[1])->value;
+public:
+  fnPrint() : fnDef(
+    NULL, 
+    new std::vector<std::string>{"out"}
+  ) {};
+};
 
-  return new fnInt(diff);
-}
+class fnNot : public fnDef {
+  fnValue* execute(fnMachine* context, std::vector<fnValue*> values) {
+    bool result = !(values[0]->asBool());
+    return new fnBool(result);
+  }
 
-// Multiplies two integers.
-fnValue* multiply(fnMachine* context, std::vector<fnValue*> values) {
-  int product =
-    static_cast<fnInt*>(values[0])->value *
-    static_cast<fnInt*>(values[1])->value;
+public:
+  fnNot() : fnDef(
+    NULL, 
+    new std::vector<std::string>{"obj"}
+  ) {};
+};
 
-  return new fnInt(product);
-}
+class fnListConstructor : public fnDef {
+  fnValue* execute(fnMachine* context, std::vector<fnValue*> values) {
+    return new fnList(values);
+  }
 
-// Divides two integers.
-fnValue* divide(fnMachine* context, std::vector<fnValue*> values) {
-  int quotient =
-    static_cast<fnInt*>(values[0])->value /
-    static_cast<fnInt*>(values[1])->value;
+public:
+  fnListConstructor() : fnDef(
+    NULL, 
+    new std::vector<std::string>{"...items"}
+  ) {};
+};
 
-  return new fnInt(quotient);
-}
-
-fnValue* fnAnd(fnMachine* context, std::vector<fnValue*> values) {
-  bool result =
-    values[0]->asBool() &&
-    values[1]->asBool();
-
-  return new fnBool(result);
-}
-
-fnValue* fnOr(fnMachine* context, std::vector<fnValue*> values) {
-  bool result =
-    values[0]->asBool() ||
-    values[1]->asBool();
-
-  return new fnBool(result);
-}
-
-fnValue* fnNot(fnMachine* context, std::vector<fnValue*> values) {
-  bool result = !(values[0]->asBool());
-
-  return new fnBool(result);
-}
-
-fnValue* fnEq(fnMachine* context, std::vector<fnValue*> values) {
-  bool result = values[0]->hash() == values[1]->hash();
-
-  return new fnBool(result);
-}
-
-fnValue* print(fnMachine* context, std::vector<fnValue*> values) {
-  std::cout << values[0]->asString() << "\n";
-  return new fnString(new std::string(values[0]->asString()));
-}
-
-fnValue* list(fnMachine* context, std::vector<fnValue*> values) {
-  return new fnList(values);
-}
-
-fnValue* dump(fnMachine* context, std::vector<fnValue*> values) {
-  context->printState();
-  return new fnBool(true);
+fnWorld::fnWorld() : fnValue() {
+  this->locals = ValueDict{
+    {"print", new fnPrint()},
+    {"not", new fnNot()},
+    {"List", new fnListConstructor()}
+  };
 }

@@ -1,9 +1,22 @@
 #include "src/interpreter/objects/value.h"
+#include "src/interpreter/objects/defs/eq.h"
+#include "src/interpreter/objects/defs/and.h"
+#include "src/interpreter/objects/defs/or.h"
+#include "src/interpreter/machine.h"
 
 #include <iostream>
 
 // Number of spaces between indent levels when converting to string.
 const int INDENT_SIZE = 2;
+
+fnValue::fnValue(fnValue* parent) {
+  this->parent = parent;
+  this->locals = ValueDict{
+    {"eq", new fnEq(this)},
+    {"and", new fnAnd(this)},
+    {"or", new fnOr(this)}
+  };
+}
 
 fnValue* fnValue::get(std::string* name) {
   fnValue* value = this->locals[(*name)];

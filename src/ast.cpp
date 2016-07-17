@@ -66,11 +66,11 @@ fnValue* astAssignment::execute(fnMachine* context) {
 }
 
 fnValue* astInt::execute(fnMachine* context) {
-  return dynamic_cast<fnValue*>(new fnInt(this->value));
+  return dynamic_cast<fnValue*>(new fnNumber(this->value));
 }
 
 fnValue* astDouble::execute(fnMachine* context) {
-  return dynamic_cast<fnValue*>(new fnDouble(this->value));
+  return dynamic_cast<fnValue*>(new fnNumber(this->value));
 }
 
 fnValue* astString::execute(fnMachine* context) {
@@ -94,7 +94,7 @@ fnValue* astFnCall::execute(fnMachine* context) {
 }
 
 fnValue* astFnDef::execute(fnMachine* context) {
-  return new fnDef(this->body, context->currentScope(), this->params);
+  return new fnFnDef(this->body, context->currentScope(), this->params);
 }
 
 fnValue* astConditional::execute(fnMachine* context) {

@@ -125,7 +125,11 @@ literal:
   ;
 
 infixOperation:
-  value TINFIX value { astId* id = new astId($2); $$ = new astFnCall(id, new std::vector<astValue*>{$1, $3}); }
+  value TINFIX value { 
+    $$ = new astFnCall(
+      new astDeref($1, new astId($2)), 
+      new std::vector<astValue*>{$3}); 
+  }
 
 reference:
   identifier

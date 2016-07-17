@@ -3,7 +3,7 @@
 #include "src/interpreter/machine.h"
 
 fnValue* fnDef::call(fnMachine* context, std::vector<fnValue*> args) {
-  fnValue* scope = context->pushNewScope(this->parentScope);
+  fnValue* scope = context->pushNewScope(this->parent);
 
   // Set the arguments in the FnDef scope.
   for(int i = 0; i < this->params->size(); i++) {
@@ -14,7 +14,7 @@ fnValue* fnDef::call(fnMachine* context, std::vector<fnValue*> args) {
   }
 
   // Execute the FnDef instructions.
-  fnValue* result = this->func(context, args);
+  fnValue* result = this->execute(context, args);
 
   context->popScope();
 
@@ -34,3 +34,19 @@ std::string fnDef::asString(int indentationLevel) {
 
   return result;
 }
+
+std::string fnFnDef::asString(int indentationLevel) {
+  std::string result = "(";
+  for(auto param: (*this->params)) {
+    result += param;
+    if(param != this->params->back()) {
+      result += ", ";
+    }
+  }
+
+  result += ") ";
+  result += this->block->asString(indentationLevel);
+
+  return result;
+}
+

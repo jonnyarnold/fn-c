@@ -6,6 +6,7 @@
 
 // A few forward declarations...
 class fnValue;
+class fnDef;
 class fnMachine;
 
 // Shorthand for a dictionary of values.
@@ -18,20 +19,25 @@ protected:
   // Stores attributes that are nested within the value.
   ValueDict locals;
 
+  // Super-special constructor.
+  // This is used for fnDefs attached to fnValue,
+  // otherwise an infinite loop occurs because
+  // fnDef's constructor calls fnValue's constructor,
+  // which calls a new fnDef...
+  //
+  // So this is bare. It has no locals or parent.
+  fnValue() {
+    this->parent = NULL;
+    this->locals = ValueDict{};
+  }
+
 public:
 
   // If a value has a parent, the parent will be searched for a value
   // if this value does not have it in its locals.
   fnValue* parent;
 
-  fnValue(fnValue* parent) {
-    this->parent = parent;
-  }
-
-  // Create a value without a parent.
-  fnValue() : fnValue(NULL) {
-    this->locals = ValueDict{};
-  }
+  fnValue(fnValue* parent);
 
   // Return a value for comparison.
   virtual std::size_t hash();
