@@ -7,6 +7,7 @@
 #include "src/interpreter/machine.h"
 
 #include "src/exec.h"
+#include "src/errors.h"
 
 // Loads the result of executing the file at the given path
 // into a value for use.
@@ -18,8 +19,7 @@ class fnLoad : public bareFnDef {
     
     fnString* path = dynamic_cast<fnString*>(values[0]);
     if (path == NULL) {
-      std::cout << "RuntimeError(\"load called with non-string argument " << values[0]->asString() << "\")";
-      exit(-1);
+      throw FnRuntimeError("load called with non-string argument " + values[0]->asString());
     }
 
     return exec(path->value->c_str(), context->debug);

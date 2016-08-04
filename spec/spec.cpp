@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "vendor/catch.h"
 
+#include "src/errors.h"
 #include "src/parser.h"
 #include "src/interpreter/machine.h"
 
@@ -26,7 +27,7 @@ bool failure(const char code[]) {
     astBlock* program = (new fnParser())->parseCode(code);
     fnMachine* context = new fnMachine();
     fnValue* value = program->execute(context);
-  } catch(...) {
+  } catch (FnError &e) {
     failed = true;
   }
 

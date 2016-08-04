@@ -4,12 +4,9 @@ TEST_CASE("Empty programs compile") {
   REQUIRE(resultOf("") == "{}");
 }
 
-// TODO: failure() doesn't work yet,
-// because the compiler has no error handling!!!
-//
-// TEST_CASE("Bad programs do not compile") {
-//   REQUIRE(failure("({)}"));
-// }
+TEST_CASE("Bad programs do not compile") {
+  REQUIRE(failure("({)}"));
+}
 
 TEST_CASE("Semicolons") {
   REQUIRE(resultOf("x = 1; x") == "1");
@@ -19,12 +16,9 @@ TEST_CASE("Brackets") {
   REQUIRE(resultOf("2 * (1 + 2)") == "6");
 }
 
-// TODO: failure() doesn't work yet,
-// because the compiler has no error handling!!!
-//
-// TEST_CASE("Variable redefinition not allowed") {
-//   REQUIRE(failure("a = 1; a = 2"));
-// }
+TEST_CASE("Variable redefinition not allowed") {
+  REQUIRE(failure("a = 1; a = 2"));
+}
 
 TEST_CASE("when") {
   SECTION("runs code on true") {

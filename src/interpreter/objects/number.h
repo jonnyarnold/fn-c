@@ -4,6 +4,7 @@
 
 #include "src/interpreter/objects/constant.h"
 #include "src/interpreter/objects/def.h"
+#include "src/errors.h"
 
 // Generic number class, incorporating integers and doubles.
 class Number {
@@ -56,9 +57,7 @@ public:
   int asInt() {
     if(this->active == INT) { return this->value.i; }
     else { 
-      // KABOOM
-      std::cout << "RuntimeError: Integer required, " << this->value.d << " received.";
-      exit(-1); 
+      throw FnRuntimeError("Attempted conversion from double to integer.");
     }
   }
 };

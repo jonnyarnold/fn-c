@@ -6,10 +6,16 @@
 #include "src/interpreter/machine.h"
 
 #include "src/exec.h"
+#include "src/errors.h"
 
 int run(const char fileName[], bool debug) {
-  exec(fileName, debug);
-  return 0;
+  try {
+    exec(fileName, debug);
+    return 0;
+  } catch (FnError e) {
+    std::cout << e.what();
+    return -1;
+  }
 }
 
 int repl(bool debug) {

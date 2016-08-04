@@ -5,6 +5,7 @@
 #include "src/interpreter/objects/defs/include.h"
 #include "src/interpreter/objects/defs/load.h"
 #include "src/interpreter/machine.h"
+#include "src/errors.h"
 
 #include <iostream>
 
@@ -36,9 +37,7 @@ fnValue* fnValue::get(std::string* name) {
   if (value == NULL) {
     if(this->parent != NULL) { return this->parent->get(name); }
     else {
-      // TODO: fnError
-      std::cout << "RuntimeError(\"" << *name << " is not defined in " << this->asString(0) << "\")\n";
-      exit(-1);
+      throw FnRuntimeError(*name + " is not defined in " + this->asString(0));
     }
   }
 
@@ -47,9 +46,7 @@ fnValue* fnValue::get(std::string* name) {
 
 void fnValue::set(std::string* name, fnValue* value) {
   if(this->locals.find(*name) != this->locals.end()) {
-    // TODO: fnError
-    std::cout << "RuntimeError(\"" << *name << " is already defined.\")\n";
-    exit(-1);
+    throw FnRuntimeError(*name + " is already defined in " + this->asString(0));
   }
 
   this->locals[*name] = value;

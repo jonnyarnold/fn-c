@@ -1,12 +1,14 @@
 #include "src/interpreter/objects/list.h"
+#include "src/errors.h"
 
 #include <iostream>
 
 fnValue* fnMap::execute(fnMachine* context, std::vector<fnValue*> values) {
   fnDef* def = dynamic_cast<fnDef*>(values[0]);
   if (def == NULL) {
-    std::cout << "RuntimeError(non-def " << values[0]->asString() << " given to map)";
-    exit(-1);
+    throw FnRuntimeError(
+      "Non-def " + values[0]->asString() + " given to List.map"
+    );
   }
 
   std::vector<fnValue*>* results = new std::vector<fnValue*>();

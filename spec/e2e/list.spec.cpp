@@ -5,10 +5,21 @@ TEST_CASE("List get/set") {
 }
 
 TEST_CASE("List.map") {
-  REQUIRE(resultOf(R"(
-    l = List(1, 2, 3)
-    l.map(fn (i) { i + 1 })
-  )") == "List(2, 3, 4)");
+
+  SECTION("applies to every item of the List") {
+    REQUIRE(resultOf(R"(
+      l = List(1, 2, 3)
+      l.map(fn (i) { i + 1 })
+    )") == "List(2, 3, 4)");
+  }
+  
+  SECTION("Fails if non-def is given") {
+    REQUIRE(failure(R"(
+      l = List(1, 2, 3)
+      l.map(false)
+    )"));
+  }
+
 }
 
 // TODO: List.reduce

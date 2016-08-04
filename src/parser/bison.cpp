@@ -5,6 +5,7 @@
 
   #include "tmp/lex.h"
   #include "src/ast.h"
+  #include "src/errors.h"
 
   // stuff from flex that bison needs to know about:
   extern int yylex();
@@ -193,7 +194,13 @@ test:
 
 %%
 
+class FnParseError : public FnError {
+  using FnError::FnError;
+};
+
 void yyerror(char const* s) {
-  std::cout << "Parse error on line " << line << ": " << s;
-  exit(-1);
+  throw FnParseError(
+    s,
+    new CodeLocation("???", line)
+  );
 }
