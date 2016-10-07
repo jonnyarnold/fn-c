@@ -4,9 +4,10 @@
 
 // Represents a string.
 class fnString : public fnConstant<std::string*> {
-  using fnConstant::fnConstant;
 
 public:
+  fnString(std::string*);
+
   virtual std::size_t hash() override {
     return std::hash<std::string>()(*this->value);
   }
