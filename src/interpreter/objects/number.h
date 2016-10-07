@@ -4,6 +4,7 @@
 
 #include "src/interpreter/objects/constant.h"
 #include "src/interpreter/objects/def.h"
+#include "src/interpreter/objects/bool.h"
 #include "src/errors.h"
 
 // Generic number class, incorporating integers and doubles.
@@ -21,15 +22,15 @@ class Number {
 public:
 
   Number(int i) { this->active = INT; this->value.i = i; }
-  Number(double d) { 
+  Number(double d) {
     // We check if the double could be an int;
     // if it can, we store it as an int instead.
-    if (roundf(d) == d) { 
-      this->active = INT; 
+    if (roundf(d) == d) {
+      this->active = INT;
       this->value.i = (int)d;
     } else {
-      this->active = DOUBLE; 
-      this->value.d = d; 
+      this->active = DOUBLE;
+      this->value.d = d;
     }
   }
 
@@ -43,7 +44,7 @@ public:
   // Useful for hashing.
   std::size_t asSizeT() {
     if(this->active == INT) {
-      return std::hash<int>()(this->value.i); 
+      return std::hash<int>()(this->value.i);
     } else if(this->active == DOUBLE) {
       return std::hash<double>()(this->value.d);
     }
@@ -56,14 +57,14 @@ public:
 
   int asInt() {
     if(this->active == INT) { return this->value.i; }
-    else { 
+    else {
       throw FnRuntimeError("Attempted conversion from double to integer.");
     }
   }
 };
 
 // Represents a number (either integer or double).
-class fnNumber : public fnConstant<Number*> {  
+class fnNumber : public fnConstant<Number*> {
 public:
   fnNumber(int i);
   fnNumber(double d);

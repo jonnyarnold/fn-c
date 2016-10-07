@@ -16,7 +16,7 @@ class fnAdd : public fnDef {
 
 public:
   fnAdd(fnValue* parent) : fnDef(
-    parent, 
+    parent,
     new std::vector<std::string>{"other"}
   ) {};
 };
@@ -33,7 +33,7 @@ class fnSubtract : public fnDef {
 
 public:
   fnSubtract(fnValue* parent) : fnDef(
-    parent, 
+    parent,
     new std::vector<std::string>{"other"}
   ) {};
 };
@@ -49,7 +49,7 @@ class fnMultiply : public fnDef {
 
 public:
   fnMultiply(fnValue* parent) : fnDef(
-    parent, 
+    parent,
     new std::vector<std::string>{"other"}
   ) {};
 };
@@ -65,7 +65,39 @@ class fnDivide : public fnDef {
 
 public:
   fnDivide(fnValue* parent) : fnDef(
-    parent, 
+    parent,
+    new std::vector<std::string>{"other"}
+  ) {};
+};
+
+class fnMoreThan : public fnDef {
+  fnValue* execute(fnMachine* context, std::vector<fnValue*> values) {
+    bool moreThan =
+      static_cast<fnNumber*>(this->parent)->asDouble() >
+      static_cast<fnNumber*>(values[0])->asDouble();
+
+    return new fnBool(moreThan);
+  }
+
+public:
+  fnMoreThan(fnValue* parent) : fnDef(
+    parent,
+    new std::vector<std::string>{"other"}
+  ) {};
+};
+
+class fnLessThan : public fnDef {
+  fnValue* execute(fnMachine* context, std::vector<fnValue*> values) {
+    bool lessThan =
+      static_cast<fnNumber*>(this->parent)->asDouble() <
+      static_cast<fnNumber*>(values[0])->asDouble();
+
+    return new fnBool(lessThan);
+  }
+
+public:
+  fnLessThan(fnValue* parent) : fnDef(
+    parent,
     new std::vector<std::string>{"other"}
   ) {};
 };
@@ -76,6 +108,8 @@ fnNumber::fnNumber(int i) : fnConstant(new Number(i)) {
     {"-", new fnSubtract(this)},
     {"*", new fnMultiply(this)},
     {"/", new fnDivide(this)},
+    {"moreThan", new fnMoreThan(this)},
+    {"lessThan", new fnLessThan(this)},
   };
 
   this->locals.insert(methods.begin(), methods.end());
@@ -87,6 +121,8 @@ fnNumber::fnNumber(double d) : fnConstant(new Number(d)) {
     {"-", new fnSubtract(this)},
     {"*", new fnMultiply(this)},
     {"/", new fnDivide(this)},
+    {"moreThan", new fnMoreThan(this)},
+    {"lessThan", new fnLessThan(this)},
   };
 
   this->locals.insert(methods.begin(), methods.end());
