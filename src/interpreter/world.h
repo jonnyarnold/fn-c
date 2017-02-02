@@ -7,4 +7,5 @@
 class fnWorld : public fnValue {
 public:
   fnWorld();
+  ~fnWorld();
 };

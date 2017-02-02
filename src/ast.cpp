@@ -21,9 +21,7 @@ fnValue* astDeref::execute(fnMachine* context) {
 
 fnValue* astBlock::execute(fnMachine* context) {
   fnValue* block = context->pushNewScope();
-
   fnValue* value = this->executeStatements(context);
-
   context->popScope();
 
   return value;
@@ -35,6 +33,7 @@ fnValue* astBlock::executeStatements(fnMachine* context) {
   // are no statements in the block.
   fnValue* lastValue = context->currentScope();
   
+  // FIXME: Possible memory leak?
   for(auto statement: statements) {
     lastValue = statement->execute(context);
   }
@@ -48,10 +47,12 @@ fnValue* astAssignment::execute(fnMachine* context) {
   // TODO: How can we avoid type checking here?
   astDeref* ref = dynamic_cast<astDeref*>(this->key);
   if(ref != NULL) {
+
     fnValue* parentValue = ref->parent->execute(context);
     context->pushScopeByValue(parentValue);
     computedValue = (new astAssignment((astReference*)ref->child, this->value))->execute(context);
     context->popScope();
+
   } else {
 
     // If we don't have an astDeref, we have an astId.
@@ -83,14 +84,17 @@ fnValue* astBool::execute(fnMachine* context) {
 
 fnValue* astFnCall::execute(fnMachine* context) {
   // Execute the arguments...
-  std::vector<fnValue*>* executedArgs = new std::vector<fnValue*>();
+  std::vector<fnValue*> executedArgs = std::vector<fnValue*>();
   for(auto arg: (*this->args)) {
-    executedArgs->push_back(arg->execute(context));
+    executedArgs.push_back(arg->execute(context));
   }
 
   fnValue* def = this->target->execute(context);
+  fnValue* result = context->callByValue(def, executedArgs);
 
-  return context->callByValue(def, *executedArgs);
+  // delete def;
+
+  return result;
 }
 
 fnValue* astFnDef::execute(fnMachine* context) {
@@ -99,6 +103,7 @@ fnValue* astFnDef::execute(fnMachine* context) {
 
 fnValue* astConditional::execute(fnMachine* context) {
   
+  // FIXME: Potential memory leak?
   fnValue* returnValue;
   for(auto condition: (*this->conditions)) {
     returnValue = condition->execute(context);
@@ -114,10 +119,12 @@ fnValue* astConditional::execute(fnMachine* context) {
 fnValue* astCondition::execute(fnMachine* context) {
   
   fnValue* testResult = this->test->execute(context);
+  fnValue* conditionResult = NULL;
+
   if(testResult->asBool()) {
-    return this->body->execute(context);
+    conditionResult = this->body->execute(context);
   }
 
-  // NULL shows that the condition failed.
-  return NULL;
+  // delete testResult;
+  return conditionResult;
 }

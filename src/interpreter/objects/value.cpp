@@ -26,6 +26,12 @@ fnValue::fnValue(fnValue* parent) {
   this->locals = ValueDict{};
 }
 
+fnValue::~fnValue() {
+  // Don't delete the parent!
+  this->locals.clear();
+  this->builtins.clear();
+}
+
 fnValue* fnValue::get(std::string* name) {
   fnValue* value = this->locals[(*name)];
 

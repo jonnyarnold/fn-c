@@ -6,6 +6,7 @@
 
 fnValue* fnMachine::pushNewScope(fnValue* parent) {
   fnValue* scope = new fnValue(parent);
+
   this->scopeStack->push(scope);
 
   DEBUG("PUSH_NEW_SCOPE(parent: " << parent << ") = " << scope);
@@ -36,9 +37,7 @@ fnValue* fnMachine::currentScope() {
 void fnMachine::popScope() {
   fnValue* poppedScope = this->scopeStack->top();
   this->scopeStack->pop();
-
-  // TODO: Garbage collection?
-
+  
   DEBUG("POP_SCOPE(" << poppedScope->asString(0) << ")");
 }
 

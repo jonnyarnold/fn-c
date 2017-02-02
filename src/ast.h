@@ -37,6 +37,7 @@ class astId : public astReference {
 public:
   std::string* name;
   astId(std::string* name) { this->name = name; }
+  ~astId() { delete this->name; }
   fnValue* execute(fnMachine*) override;
 
   virtual std::string asString(int indent) override {
@@ -49,6 +50,7 @@ public:
   astValue* parent;
   astValue* child;
   astDeref(astValue* parent, astValue* child) { this->parent = parent; this->child = child; }
+  ~astDeref() { delete this->child; delete this->parent; }
   fnValue* execute(fnMachine*) override;
 
   virtual std::string asString(int indent) override {
@@ -62,6 +64,11 @@ class astBlock : public astValue {
 public:
   astBlock(std::vector<astStatement*> statements) { this->statements = statements; }
   astBlock() {}
+
+  ~astBlock() {
+    this->statements.clear();
+  }
+
   virtual fnValue* execute(fnMachine*) override;
   fnValue* executeStatements(fnMachine*);
 
@@ -85,6 +92,7 @@ public:
   astReference* key;
   astValue* value;
   astAssignment(astReference* key, astValue* value) { this->key = key; this->value = value; }
+  ~astAssignment() { delete this->value; delete this->key; }
   virtual fnValue* execute(fnMachine*) override;
 
   virtual std::string asString(int indent) override {
@@ -121,6 +129,7 @@ class astString : public astValue {
 
 public:
   astString(std::string* value) { this->value = value; }
+  ~astString() { delete this->value; }
   virtual fnValue* execute(fnMachine*) override;
 
   virtual std::string asString(int indent) override {
@@ -146,6 +155,7 @@ class astFnCall : public astValue {
 
 public:
   astFnCall(astReference* target, std::vector<astValue*>* args) { this->target = target; this->args = args; }
+  ~astFnCall() { delete this->args; delete this->target; }
   virtual fnValue* execute(fnMachine*) override;
 
   virtual std::string asString(int indent) override {
@@ -167,6 +177,7 @@ class astFnDef : public astValue {
 
 public:
   astFnDef(std::vector<std::string>* params, astBlock* body) { this->params = params; this->body = body; }
+  ~astFnDef() { delete this->body; delete this->params; }
   virtual fnValue* execute(fnMachine*) override;
 
   virtual std::string asString(int indent) override {
@@ -188,6 +199,7 @@ class astCondition : public astStatement {
 
 public:
   astCondition(astValue* test, astBlock* body) { this->test = test; this->body = body; }
+  ~astCondition() { delete this->body; delete this->test; }
   virtual fnValue* execute(fnMachine*) override;
 
   virtual std::string asString(int indent) override {
@@ -203,6 +215,7 @@ class astConditional : public astValue {
 
 public:
   astConditional(std::vector<astCondition*>* conditions) { this->conditions = conditions; }
+  ~astConditional() { delete this->conditions; }
   fnValue* execute(fnMachine*) override;
 
   virtual std::string asString(int indent) override {

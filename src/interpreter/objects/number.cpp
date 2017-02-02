@@ -127,3 +127,7 @@ fnNumber::fnNumber(double d) : fnConstant(new Number(d)) {
 
   this->locals.insert(methods.begin(), methods.end());
 }
+
+fnNumber::~fnNumber() {
+  delete this->value;
+}

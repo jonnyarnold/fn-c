@@ -32,6 +32,10 @@ public:
     this->params = params;
   }
 
+  ~fnDef() {
+    delete this->params;
+  }
+
   // Call is used by the machine
   // to set up the arguments and 
   // then pass to execute().
@@ -57,6 +61,10 @@ protected:
     this->parent = parent;
     this->params = params;
   }
+
+  ~bareFnDef() {
+    delete this->params;
+  }
 };
 
 // Denotes a fnDef whose implementation is a fn block.
@@ -67,6 +75,10 @@ class fnFnDef : public fnDef {
 public:
   fnFnDef(astBlock* block, fnValue* parent, Strings* params) : fnDef(parent, params) { 
     this->block = block;
+  }
+
+  ~fnFnDef() {
+    delete this->block;
   }
 
   virtual fnValue* execute(fnMachine* context, std::vector<fnValue*> values) override {

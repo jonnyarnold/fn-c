@@ -52,3 +52,7 @@ fnWorld::fnWorld() : fnValue() {
     {"load", new fnLoad()},
   };
 }
+
+fnWorld::~fnWorld() {
+  this->locals.clear();
+}

@@ -69,6 +69,8 @@ public:
   fnNumber(int i);
   fnNumber(double d);
 
+  ~fnNumber();
+
   virtual std::size_t hash() override {
     return this->value->asSizeT();
   }

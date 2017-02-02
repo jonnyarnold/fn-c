@@ -43,6 +43,7 @@ public:
   fnValue* parent;
 
   fnValue(fnValue* parent);
+  ~fnValue();
 
   // Return a value for comparison.
   virtual std::size_t hash();

@@ -22,7 +22,15 @@ public:
 
   fnMachine() : fnMachine(false) {}
 
+  ~fnMachine() {
+    while (!this->scopeStack->empty()) {
+      fnValue* scope = this->scopeStack->top();
+      delete scope;
+      this->scopeStack->pop();
+    }
 
+    delete this->scopeStack;
+  }
 
   // ===
   // BLOCKS
