@@ -23,6 +23,13 @@ class fnVMNumber {
 public:
   fnExponent exponent;
   fnCoefficient coefficient;
+
+  fnVMNumber(fnExponent exponent, fnCoefficient coefficient) {
+    this->exponent = exponent;
+    this->coefficient = coefficient;
+  }
+
+  fnVMNumber() = default;
 };
 
 // Values in the fn VM.

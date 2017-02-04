@@ -22,9 +22,9 @@ fnVMValue fnVM::run(fnByte instructions[], size_t num_bytes) {
 
   while(counter < num_bytes) {
     fnByte opcode = instructions[counter];
-    
+
     switch(opcode) {
-    
+
     case FN_OP_FALSE:
     case FN_OP_TRUE:
       returnValue = this->declareBool(opcode);
@@ -61,12 +61,8 @@ fnVMValue* fnVM::declareNumber(fnByte value[]) {
   fnExponent exponent = (fnExponent)value[1];
   fnCoefficient coefficient = (fnCoefficient)value[2];
 
-  // TODO: Figure out how I can have a non-default constructor
-  // AND still be allowed to have fnVMNumber in the fnVMValue union.
   fnVMValue* n = new fnVMValue;
-  n->asNumber = fnVMNumber();
-  n->asNumber.exponent = exponent;
-  n->asNumber.coefficient = coefficient;
+  n->asNumber = fnVMNumber(exponent, coefficient);
 
   this->values.push(n);
 
