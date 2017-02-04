@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stdlib.h"
-#include <stack>
+#include <vector>
 
 // The smallest unit of instruction.
 // (Note that instructions are at least this size,
@@ -14,6 +14,9 @@ typedef fnByte fnOp;
 #define FN_OP_TRUE (fnOp)(1)
 #define FN_OP_NUMBER (fnOp)(2)
 #define FN_OP_STRING (fnOp)(3)
+#define FN_OP_AND (fnOp)(4)
+#define FN_OP_OR (fnOp)(5)
+#define FN_OP_NOT (fnOp)(6)
 
 // The Number struct
 typedef signed char fnExponent;
@@ -51,8 +54,17 @@ public:
 
 protected:
   bool debug;
-  std::stack<fnVMValue*> values;
+
+  std::vector<fnVMValue*> values;
+  fnVMValue* value(fnByte index);
 
   fnVMValue* declareBool(fnByte value);
+  fnVMValue* declareBool(bool value);
+
   fnVMValue* declareNumber(fnByte value[]);
+  fnVMValue* declareNumber(fnExponent exponent, fnCoefficient coefficient);
+
+  fnVMValue* fnAnd(fnByte value[]);
+  fnVMValue* fnOr(fnByte value[]);
+  fnVMValue* fnNot(fnByte value[]);
 };

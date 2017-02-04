@@ -136,10 +136,13 @@ watch-linux:
 obj/vm.o: src/vm/vm.cpp src/vm/vm.h
 	g++ -c -o $@ src/vm/vm.cpp $(CPP_FLAGS) $(INCLUDES)
 
-obj/vm.spec.o: spec/spec.cpp spec/spec.h spec/vm/vm.spec.cpp
-	g++ -c -o $@ spec/vm/vm.spec.cpp $(CPP_FLAGS) $(INCLUDES)
+obj/bool.spec.o: spec/spec.cpp spec/spec.h spec/vm/bool.spec.cpp
+	g++ -c -o $@ spec/vm/bool.spec.cpp $(CPP_FLAGS) $(INCLUDES)
 
-tmp/vm_spec: obj/vm.o obj/vm.spec.o obj/spec.o
+obj/number.spec.o: spec/spec.cpp spec/spec.h spec/vm/number.spec.cpp
+	g++ -c -o $@ spec/vm/number.spec.cpp $(CPP_FLAGS) $(INCLUDES)
+
+tmp/vm_spec: obj/vm.o obj/bool.spec.o obj/number.spec.o obj/spec.o
 	g++ $(CPP_FLAGS) -o $@ $^
 
 vm: tmp/vm_spec
