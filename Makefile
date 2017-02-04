@@ -128,3 +128,19 @@ watch-mac: # Mac-specific!
 
 watch-linux:
 	while inotifywait -qq -e close_write -r .; do make; done
+
+
+
+### VM STUFF ###
+
+obj/vm.o: src/vm/vm.cpp src/vm/vm.h
+	g++ -c -o $@ src/vm/vm.cpp $(CPP_FLAGS) $(INCLUDES)
+
+obj/vm.spec.o: spec/spec.cpp spec/spec.h spec/vm/vm.spec.cpp
+	g++ -c -o $@ spec/vm/vm.spec.cpp $(CPP_FLAGS) $(INCLUDES)
+
+tmp/vm_spec: obj/vm.o obj/vm.spec.o obj/spec.o
+	g++ $(CPP_FLAGS) -o $@ $^
+
+vm: tmp/vm_spec
+	./tmp/vm_spec
