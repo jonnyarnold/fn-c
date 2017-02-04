@@ -1,22 +1,6 @@
 #include "spec/spec.h"
 #include "src/vm/vm.h"
 
-TEST_CASE("BOOL false") {
-  fnByte instructions[1] = {FN_OP_FALSE};
-
-  fnVM vm = fnVM();
-  fnVMValue result = vm.run(instructions, (size_t)1);
-  REQUIRE(result.asBool == false);
-}
-
-TEST_CASE("BOOL true") {
-  fnByte instructions[1] = {FN_OP_TRUE};
-
-  fnVM vm = fnVM();
-  fnVMValue result = vm.run(instructions, (size_t)1);
-  REQUIRE(result.asBool == true);
-}
-
 TEST_CASE("NUMBER 1") {
   fnByte instructions[8];
   instructions[0] = FN_OP_NUMBER;
