@@ -3,6 +3,8 @@
 #include "stdlib.h"
 #include <vector>
 
+#include "src/vm/number.h"
+
 // The smallest unit of instruction.
 // (Note that instructions are at least this size,
 // but are usually more.)
@@ -17,23 +19,10 @@ typedef fnByte fnOp;
 #define FN_OP_AND (fnOp)(4)
 #define FN_OP_OR (fnOp)(5)
 #define FN_OP_NOT (fnOp)(6)
+#define FN_OP_MULTIPLY (fnOp)(7)
+#define FN_OP_DIVIDE (fnOp)(8)
 
-// The Number struct
-typedef signed char fnExponent;
-typedef signed long long int fnCoefficient;
-
-class fnVMNumber {
-public:
-  fnExponent exponent;
-  fnCoefficient coefficient;
-
-  fnVMNumber(fnExponent exponent, fnCoefficient coefficient) {
-    this->exponent = exponent;
-    this->coefficient = coefficient;
-  }
-
-  fnVMNumber() = default;
-};
+// TODO: Helper methods for defining instructions.
 
 // Values in the fn VM.
 typedef union _fnVMValue {
@@ -62,9 +51,12 @@ protected:
   fnVMValue* declareBool(bool value);
 
   fnVMValue* declareNumber(fnByte value[]);
-  fnVMValue* declareNumber(fnExponent exponent, fnCoefficient coefficient);
+  fnVMValue* declareNumber(fnVMNumber value);
 
   fnVMValue* fnAnd(fnByte value[]);
   fnVMValue* fnOr(fnByte value[]);
   fnVMValue* fnNot(fnByte value[]);
+
+  fnVMValue* fnMultiply(fnByte value[]);
+  fnVMValue* fnDivide(fnByte value[]);
 };
