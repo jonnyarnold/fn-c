@@ -1,16 +1,21 @@
+// The Fn VM is a basic, hand-made virtual machine.
+// Using a handful of VM instructions,
+// this VM is capable of running any Fn program.
+
 #pragma once
 
-#include "stdlib.h"
-#include <vector>
+#include "stdlib.h" // size_t
+#include <vector> // std::vector
 
-#include "src/vm/number.h"
+#include "src/vm/number.h" // fnVMNumber
 
 // The smallest unit of instruction.
 // (Note that instructions are at least this size,
 // but are usually more.)
 typedef char fnByte;
 
-// Opcodes
+// Opcodes are the first byte of any instruction,
+// and denote the operation that the VM should perform.
 typedef fnByte fnOp;
 #define FN_OP_FALSE (fnOp)(0)
 #define FN_OP_TRUE (fnOp)(1)
@@ -29,12 +34,13 @@ typedef fnByte fnOp;
 
 // TODO: Helper methods for defining instructions.
 
-// Values in the fn VM.
+// fnVMValue is a union capable of storing any value.
 typedef union _fnVMValue {
   bool asBool;
   fnVMNumber asNumber;
 } fnVMValue;
 
+// fnVM is the virtual machine that instructions are run in.
 class fnVM {
 public:
 

@@ -1,11 +1,13 @@
 // Defines the Number type for the VM.
+//
 // The number type is a version of Douglas Crockford's decimal number type,
 // but done badly.
 
 #pragma once
 
-#include <cmath>
+#include <cmath> // pow, abs, ...
 
+// Types for the exponent and coefficient of a Number.
 typedef signed char fnExponent;
 typedef signed long long int fnCoefficient;
 

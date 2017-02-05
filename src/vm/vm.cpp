@@ -1,7 +1,7 @@
 #include "src/vm/vm.h"
 
-#include <iostream>
-#include <bitset>
+#include <iostream> // std::cout
+#include <bitset> // std::bitset
 
 #define DEBUG(msg) if (this->debug) { std::cout << msg << std::endl; }
 
@@ -78,10 +78,16 @@ fnVMValue fnVM::run(fnByte instructions[], size_t num_bytes) {
   return *returnValue;
 }
 
+// Get a value by index.
 fnVMValue* fnVM::value(fnByte index) {
   return this->values[index];
 }
 
+// BOOL_TRUE
+// BOOL_FALSE
+// (1 byte)
+//
+// Allocates a new boolean constant.
 fnVMValue* fnVM::declareBool(fnByte value) {
   return this->declareBool((bool)value);
 }
@@ -95,10 +101,11 @@ fnVMValue* fnVM::declareBool(bool value) {
   return b;
 }
 
+// NUMBER [EXPONENT (1)] [COEFFICIENT (6)]
+// (8 bytes)
+//
+// Allocates a new numeric constant.
 fnVMValue* fnVM::declareNumber(fnByte value[]) {
-  // A Number is of the form:
-  // [1-BYTE NUMBER_OP_CODE] [1-BYTE EXPONENT] [6-BYTE COEFFICIENT]
-  // (8 bytes total)
   fnExponent exponent = (fnExponent)value[1];
   fnCoefficient coefficient = (fnCoefficient)value[2];
 
@@ -122,12 +129,13 @@ fnVMValue* fnVM::declareNumber(fnVMNumber value) {
   return n;
 }
 
+// AND [INDEX_1 (1)] [INDEX_2 (1)]
+// (3 bytes)
+//
+// Returns true if both arguments are true,
+// false otherwise.
 fnVMValue* fnVM::fnAnd(fnByte value[]) {
-  // AND is of the form:
-  // [1-BYTE AND_OP_CODE] [1-BYTE CONST REF] [1-BYTE CONST REF]
-  //
-  // AND will return true if both arguments are true,
-  // false otherwise.
+  
   bool first = this->value(value[1])->asBool;
   if (!first) {
     DEBUG("AND(false, ???)");
@@ -144,12 +152,12 @@ fnVMValue* fnVM::fnAnd(fnByte value[]) {
   return this->declareBool(FN_OP_TRUE);
 }
 
+// OR [INDEX_1 (1)] [INDEX_2 (1)]
+// (3 bytes)
+//
+// Returns true if either arguments are true,
+// false otherwise.
 fnVMValue* fnVM::fnOr(fnByte value[]) {
-  // OR is of the form:
-  // [1-BYTE OR_OP_CODE] [1-BYTE CONST REF] [1-BYTE CONST REF]
-  //
-  // OR will return true if either argument is true;
-  // false otherwise.
   bool first = this->value(value[1])->asBool;
   if (first) {
     DEBUG("OR(true, ???)");
@@ -166,12 +174,12 @@ fnVMValue* fnVM::fnOr(fnByte value[]) {
   return this->declareBool(FN_OP_FALSE);
 }
 
+// NOT [INDEX (1)]
+// (2 bytes)
+//
+// Returns true if the argument is false
+// and vice versa.
 fnVMValue* fnVM::fnNot(fnByte value[]) {
-  // NOT is of the form:
-  // [1-BYTE NOT_OP_CODE] [1-BYTE CONST REF] [1-BYTE CONST REF]
-  //
-  // NOT will return true if the argument is false,
-  // and vice versa.
   bool arg = this->value(value[1])->asBool;
   DEBUG("NOT(" << arg << ")");
 
@@ -182,11 +190,11 @@ fnVMValue* fnVM::fnNot(fnByte value[]) {
   }
 }
 
+// MULTIPLY [INDEX_1 (1)] [INDEX_2 (1)]
+// (3 bytes)
+//
+// Returns the product of two numeric values.
 fnVMValue* fnVM::fnMultiply(fnByte value[]) {
-  // MULTIPLY is of the form:
-  // [1-BYTE MULTIPLY_OP_CODE] [1-BYTE CONST REF] [1-BYTE CONST REF]
-  //
-  // MULTIPLY will return the product of the given values.
   fnVMNumber first = this->value(value[1])->asNumber;
   fnVMNumber second = this->value(value[2])->asNumber;
 
@@ -197,11 +205,11 @@ fnVMValue* fnVM::fnMultiply(fnByte value[]) {
   return this->declareNumber(product);
 }
 
+// DIVIDE [INDEX_1 (1)] [INDEX_2 (1)]
+// (3 bytes)
+//
+// Returns the fraction of two numeric values.
 fnVMValue* fnVM::fnDivide(fnByte value[]) {
-  // DIVIDE is of the form:
-  // [1-BYTE DIVIDE_OP_CODE] [1-BYTE CONST REF] [1-BYTE CONST REF]
-  //
-  // DIVIDE will return the fraction (first / second) as a Number.
   fnVMNumber first = this->value(value[1])->asNumber;
   fnVMNumber second = this->value(value[2])->asNumber;
 
@@ -212,11 +220,11 @@ fnVMValue* fnVM::fnDivide(fnByte value[]) {
   return this->declareNumber(fraction);
 }
 
+// ADD [INDEX_1 (1)] [INDEX_2 (1)]
+// (3 bytes)
+//
+// Returns the sum of two numeric values.
 fnVMValue* fnVM::fnAdd(fnByte value[]) {
-  // ADD is of the form:
-  // [1-BYTE ADD_OP_CODE] [1-BYTE CONST REF] [1-BYTE CONST REF]
-  //
-  // ADD will return the sum as a Number.
   fnVMNumber first = this->value(value[1])->asNumber;
   fnVMNumber second = this->value(value[2])->asNumber;
 
@@ -227,11 +235,11 @@ fnVMValue* fnVM::fnAdd(fnByte value[]) {
   return this->declareNumber(sum);
 }
 
+// SUBTRACT [INDEX_1 (1)] [INDEX_2 (1)]
+// (3 bytes)
+//
+// Returns the difference of two numeric values.
 fnVMValue* fnVM::fnSubtract(fnByte value[]) {
-  // SUBTRACT is of the form:
-  // [1-BYTE SUBTRACT_OP_CODE] [1-BYTE CONST REF] [1-BYTE CONST REF]
-  //
-  // SUBTRACT will return the difference as a Number.
   fnVMNumber first = this->value(value[1])->asNumber;
   fnVMNumber second = this->value(value[2])->asNumber;
 
