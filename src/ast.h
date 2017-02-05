@@ -1,234 +1,283 @@
-#ifndef FN_AST
-#define FN_AST
+// An Abstract Syntax Tree is used
+// to represent a Fn program in a tree format;
+// this provides the right ordering when
+// generating code.
+//
+// This is the data structure that links the parser
+// and code generator.
 
-#include <string>
-#include <vector>
+#pragma once
 
-// FORWARD DECLARATIONS
-// See fn.runtime.h
-class fnMachine;
-class fnValue;
+#include <string> // std::string
+#include <vector> // std::vector
 
-class astStatement {
-public:
-  virtual ~astStatement() {};
-  virtual fnValue* execute(fnMachine*) = 0;
-  virtual std::string asString(int indent) = 0;
-  std::string asString() {
-    return this->asString(0);
-  }
-};
+// #include "src/bytecode.h" // CodeByte
+// #include "src/codegen.h" // Generator
 
-class astValue : public astStatement {
-public:
-  virtual ~astValue() {};
-  virtual fnValue* execute(fnMachine*) = 0;
-  virtual std::string asString(int indent) = 0;
-};
+namespace fn { namespace ast {
 
-class astReference : public astValue {
-public:
-  virtual ~astReference() {};
-  virtual fnValue* execute(fnMachine*) = 0;
-  virtual std::string asString(int indent) = 0;
-};
+  // Base class for all statements.
+  class Statement {
+  public:
+    //virtual bytecode::CodeByte* codegen(codegen::Generator*) = 0;
+    virtual std::string asString(int indent) = 0;
+    std::string asString() { return this->asString(0); }
+  };
 
-class astId : public astReference {
-public:
-  std::string* name;
-  astId(std::string* name) { this->name = name; }
-  ~astId() { delete this->name; }
-  fnValue* execute(fnMachine*) override;
+  // Base class for all statements
+  // that refer to values.
+  class Value : public Statement {
+  public:
+    //virtual bytecode::CodeByte* codegen(codegen::Generator*) = 0;
+    virtual std::string asString(int indent) = 0;
+  };
 
-  virtual std::string asString(int indent) override {
-    return *this->name;
-  }
-};
+  // Base class for all statements
+  // that alias defined values.
+  class Reference : public Value {
+  public:
+    //virtual bytecode::CodeByte* codegen(codegen::Generator*) = 0;
+    virtual std::string asString(int indent) = 0;
+  };
 
-class astDeref : public astReference {
-public:
-  astValue* parent;
-  astValue* child;
-  astDeref(astValue* parent, astValue* child) { this->parent = parent; this->child = child; }
-  ~astDeref() { delete this->child; delete this->parent; }
-  fnValue* execute(fnMachine*) override;
+  // Represents a variable name.
+  class Id : public Reference {
+  public:
+    std::string name;
+    Id(std::string name) { this->name = name; }
+    ~Id() = default;
 
-  virtual std::string asString(int indent) override {
-    return "(DEREF parent:" + this->parent->asString(indent) + " child:" + this->child->asString(indent) + ")";
-  }
-};
+    //bytecode::CodeByte* codegen(codegen::Generator*) override;
 
-class astBlock : public astValue {
-  std::vector<astStatement*> statements;
-
-public:
-  astBlock(std::vector<astStatement*> statements) { this->statements = statements; }
-  astBlock() {}
-
-  ~astBlock() {
-    this->statements.clear();
-  }
-
-  virtual fnValue* execute(fnMachine*) override;
-  fnValue* executeStatements(fnMachine*);
-
-  int size() { return statements.size(); }
-
-  virtual std::string asString(int indent) override {
-    std::string result = "(BLOCK [\n";
-
-    for(auto statement: this->statements) {
-      result += std::string(indent + 2, ' ') + statement->asString(indent + 2) + "\n";
+    std::string asString(int indent) override { 
+      return "(ID " + this->name + ")"; 
     }
+  };
 
-    result += std::string(indent, ' ') + "])";
-
-    return result;
-  }
-};
-
-class astAssignment : public astStatement {
-public:
-  astReference* key;
-  astValue* value;
-  astAssignment(astReference* key, astValue* value) { this->key = key; this->value = value; }
-  ~astAssignment() { delete this->value; delete this->key; }
-  virtual fnValue* execute(fnMachine*) override;
-
-  virtual std::string asString(int indent) override {
-    return "(ASSIGNMENT id:" + this->key->asString(indent) + " value:" + this->value->asString(indent) + ")";
-  }
-};
-
-class astInt : public astValue {
-  int value;
-
-public:
-  astInt(int value) { this->value = value; }
-  virtual fnValue* execute(fnMachine*) override;
-
-  virtual std::string asString(int indent) override {
-    return "(INT " + std::to_string(this->value) + ")";
-  }
-};
-
-class astDouble : public astValue {
-  double value;
-
-public:
-  astDouble(double value) { this->value = value; }
-  virtual fnValue* execute(fnMachine*) override;
-
-  virtual std::string asString(int indent) override {
-    return "(DOUBLE " + std::to_string(this->value) + ")";
-  }
-};
-
-class astString : public astValue {
-  std::string* value;
-
-public:
-  astString(std::string* value) { this->value = value; }
-  ~astString() { delete this->value; }
-  virtual fnValue* execute(fnMachine*) override;
-
-  virtual std::string asString(int indent) override {
-    return "(STRING " + *this->value + ")";
-  }
-};
-
-class astBool : public astValue {
-  bool value;
-
-public:
-  astBool(bool value) { this->value = value; }
-  virtual fnValue* execute(fnMachine*) override;
-
-  virtual std::string asString(int indent) override {
-    return "(BOOL " + std::to_string(this->value) + ")";
-  }
-};
-
-class astFnCall : public astValue {
-  astReference* target;
-  std::vector<astValue*>* args;
-
-public:
-  astFnCall(astReference* target, std::vector<astValue*>* args) { this->target = target; this->args = args; }
-  ~astFnCall() { delete this->args; delete this->target; }
-  virtual fnValue* execute(fnMachine*) override;
-
-  virtual std::string asString(int indent) override {
-    std::string result = "(CALL target:" + this->target->asString(indent) + " args:[\n";
-
-    for(auto arg: *this->args) {
-      result += std::string(indent + 2, ' ') + arg->asString(indent + 2) + "\n";
+  // Represents a nested variable reference.
+  // (The variable exists within another value.)
+  class Deref : public Reference {
+  public:
+    Value* parent;
+    Value* child;
+    Deref(Value* parent, Value* child) { 
+      this->parent = parent; 
+      this->child = child; 
     }
+    ~Deref() { delete this->child; delete this->parent; }
 
-    result += std::string(indent, ' ') + "])";
+    //bytecode::CodeByte* codegen(codegen::Generator*) override;
 
-    return result;
-  }
-};
-
-class astFnDef : public astValue {
-  std::vector<std::string>* params;
-  astBlock* body;
-
-public:
-  astFnDef(std::vector<std::string>* params, astBlock* body) { this->params = params; this->body = body; }
-  ~astFnDef() { delete this->body; delete this->params; }
-  virtual fnValue* execute(fnMachine*) override;
-
-  virtual std::string asString(int indent) override {
-    std::string result = "(DEF params:[\n";
-
-    for(auto param: *this->params) {
-      result += std::string(indent + 2, ' ') + param + "\n";
+    std::string asString(int indent) override {
+      return "(DEREF parent:" + 
+        this->parent->asString(indent) + 
+        " child:" + 
+        this->child->asString(indent) + ")";
     }
+  };
 
-    result += std::string(indent, ' ') + "] body:" + this->body->asString(indent) + ")";
-
-    return result;
-  }
-};
-
-class astCondition : public astStatement {
-  astValue* test;
-  astBlock* body;
-
-public:
-  astCondition(astValue* test, astBlock* body) { this->test = test; this->body = body; }
-  ~astCondition() { delete this->body; delete this->test; }
-  virtual fnValue* execute(fnMachine*) override;
-
-  virtual std::string asString(int indent) override {
-    return "(COND test:" +
-      this->test->asString(indent) +
-      " body:" +
-      this->body->asString(indent) + ")";
-  }
-};
-
-class astConditional : public astValue {
-  std::vector<astCondition*>* conditions;
-
-public:
-  astConditional(std::vector<astCondition*>* conditions) { this->conditions = conditions; }
-  ~astConditional() { delete this->conditions; }
-  fnValue* execute(fnMachine*) override;
-
-  virtual std::string asString(int indent) override {
-    std::string result = "(WHEN [\n";
-
-    for(auto condition: *this->conditions) {
-      result += std::string(indent + 2, ' ') + condition->asString(indent + 2) + "\n";
+  // Represents the definition of a variable.
+  class Assignment : public Statement {
+  public:
+    Reference* key;
+    Value* value;
+    Assignment(Reference* key, Value* value) { 
+      this->key = key; 
+      this->value = value; 
     }
+    ~Assignment() { delete this->value; delete this->key; }
 
-    result += std::string(indent, ' ') + "])";
+    //bytecode::CodeByte* codegen(codegen::Generator*) override;
 
-    return result;
-  }
-};
+    virtual std::string asString(int indent) override {
+      return "(ASSIGNMENT id:" + this->key->asString(indent) + " value:" + this->value->asString(indent) + ")";
+    }
+  };
 
-#endif
+  // Represents a collection of statements which,
+  // when executed, return a value.
+  //
+  // They can be thought of as zero-arity, immediately executed
+  // function closures, if you're feeling masochistic.
+  class Block : public Value {
+    std::vector<Statement*> statements;
+
+  public:
+    Block(std::vector<Statement*> statements) { this->statements = statements; }
+    Block() { this->statements = std::vector<Statement*>(); }
+    ~Block() { this->statements.clear(); }
+
+    //bytecode::CodeByte* codegen(codegen::Generator*) override;
+    //bytecode::CodeByte* executeStatements(codegen::Generator*);
+
+    std::string asString(int indent) override {
+      std::string result = "(BLOCK [\n";
+
+      for(auto statement: this->statements) {
+        result += std::string(indent + 2, ' ') + 
+          statement->asString(indent + 2) + 
+          "\n";
+      }
+
+      result += std::string(indent, ' ') + "])";
+
+      return result;
+    }
+  };
+
+  // Represents a boolean value.
+  class Bool : public Value {
+    bool value;
+
+  public:
+    Bool(bool value) { this->value = value; }
+    ~Bool() = default;
+
+    //bytecode::CodeByte* codegen(codegen::Generator*) override;
+
+    std::string asString(int indent) override {
+      return "(BOOL " + std::to_string(this->value) + ")";
+    }
+  };
+
+  // Represents a numeric value.
+  class Number : public Value {
+    double value;
+
+  public:
+    Number(double value) { this->value = value; }
+    ~Number() = default;
+
+    //bytecode::CodeByte* codegen(codegen::Generator*) override;
+
+    std::string asString(int indent) override {
+      return "(NUMBER " + std::to_string(this->value) + ")";
+    }
+  };
+
+  // Represents a string of characters.
+  class String : public Value {
+    std::string value;
+
+  public:
+    String(std::string value) { this->value = value; }
+    ~String() = default;
+
+    //bytecode::CodeByte* codegen(codegen::Generator*) override;
+
+    std::string asString(int indent) override {
+      return "(STRING " + this->value + ")";
+    }
+  };
+
+  // Represents a call (request to execute) to a function.
+  class Call : public Value {
+    Reference* target;
+    std::vector<Value*> args;
+
+  public:
+    Call(Reference* target, std::vector<Value*> args) { 
+      this->target = target; 
+      this->args = args; 
+    }
+    ~Call() { this->args.clear(); delete this->target; }
+    
+    //bytecode::CodeByte* codegen(codegen::Generator*) override;
+
+    std::string asString(int indent) override {
+      std::string result = "(CALL target:" + 
+        this->target->asString(indent) + 
+        " args:[\n";
+
+      for(auto arg: this->args) {
+        result += std::string(indent + 2, ' ') + arg->asString(indent + 2) + "\n";
+      }
+
+      result += std::string(indent, ' ') + "])";
+
+      return result;
+    }
+  };
+
+  // Represents a function definition (sometimes known as a prototype).
+  class Def : public Value {
+    std::vector<std::string> params;
+    Block* body;
+
+  public:
+    Def(std::vector<std::string> params, Block* body) { 
+      this->params = params; 
+      this->body = body; 
+    }
+    ~Def() { delete this->body; }
+
+    //bytecode::CodeByte* codegen(codegen::Generator*) override;
+
+    virtual std::string asString(int indent) override {
+      std::string result = "(DEF params:[\n";
+
+      for(auto param: this->params) {
+        result += std::string(indent + 2, ' ') + param + "\n";
+      }
+
+      result += std::string(indent, ' ') + 
+        "] body:" + 
+        this->body->asString(indent) + 
+        ")";
+
+      return result;
+    }
+  };
+
+  // Used within Conditionals; represents a test
+  // and the code to execute if the test passes.
+  class Condition : public Statement {
+    Value* test;
+    Block* body;
+
+  public:
+    Condition(Value* test, Block* body) { 
+      this->test = test; 
+      this->body = body; 
+    }
+    ~Condition() { delete this->body; delete this->test; }
+    
+    //bytecode::CodeByte* codegen(codegen::Generator*) override;
+
+    std::string asString(int indent) override {
+      return "(COND test:" +
+        this->test->asString(indent) +
+        " body:" +
+        this->body->asString(indent) + ")";
+    }
+  };
+
+  // Represents a collection of Conditions
+  // (conditionally executed code paths).
+  class Conditional : public Value {
+    std::vector<Condition*> conditions;
+
+  public:
+    Conditional(std::vector<Condition*> conditions) { 
+      this->conditions = conditions; 
+    }
+    ~Conditional() { this->conditions.clear(); }
+    
+    //bytecode::CodeByte* codegen(codegen::Generator*) override;
+
+    std::string asString(int indent) override {
+      std::string result = "(WHEN [\n";
+
+      for(auto condition: this->conditions) {
+        result += std::string(indent + 2, ' ') + 
+          condition->asString(indent + 2) + 
+          "\n";
+      }
+
+      result += std::string(indent, ' ') + "])";
+
+      return result;
+    }
+  };
+
+}}

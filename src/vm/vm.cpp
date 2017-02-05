@@ -3,23 +3,25 @@
 #include <iostream> // std::cout
 #include <bitset> // std::bitset
 
+using namespace fn;
+
 #define DEBUG(msg) if (this->debug) { std::cout << msg << std::endl; }
 
-fnVM::fnVM(bool debug) {
+VM::VM(bool debug) {
   this->debug = debug;
-  this->values = std::vector<fnVMValue*>();
+  this->values = std::vector<vm::Value*>();
 }
 
-fnVM::~fnVM() {
+VM::~VM() {
   this->values.clear();
 }
 
-fnVMValue fnVM::run(fnByte instructions[], size_t num_bytes) {
+vm::Value VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
   size_t counter = 0;
-  fnVMValue* returnValue = NULL;
+  vm::Value* returnValue = NULL;
 
   while(counter < num_bytes) {
-    fnByte opcode = instructions[counter];
+    bytecode::CodeByte opcode = instructions[counter];
 
     switch(opcode) {
 
@@ -79,7 +81,7 @@ fnVMValue fnVM::run(fnByte instructions[], size_t num_bytes) {
 }
 
 // Get a value by index.
-fnVMValue* fnVM::value(fnByte index) {
+vm::Value* VM::value(bytecode::CodeByte index) {
   return this->values[index];
 }
 
@@ -88,13 +90,13 @@ fnVMValue* fnVM::value(fnByte index) {
 // (1 byte)
 //
 // Allocates a new boolean constant.
-fnVMValue* fnVM::declareBool(fnByte value) {
+vm::Value* VM::declareBool(bytecode::CodeByte value) {
   return this->declareBool((bool)value);
 }
 
-fnVMValue* fnVM::declareBool(bool value) {
+vm::Value* VM::declareBool(bool value) {
   DEBUG("DECLARE_BOOL(" << value << ")");
-  fnVMValue* b = new fnVMValue;
+  vm::Value* b = new vm::Value;
   b->asBool = value;
 
   this->values.push_back(b);
@@ -105,24 +107,24 @@ fnVMValue* fnVM::declareBool(bool value) {
 // (8 bytes)
 //
 // Allocates a new numeric constant.
-fnVMValue* fnVM::declareNumber(fnByte value[]) {
-  fnExponent exponent = (fnExponent)value[1];
-  fnCoefficient coefficient = (fnCoefficient)value[2];
+vm::Value* VM::declareNumber(bytecode::CodeByte value[]) {
+  vm::number::Exponent exponent = (vm::number::Exponent)value[1];
+  vm::number::Coefficient coefficient = (vm::number::Coefficient)value[2];
 
   DEBUG("DECLARE_NUMBER(" << (int)coefficient << " * 10^" << (int)exponent << ")");
 
-  fnVMValue* n = new fnVMValue;
-  n->asNumber = fnVMNumber(exponent, coefficient);
+  vm::Value* n = new vm::Value;
+  n->asNumber = vm::Number(exponent, coefficient);
 
   this->values.push_back(n);
 
   return n;
 }
 
-fnVMValue* fnVM::declareNumber(fnVMNumber value) {
+vm::Value* VM::declareNumber(vm::Number value) {
   DEBUG("DECLARE_NUMBER(" << (int)value.coefficient << " * 10^" << (int)value.exponent << ")");
 
-  fnVMValue* n = new fnVMValue;
+  vm::Value* n = new vm::Value;
   n->asNumber = value;
 
   this->values.push_back(n);
@@ -134,7 +136,7 @@ fnVMValue* fnVM::declareNumber(fnVMNumber value) {
 //
 // Returns true if both arguments are true,
 // false otherwise.
-fnVMValue* fnVM::fnAnd(fnByte value[]) {
+vm::Value* VM::fnAnd(bytecode::CodeByte value[]) {
   
   bool first = this->value(value[1])->asBool;
   if (!first) {
@@ -157,7 +159,7 @@ fnVMValue* fnVM::fnAnd(fnByte value[]) {
 //
 // Returns true if either arguments are true,
 // false otherwise.
-fnVMValue* fnVM::fnOr(fnByte value[]) {
+vm::Value* VM::fnOr(bytecode::CodeByte value[]) {
   bool first = this->value(value[1])->asBool;
   if (first) {
     DEBUG("OR(true, ???)");
@@ -179,7 +181,7 @@ fnVMValue* fnVM::fnOr(fnByte value[]) {
 //
 // Returns true if the argument is false
 // and vice versa.
-fnVMValue* fnVM::fnNot(fnByte value[]) {
+vm::Value* VM::fnNot(bytecode::CodeByte value[]) {
   bool arg = this->value(value[1])->asBool;
   DEBUG("NOT(" << arg << ")");
 
@@ -194,13 +196,13 @@ fnVMValue* fnVM::fnNot(fnByte value[]) {
 // (3 bytes)
 //
 // Returns the product of two numeric values.
-fnVMValue* fnVM::fnMultiply(fnByte value[]) {
-  fnVMNumber first = this->value(value[1])->asNumber;
-  fnVMNumber second = this->value(value[2])->asNumber;
+vm::Value* VM::fnMultiply(bytecode::CodeByte value[]) {
+  vm::Number first = this->value(value[1])->asNumber;
+  vm::Number second = this->value(value[2])->asNumber;
 
   DEBUG("MULTIPLY(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
 
-  fnVMNumber product = first * second;
+  vm::Number product = first * second;
 
   return this->declareNumber(product);
 }
@@ -209,13 +211,13 @@ fnVMValue* fnVM::fnMultiply(fnByte value[]) {
 // (3 bytes)
 //
 // Returns the fraction of two numeric values.
-fnVMValue* fnVM::fnDivide(fnByte value[]) {
-  fnVMNumber first = this->value(value[1])->asNumber;
-  fnVMNumber second = this->value(value[2])->asNumber;
+vm::Value* VM::fnDivide(bytecode::CodeByte value[]) {
+  vm::Number first = this->value(value[1])->asNumber;
+  vm::Number second = this->value(value[2])->asNumber;
 
   DEBUG("DIVIDE(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
 
-  fnVMNumber fraction = first / second;
+  vm::Number fraction = first / second;
 
   return this->declareNumber(fraction);
 }
@@ -224,13 +226,13 @@ fnVMValue* fnVM::fnDivide(fnByte value[]) {
 // (3 bytes)
 //
 // Returns the sum of two numeric values.
-fnVMValue* fnVM::fnAdd(fnByte value[]) {
-  fnVMNumber first = this->value(value[1])->asNumber;
-  fnVMNumber second = this->value(value[2])->asNumber;
+vm::Value* VM::fnAdd(bytecode::CodeByte value[]) {
+  vm::Number first = this->value(value[1])->asNumber;
+  vm::Number second = this->value(value[2])->asNumber;
 
   DEBUG("ADD(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
 
-  fnVMNumber sum = first + second;
+  vm::Number sum = first + second;
 
   return this->declareNumber(sum);
 }
@@ -239,13 +241,13 @@ fnVMValue* fnVM::fnAdd(fnByte value[]) {
 // (3 bytes)
 //
 // Returns the difference of two numeric values.
-fnVMValue* fnVM::fnSubtract(fnByte value[]) {
-  fnVMNumber first = this->value(value[1])->asNumber;
-  fnVMNumber second = this->value(value[2])->asNumber;
+vm::Value* VM::fnSubtract(bytecode::CodeByte value[]) {
+  vm::Number first = this->value(value[1])->asNumber;
+  vm::Number second = this->value(value[2])->asNumber;
 
   DEBUG("SUBTRACT(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
 
-  fnVMNumber difference = first - second;
+  vm::Number difference = first - second;
 
   return this->declareNumber(difference);
 }

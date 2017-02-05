@@ -7,85 +7,94 @@
 
 #include <cmath> // pow, abs, ...
 
-// Types for the exponent and coefficient of a Number.
-typedef signed char fnExponent;
-typedef signed long long int fnCoefficient;
+namespace fn { namespace vm {
 
-class fnVMNumber {
-public:
-  fnExponent exponent;
-  fnCoefficient coefficient;
-
-  fnVMNumber(fnExponent exponent, fnCoefficient coefficient) {
-    this->exponent = exponent;
-    this->coefficient = coefficient;
+  namespace number {
+    // Types for the exponent and coefficient of a Number.
+    typedef signed char Exponent;
+    typedef signed long long int Coefficient;
   }
 
-  fnVMNumber() = default;
+  class Number {
+  public:
+    number::Exponent exponent;
+    number::Coefficient coefficient;
 
-  friend fnVMNumber operator*(fnVMNumber lhs, fnVMNumber rhs) {
-    fnVMNumber result;
-    
-    result.exponent = lhs.exponent + rhs.exponent;
-    result.coefficient = lhs.coefficient * rhs.coefficient;
-
-    // TODO: Detect overflow and correct
-
-    return result;
-  }
-
-  friend fnVMNumber operator/(fnVMNumber lhs, fnVMNumber rhs) {
-    fnVMNumber result;
-    
-    result.exponent = lhs.exponent - rhs.exponent;
-    result.coefficient = lhs.coefficient / rhs.coefficient;
-
-    // TODO: Divide by 0?
-
-    return result;
-  }
-
-  friend fnVMNumber operator+(fnVMNumber lhs, fnVMNumber rhs) {
-    fnVMNumber result;
-
-    // Get both numbers to the same base.
-    fnExponent exponentDifference = lhs.exponent - rhs.exponent;
-    fnCoefficient coefficientMultiplier = (int)pow(10, abs(exponentDifference));
-
-    if (exponentDifference < 0) {
-      rhs.coefficient *= coefficientMultiplier;
-      result.exponent = lhs.exponent;
-    } else {
-      lhs.coefficient *= coefficientMultiplier;
-      result.exponent = rhs.exponent;
+    Number(number::Exponent exponent, number::Coefficient coefficient) {
+      this->exponent = exponent;
+      this->coefficient = coefficient;
     }
-    
-    result.coefficient = lhs.coefficient + rhs.coefficient;
 
-    // TODO: Detect overflow and correct
+    Number() = default;
 
-    return result;
-  }
+    friend Number operator*(Number lhs, Number rhs) {
+      Number result;
+      
+      result.exponent = lhs.exponent + rhs.exponent;
+      result.coefficient = lhs.coefficient * rhs.coefficient;
 
-  friend fnVMNumber operator-(fnVMNumber lhs, fnVMNumber rhs) {
-    fnVMNumber result;
+      // TODO: Detect overflow and correct
 
-    // Get both numbers to the same base.
-    fnExponent exponentDifference = lhs.exponent - rhs.exponent;
-    fnCoefficient coefficientMultiplier = (int)pow(10, abs(exponentDifference));
-
-    if (exponentDifference < 0) {
-      rhs.coefficient *= coefficientMultiplier;
-      result.exponent = lhs.exponent;
-    } else {
-      lhs.coefficient *= coefficientMultiplier;
-      result.exponent = rhs.exponent;
+      return result;
     }
-    
-    result.coefficient = lhs.coefficient - rhs.coefficient;
 
-    // TODO: Detect overflow and correct
+    friend Number operator/(Number lhs, Number rhs) {
+      Number result;
+      
+      result.exponent = lhs.exponent - rhs.exponent;
+      result.coefficient = lhs.coefficient / rhs.coefficient;
 
-    return result;
-  }
-};
+      // TODO: Divide by 0?
+
+      return result;
+    }
+
+    friend Number operator+(Number lhs, Number rhs) {
+      Number result;
+
+      // Get both numbers to the same base.
+      number::Exponent exponentDifference = lhs.exponent - rhs.exponent;
+      number::Coefficient coefficientMultiplier = (int)pow(10, abs(exponentDifference));
+
+      if (exponentDifference < 0) {
+        rhs.coefficient *= coefficientMultiplier;
+        result.exponent = lhs.exponent;
+      } else {
+        lhs.coefficient *= coefficientMultiplier;
+        result.exponent = rhs.exponent;
+      }
+      
+      result.coefficient = lhs.coefficient + rhs.coefficient;
+
+      // TODO: Detect overflow and correct
+
+      return result;
+    }
+
+    friend Number operator-(Number lhs, Number rhs) {
+      Number result;
+
+      // Get both numbers to the same base.
+      number::Exponent exponentDifference = lhs.exponent - rhs.exponent;
+      number::Coefficient coefficientMultiplier = (int)pow(10, abs(exponentDifference));
+
+      if (exponentDifference < 0) {
+        rhs.coefficient *= coefficientMultiplier;
+        result.exponent = lhs.exponent;
+      } else {
+        lhs.coefficient *= coefficientMultiplier;
+        result.exponent = rhs.exponent;
+      }
+      
+      result.coefficient = lhs.coefficient - rhs.coefficient;
+
+      // TODO: Detect overflow and correct
+
+      return result;
+    }
+  };
+  
+
+}}
+
+

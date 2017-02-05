@@ -1,11 +1,10 @@
 %{
-  #include <string>
-  #include <iostream>
-  #include <algorithm>
+  #include <string> // std::string
+  #include <iostream> // std::cout
+  #include <algorithm> // std::reverse
 
   #include "tmp/lex.h"
   #include "src/ast.h"
-  #include "src/errors.h"
 
   // stuff from flex that bison needs to know about:
   extern int yylex();
@@ -14,7 +13,8 @@
   void yyerror(const char *s);
 
   // Here we go!
-  astBlock* programBlock;
+  using namespace fn;
+  fn::ast::Block* programBlock;
 %}
 
 /* Represents the many different ways we can access our data */
@@ -22,34 +22,32 @@
   // Literals
   std::string *v_string;
   double      v_double;
-  int         v_int;
   bool        v_bool;
 
-  // AST
-  astBlock* v_block;
-  astStatement* v_statement;
-  astReference* v_reference;
-  astId* v_id;
-  astDeref* v_deref;
-  astValue* v_value;
-  astConditional* v_conditional;
-  astCondition* v_condition;
-  astAssignment* v_assignment;
-  astFnCall* v_fncall;
-  astFnDef* v_fndef;
+  // AST elements
+  fn::ast::Block* v_block;
+  fn::ast::Statement* v_statement;
+  fn::ast::Reference* v_reference;
+  fn::ast::Id* v_id;
+  fn::ast::Deref* v_deref;
+  fn::ast::Value* v_value;
+  fn::ast::Conditional* v_conditional;
+  fn::ast::Condition* v_condition;
+  fn::ast::Assignment* v_assignment;
+  fn::ast::Call* v_call;
+  fn::ast::Def* v_def;
 
   // Intermediaries
-  std::vector<astStatement*>* v_statements;
+  std::vector<fn::ast::Statement*>* v_statements;
   std::vector<std::string>* v_strings;
-  std::vector<astValue*>* v_values;
-  std::vector<astId>* v_ids;
-  std::vector<astCondition*>* v_conditions;
+  std::vector<fn::ast::Value*>* v_values;
+  std::vector<fn::ast::Id>* v_ids;
+  std::vector<fn::ast::Condition*>* v_conditions;
 }
 
 // Terminal symbols.
 %token <v_string> TSTRING TINFIX TID
 %token <v_double> TDOUBLE
-%token <v_int>    TINT
 %token <v_bool>   TBOOL
 
 // Non-terminal symbols.
@@ -66,8 +64,8 @@
 %type <v_conditions> conditions
 %type <v_condition> condition
 %type <v_assignment> assignment
-%type <v_fndef> functionDef
-%type <v_fncall> functionCall infixOperation
+%type <v_def> functionDef
+%type <v_call> functionCall infixOperation
 
 // The starting rule.
 %start program
@@ -86,10 +84,10 @@
 %%
 
 program:
-  statements { programBlock = new astBlock(*$1); }
+  statements { programBlock = new fn::ast::Block(*$1); }
 
 statements:
-  /* empty */                     { $$ = new std::vector<astStatement*>(); }
+  /* empty */                     { $$ = new std::vector<fn::ast::Statement*>(); }
 | statements statement            { ($1)->push_back($2); $$ = $1; }
 | statements statement ';'        { ($1)->push_back($2); $$ = $1; }
   ;
@@ -100,7 +98,7 @@ statement:
   ;
 
 assignment:
-  reference '=' value   { $$ = new astAssignment($1, $3); }
+  reference '=' value   { $$ = new fn::ast::Assignment($1, $3); }
   ;
 
 value:
@@ -118,17 +116,16 @@ brackets:
   ;
 
 literal:
-  TINT    { $$ = new astInt($1); }
-| TDOUBLE { $$ = new astDouble($1); }
-| TSTRING { $$ = new astString($1); }
-| TBOOL   { $$ = new astBool($1); }
+  TBOOL   { $$ = new fn::ast::Bool($1); }
+| TDOUBLE { $$ = new fn::ast::Number($1); }
+| TSTRING { $$ = new fn::ast::String(*$1); }
   ;
 
 infixOperation:
   value TINFIX value { 
-    $$ = new astFnCall(
-      new astDeref($1, new astId($2)), 
-      new std::vector<astValue*>{$3}); 
+    $$ = new fn::ast::Call(
+      new fn::ast::Deref($1, new fn::ast::Id(*$2)), 
+      std::vector<fn::ast::Value*>{$3}); 
   }
 
 reference:
@@ -138,12 +135,12 @@ reference:
   ;
 
 identifier:
-  TID    { $$ = new astId($1); }
-| TINFIX { $$ = new astId($1); }
+  TID    { $$ = new fn::ast::Id(*$1); }
+| TINFIX { $$ = new fn::ast::Id(*$1); }
   ;
 
 deref:
-  reference '.' reference { $$ = new astDeref($1, $3); }
+  reference '.' reference { $$ = new fn::ast::Deref($1, $3); }
 
 functionCall:
   reference '(' args ')' {
@@ -151,12 +148,12 @@ functionCall:
     // args are parsed in reverse order...
     std::reverse(($3)->begin(), ($3)->end());
 
-    $$ = new astFnCall($1, $3);
+    $$ = new fn::ast::Call($1, *$3);
   }
 
 args:
-  /* empty */    { $$ = new std::vector<astValue*>{}; }
-| value          { $$ = new std::vector<astValue*>{$1}; }
+  /* empty */    { $$ = new std::vector<fn::ast::Value*>{}; }
+| value          { $$ = new std::vector<fn::ast::Value*>{$1}; }
 | value ',' args { ($3)->push_back($1); $$ = $3; }
 
 functionDef:
@@ -165,7 +162,7 @@ functionDef:
     // params are parsed in reverse order...
     std::reverse(($3)->begin(), ($3)->end());
 
-    $$ = new astFnDef($3, $5);
+    $$ = new fn::ast::Def(*$3, $5);
   }
 
 params:
@@ -174,33 +171,24 @@ params:
 | TID ',' params { std::string* str = new std::string(*$1); ($3)->push_back(*str); $$ = $3; }
 
 block:
-  '{' statements '}' { $$ = new astBlock(*$2); }
+  '{' statements '}' { $$ = new fn::ast::Block(*$2); }
 
 conditional:
-  TWHEN '{' conditions '}' { $$ = new astConditional($3); }
+  TWHEN '{' conditions '}' { $$ = new fn::ast::Conditional(*$3); }
 
 conditions:
-  /* empty */          { $$ = new std::vector<astCondition*>(); }
+  /* empty */          { $$ = new std::vector<fn::ast::Condition*>(); }
 | conditions condition { ($1)->push_back($2); $$ = $1; }
 
 condition:
-  test block { $$ = new astCondition($1, $2); }
+  test block { $$ = new fn::ast::Condition($1, $2); }
 
 test:
-  TBOOL { $$ = new astBool($1); }
+  TBOOL { $$ = new fn::ast::Bool($1); }
 | infixOperation
 | reference
 | functionCall
 
 %%
 
-class FnParseError : public FnError {
-  using FnError::FnError;
-};
-
-void yyerror(char const* s) {
-  throw FnParseError(
-    s,
-    new CodeLocation("???", line)
-  );
-}
+void yyerror(char const* s) { throw "Parse error"; }

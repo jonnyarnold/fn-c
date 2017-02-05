@@ -1,6 +1,6 @@
 %{
-  #include <string>
-  #include <iostream>
+  #include <string> // std::string
+  #include <iostream> // std::cout
 
   #include "src/ast.h"
   #include "tmp/parse.h"
@@ -18,8 +18,7 @@
 
 \n                               { line++; }
 
-[0-9]+\.[0-9]*                   { yylval.v_double = atof(yytext); return TDOUBLE; }
-[0-9]+                           { yylval.v_int = atoi(yytext); return TINT; }
+[0-9]+(\.[0-9]*)?                { yylval.v_double = atof(yytext); return TDOUBLE; }
 
 \"[^\"]*\"                       {
   std::string* workingString = new std::string(yytext);

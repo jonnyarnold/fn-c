@@ -1,16 +1,30 @@
-#include "src/parser.h"
-#include "src/interpreter/machine.h"
+#include "src/exec.h"
 
-fnValue* exec(const char fileName[], bool debug) {
-  fnParser* parser = new fnParser(debug);
-  astBlock* program = parser->parseFile(fileName);
+namespace fn {
 
-  fnMachine* context = new fnMachine(debug);
-  fnValue* result = program->execute(context);
+  vm::Value exec(const char fileName[], bool debug) {
+    // Code -> AST
+    Parser parser = fn::Parser(debug);
+    ast::Block* program = parser.parseFile(fileName);
 
-  delete context;
-  delete program;
-  delete parser;
-  
-  return result;
+    // AST -> Instructions
+    CodeGenerator generator = fn::CodeGenerator(debug);
+    generator.digest(program);
+
+    // Instructions -> Result
+    VM vm = fn::VM(debug);
+    vm::Value result = vm.run(generator.instructions, generator.instructionByteCount);
+    
+
+    delete program;
+    return result;
+  }
+
+  vm::Value Execution::exec(std::string code) {
+    ast::Block* program = parser.parseCode(code);
+    generator.digest(program);
+    return vm.run(generator.instructions, generator.instructionByteCount);
+  }
+
 }
+

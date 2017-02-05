@@ -1,47 +1,38 @@
-#include <iostream>
-#include <vector>
-#include "vendor/cxxopts.h"
+// The Command Line Interface for fn,
+// utilising cxxopts.
 
-#include "src/parser.h"
-#include "src/interpreter/machine.h"
+#include <iostream> // std::cout
+#include <vector> // std::vector
+#include "vendor/cxxopts.h" // cxxopts
 
-#include "src/exec.h"
-#include "src/errors.h"
+#include "src/exec.h" // fn::exec
+
+using namespace fn;
 
 int run(const char fileName[], bool debug) {
-  try {
-    exec(fileName, debug);
-    return 0;
-  } catch (FnError e) {
-    std::cout << e.what();
-    return -1;
-  }
+  exec(fileName, debug);
+  return 0;
 }
 
 int repl(bool debug) {
-  fnParser* parser = new fnParser(debug);
-  fnMachine* context = new fnMachine(debug);
+  Execution context = Execution(debug);
 
   std::string currentLine;
-  fnValue* lastReturnValue;
+  vm::Value lastReturnValue;
 
   // Start the REPL loop
   std::cout << "fn REPL\nCTRL+C to exit\n";
   while(true) {
+    // Read
     std::cout << "> ";
     std::getline(std::cin, currentLine);
 
-    // Parse
-    astBlock* command = parser->parseCode(currentLine);
+    // Eval
+    lastReturnValue = context.exec(currentLine);
 
-    // If we used astBlock::execute, we'd run our code in
-    // an isolated block, which we don't want to do in the REPL.
-    // So we run it manually!
-    lastReturnValue = command->executeStatements(context);
-
-    std::cout << lastReturnValue->asString() << std::endl;
+    // Print
+    std::cout << lastReturnValue.toString() << std::endl;
   }
-
 }
 
 int parseCli(int argc, char* argv[])

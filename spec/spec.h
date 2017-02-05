@@ -1,5 +1,4 @@
-#ifndef HELPERS
-#define HELPERS
+#pragma once 
 
 #include "vendor/catch.h" // Needed by all specs.
 // #include "src/errors.h"
@@ -9,5 +8,3 @@
 
 // // Expect a code listing to fail.
 // bool failure(const char code[]);
-
-#endif

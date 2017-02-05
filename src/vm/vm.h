@@ -7,69 +7,48 @@
 #include "stdlib.h" // size_t
 #include <vector> // std::vector
 
-#include "src/vm/number.h" // fnVMNumber
+#include "src/bytecode.h" // CodeByte
+#include "src/vm/value.h" // vm::Value
+#include "src/vm/number.h" // vm::Number
 
-// The smallest unit of instruction.
-// (Note that instructions are at least this size,
-// but are usually more.)
-typedef char fnByte;
+namespace fn {
 
-// Opcodes are the first byte of any instruction,
-// and denote the operation that the VM should perform.
-typedef fnByte fnOp;
-#define FN_OP_FALSE (fnOp)(0)
-#define FN_OP_TRUE (fnOp)(1)
-#define FN_OP_AND (fnOp)(2)
-#define FN_OP_OR (fnOp)(3)
-#define FN_OP_NOT (fnOp)(4)
+  // VM is the virtual machine that instructions are run in.
+  class VM {
+  public:
 
-#define FN_OP_NUMBER (fnOp)(5)
-#define FN_OP_MULTIPLY (fnOp)(6)
-#define FN_OP_DIVIDE (fnOp)(7)
-#define FN_OP_ADD (fnOp)(8)
-#define FN_OP_SUBTRACT (fnOp)(9)
+    VM(bool debug);
+    VM() : VM(false) {};
+    ~VM();
 
-#define FN_OP_STRING (fnOp)(10)
+    // Executes a number of instructions.
+    // Returns the pointer to the return value.
+    vm::Value run(bytecode::CodeByte instructions[], size_t num_bytes);
+
+  protected:
+    bool debug;
+
+    std::vector<vm::Value*> values;
+    vm::Value* value(bytecode::CodeByte index);
+
+    vm::Value* declareBool(bytecode::CodeByte value);
+    vm::Value* declareBool(bool value);
+    
+    vm::Value* fnAnd(bytecode::CodeByte value[]);
+    vm::Value* fnOr(bytecode::CodeByte value[]);
+    vm::Value* fnNot(bytecode::CodeByte value[]);
+
+    vm::Value* declareNumber(bytecode::CodeByte value[]);
+    vm::Value* declareNumber(vm::Number value);
+
+    vm::Value* fnMultiply(bytecode::CodeByte value[]);
+    vm::Value* fnDivide(bytecode::CodeByte value[]);
+    vm::Value* fnAdd(bytecode::CodeByte value[]);
+    vm::Value* fnSubtract(bytecode::CodeByte value[]);
+  };
+
+}
 
 
-// TODO: Helper methods for defining instructions.
 
-// fnVMValue is a union capable of storing any value.
-typedef union _fnVMValue {
-  bool asBool;
-  fnVMNumber asNumber;
-} fnVMValue;
 
-// fnVM is the virtual machine that instructions are run in.
-class fnVM {
-public:
-
-  fnVM(bool debug);
-  fnVM() : fnVM(false) {};
-  ~fnVM();
-
-  // Executes a number of instructions.
-  // Returns the pointer to the return value.
-  fnVMValue run(fnByte instructions[], size_t num_bytes);
-
-protected:
-  bool debug;
-
-  std::vector<fnVMValue*> values;
-  fnVMValue* value(fnByte index);
-
-  fnVMValue* declareBool(fnByte value);
-  fnVMValue* declareBool(bool value);
-  
-  fnVMValue* fnAnd(fnByte value[]);
-  fnVMValue* fnOr(fnByte value[]);
-  fnVMValue* fnNot(fnByte value[]);
-
-  fnVMValue* declareNumber(fnByte value[]);
-  fnVMValue* declareNumber(fnVMNumber value);
-
-  fnVMValue* fnMultiply(fnByte value[]);
-  fnVMValue* fnDivide(fnByte value[]);
-  fnVMValue* fnAdd(fnByte value[]);
-  fnVMValue* fnSubtract(fnByte value[]);
-};

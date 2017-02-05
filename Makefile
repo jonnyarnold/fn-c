@@ -1,149 +1,96 @@
-# TODO: This is getting a little unruly.
-# Time to move to something a little more automated!
+# Builds the fn language.
 
-.PHONY: spec
 
-all: bin/fn spec
-
-CPP_FLAGS = -g -std=c++11 -Wno-deprecated-register
-INCLUDES = -I.
-
-# Find all .cpp files in src/ and strip the front.
-CPP_FILES = `find ./src -name "*.cpp" | sed 's/\.\/src\///g'`
-OBJ_FILES = $(CPP_FILES:.cpp=.o)
-
-OBJ_DIR = obj
-OBJ_FILENAMES = lex.o parse.o parser.o value.o def.o list.o world.o ast.o machine.o number.o string.o exec.o
-MAIN_OBJ_FILENAMES = $(OBJ_FILENAMES) main.o
-MAIN_OBJS = $(patsubst %,$(OBJ_DIR)/%,$(MAIN_OBJ_FILENAMES))
-
-SPEC_OBJ_FILENAMES = $(OBJ_FILENAMES) spec.o language.spec.o world.spec.o bool.spec.o def.spec.o list.spec.o number.spec.o block.spec.o string.spec.o value.spec.o
-SPEC_OBJS = $(patsubst %,$(OBJ_DIR)/%,$(SPEC_OBJ_FILENAMES))
-
-### MAIN ###
-
-bin/fn: $(MAIN_OBJS)
-	g++ $(CPP_FLAGS) -o $@ $(MAIN_OBJS)
-
-tmp/lex.cpp: src/parser/flex.cpp
-	flex -o tmp/lex.cpp --header-file=tmp/lex.h src/parser/flex.cpp
-
-$(OBJ_DIR)/lex.o: tmp/lex.cpp tmp/parse.cpp
-	g++ -c -o $@ tmp/lex.cpp $(CPP_FLAGS) $(INCLUDES)
-
-tmp/parse.cpp: src/parser/bison.cpp
-	bison --report=state -o tmp/parse.cpp --defines=tmp/parse.h src/parser/bison.cpp
-
-$(OBJ_DIR)/parse.o: tmp/parse.cpp tmp/lex.cpp
-	g++ -c -o $@ tmp/parse.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/parser.o: src/parser.cpp
-	g++ -c -o $@ src/parser.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/value.o: src/interpreter/objects/value.cpp
-	g++ -c -o $@ src/interpreter/objects/value.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/block.o: src/interpreter/objects/block.cpp
-	g++ -c -o $@ src/interpreter/objects/block.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/def.o: src/interpreter/objects/def.cpp
-	g++ -c -o $@ src/interpreter/objects/def.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/list.o: src/interpreter/objects/list.cpp
-	g++ -c -o $@ src/interpreter/objects/list.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/world.o: src/interpreter/world.cpp
-	g++ -c -o $@ src/interpreter/world.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/number.o: src/interpreter/objects/number.cpp
-	g++ -c -o $@ src/interpreter/objects/number.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/string.o: src/interpreter/objects/string.cpp
-	g++ -c -o $@ src/interpreter/objects/string.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/machine.o: src/interpreter/machine.cpp
-	g++ -c -o $@ src/interpreter/machine.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/ast.o: src/ast.cpp
-	g++ -c -o $@ src/ast.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/cli.o: src/cli.cpp
-	g++ -c -o $@ src/cli.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/main.o: src/main.cpp
-	g++ -c -o $@ src/main.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/exec.o: src/exec.cpp
-	g++ -c -o $@ src/exec.cpp $(CPP_FLAGS) $(INCLUDES)
+### Variables:
+# The compilation command.
+COMPILE=g++ -std=c++11 -Wno-deprecated-register -I.
+COMPILE_BIN=$(COMPILE) -L.
+COMPILE_OBJ=$(COMPILE) -c
 
 
 
-### SPECS ###
+### Makefile Tasks:
+# `all` is the default, and will build in development mode:
+all: test
 
-spec: tmp/spec
+# `test` will compile fn with debugging symbols and build the specs.
+test: COMPILE+=-g
+test: bin/fn tmp/spec
 	./tmp/spec
 
-tmp/spec: $(SPEC_OBJS)
-	g++ $(CPP_FLAGS) -o $@ $(SPEC_OBJS)
+# TODO: Production compilation
 
-$(OBJ_DIR)/spec.o: spec/spec.cpp
-	g++ -c -o $@ spec/spec.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/language.spec.o: spec/e2e/language.spec.cpp
-	g++ -c -o $@ spec/e2e/language.spec.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/world.spec.o: spec/e2e/world.spec.cpp
-	g++ -c -o $@ spec/e2e/world.spec.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/bool.spec.o: spec/e2e/bool.spec.cpp
-	g++ -c -o $@ spec/e2e/bool.spec.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/def.spec.o: spec/e2e/def.spec.cpp
-	g++ -c -o $@ spec/e2e/def.spec.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/list.spec.o: spec/e2e/list.spec.cpp
-	g++ -c -o $@ spec/e2e/list.spec.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/number.spec.o: spec/e2e/number.spec.cpp
-	g++ -c -o $@ spec/e2e/number.spec.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/block.spec.o: spec/e2e/block.spec.cpp
-	g++ -c -o $@ spec/e2e/block.spec.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/string.spec.o: spec/e2e/string.spec.cpp
-	g++ -c -o $@ spec/e2e/string.spec.cpp $(CPP_FLAGS) $(INCLUDES)
-
-$(OBJ_DIR)/value.spec.o: spec/e2e/value.spec.cpp
-	g++ -c -o $@ spec/e2e/value.spec.cpp $(CPP_FLAGS) $(INCLUDES)
-
-
-
-### DEV TOOLS ###
-
+# `clean` removes all build artifacts and temporary files.
 clean:
 	rm -rf tmp/* obj/* bin/*
 
-watch-mac: # Mac-specific!
+# There are two `watch` tasks, depending on the environment.
+# (Sorry Windows, nothing for you here.)
+watch-mac:
 	fswatch -or src spec | xargs -I{} make spec
-
 watch-linux:
 	while inotifywait -qq -e close_write -r .; do make; done
 
 
 
-### VM STUFF ###
+# The fn language binary is a Command Line Interface (CLI)
+# that executes Fn code.
+#
+# TODO: Tidy this up! Can't we get some clever partial compilation somewhere?
+bin/fn: src/main.cpp tmp/cli.o obj/exec.o obj/exec.o obj/parser.o tmp/parse.o obj/codegen.o obj/vm.o tmp/lex.cpp
+	$(COMPILE_BIN) -o $@ $^
 
+# The Command Line Interface is built as an object to avoid
+# a double-definition of main() in the specs.
+tmp/cli.o: src/cli.cpp src/cli.h obj/exec.o
+	$(COMPILE_OBJ) -o $@ src/cli.cpp
+
+# To execute Fn code, we do it in three steps:
+#
+# - parser: convert Fn code to an AST.
+# - codegen: convert an AST into VM instructions.
+# - vm: execute VM instructions.
+obj/exec.o: src/exec.cpp src/exec.h obj/parser.o obj/codegen.o obj/vm.o 
+	$(COMPILE_OBJ) -o $@ src/exec.cpp
+
+
+
+# The parser uses Flex and Bison to build a parser;
+# we tack a C++ interface onto it.
+obj/parser.o: src/parser/parser.cpp src/parser/parser.h tmp/parse.o 
+	$(COMPILE_OBJ) -o $@ src/parser/parser.cpp
+
+tmp/parse.o: tmp/parse.cpp tmp/parse.h tmp/lex.cpp tmp/lex.h
+	$(COMPILE_OBJ) -o $@ tmp/parse.cpp
+
+tmp/lex.cpp tmp/lex.h: src/parser/flex.cpp
+	flex -o tmp/lex.cpp --header-file=tmp/lex.h $^
+
+tmp/parse.cpp tmp/parse.h: src/parser/bison.cpp
+	bison --report=state -o tmp/parse.cpp --defines=tmp/parse.h $^
+
+
+
+# The Code Generator converts the AST
+# into VM instructions.
+obj/codegen.o: src/codegen/codegen.cpp src/codegen/codegen.h
+	$(COMPILE_OBJ) -o $@ src/codegen/codegen.cpp
+
+
+
+# The VM is homegrown, baby!
 obj/vm.o: src/vm/vm.cpp src/vm/vm.h src/vm/number.h
-	g++ -c -o $@ src/vm/vm.cpp $(CPP_FLAGS) $(INCLUDES)
+	$(COMPILE_OBJ) -o $@ src/vm/vm.cpp
+
+
+
+# The specs are built with Catch,
+# a cool C++ testing framework.
+tmp/spec: spec/spec.cpp spec/spec.h obj/bool.spec.o obj/number.spec.o obj/vm.o
+	$(COMPILE) -o $@ $^
 
 obj/bool.spec.o: spec/spec.cpp spec/spec.h spec/vm/bool.spec.cpp
-	g++ -c -o $@ spec/vm/bool.spec.cpp $(CPP_FLAGS) $(INCLUDES)
+	$(COMPILE_OBJ) -o $@ spec/vm/bool.spec.cpp
 
 obj/number.spec.o: spec/spec.cpp spec/spec.h spec/vm/number.spec.cpp
-	g++ -c -o $@ spec/vm/number.spec.cpp $(CPP_FLAGS) $(INCLUDES)
-
-tmp/vm_spec: obj/vm.o obj/bool.spec.o obj/number.spec.o obj/spec.o
-	g++ $(CPP_FLAGS) -o $@ $^
-
-vm: tmp/vm_spec
-	./tmp/vm_spec
+	$(COMPILE_OBJ) -o $@ spec/vm/number.spec.cpp

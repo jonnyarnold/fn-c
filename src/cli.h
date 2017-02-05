@@ -1,8 +1,4 @@
-#ifndef FN_CLI
-#define FN_CLI
-
-#include "src/ast.h"
+// The Command Line Interface for fn,
+// utilising cxxopts.
 
 int parseCli(int argc, char* argv[]);
-
-#endif
