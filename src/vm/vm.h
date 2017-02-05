@@ -14,13 +14,18 @@ typedef char fnByte;
 typedef fnByte fnOp;
 #define FN_OP_FALSE (fnOp)(0)
 #define FN_OP_TRUE (fnOp)(1)
-#define FN_OP_NUMBER (fnOp)(2)
-#define FN_OP_STRING (fnOp)(3)
-#define FN_OP_AND (fnOp)(4)
-#define FN_OP_OR (fnOp)(5)
-#define FN_OP_NOT (fnOp)(6)
-#define FN_OP_MULTIPLY (fnOp)(7)
-#define FN_OP_DIVIDE (fnOp)(8)
+#define FN_OP_AND (fnOp)(2)
+#define FN_OP_OR (fnOp)(3)
+#define FN_OP_NOT (fnOp)(4)
+
+#define FN_OP_NUMBER (fnOp)(5)
+#define FN_OP_MULTIPLY (fnOp)(6)
+#define FN_OP_DIVIDE (fnOp)(7)
+#define FN_OP_ADD (fnOp)(8)
+#define FN_OP_SUBTRACT (fnOp)(9)
+
+#define FN_OP_STRING (fnOp)(10)
+
 
 // TODO: Helper methods for defining instructions.
 
@@ -49,14 +54,16 @@ protected:
 
   fnVMValue* declareBool(fnByte value);
   fnVMValue* declareBool(bool value);
-
-  fnVMValue* declareNumber(fnByte value[]);
-  fnVMValue* declareNumber(fnVMNumber value);
-
+  
   fnVMValue* fnAnd(fnByte value[]);
   fnVMValue* fnOr(fnByte value[]);
   fnVMValue* fnNot(fnByte value[]);
 
+  fnVMValue* declareNumber(fnByte value[]);
+  fnVMValue* declareNumber(fnVMNumber value);
+
   fnVMValue* fnMultiply(fnByte value[]);
   fnVMValue* fnDivide(fnByte value[]);
+  fnVMValue* fnAdd(fnByte value[]);
+  fnVMValue* fnSubtract(fnByte value[]);
 };

@@ -59,8 +59,18 @@ fnVMValue fnVM::run(fnByte instructions[], size_t num_bytes) {
       counter += 3;
       break;
 
+    case FN_OP_ADD:
+      returnValue = this->fnAdd(&instructions[counter]);
+      counter += 3;
+      break;
+
+    case FN_OP_SUBTRACT:
+      returnValue = this->fnSubtract(&instructions[counter]);
+      counter += 3;
+      break;
+
     default:
-      throw -1; // TODO: Make this more meaningful
+      throw "Unexpected opcode"; // TODO: Make this more meaningful
 
     }
   }
@@ -200,4 +210,34 @@ fnVMValue* fnVM::fnDivide(fnByte value[]) {
   fnVMNumber fraction = first / second;
 
   return this->declareNumber(fraction);
+}
+
+fnVMValue* fnVM::fnAdd(fnByte value[]) {
+  // ADD is of the form:
+  // [1-BYTE ADD_OP_CODE] [1-BYTE CONST REF] [1-BYTE CONST REF]
+  //
+  // ADD will return the sum as a Number.
+  fnVMNumber first = this->value(value[1])->asNumber;
+  fnVMNumber second = this->value(value[2])->asNumber;
+
+  DEBUG("ADD(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
+
+  fnVMNumber sum = first + second;
+
+  return this->declareNumber(sum);
+}
+
+fnVMValue* fnVM::fnSubtract(fnByte value[]) {
+  // SUBTRACT is of the form:
+  // [1-BYTE SUBTRACT_OP_CODE] [1-BYTE CONST REF] [1-BYTE CONST REF]
+  //
+  // SUBTRACT will return the difference as a Number.
+  fnVMNumber first = this->value(value[1])->asNumber;
+  fnVMNumber second = this->value(value[2])->asNumber;
+
+  DEBUG("SUBTRACT(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
+
+  fnVMNumber difference = first - second;
+
+  return this->declareNumber(difference);
 }

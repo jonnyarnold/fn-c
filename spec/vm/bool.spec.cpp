@@ -65,6 +65,54 @@ TEST_CASE("AND false false") {
   REQUIRE(result.asBool == false);
 }
 
+TEST_CASE("OR true true") {
+  fnByte instructions[5] = {
+    FN_OP_TRUE,
+    FN_OP_TRUE,
+    FN_OP_OR, 0, 1
+  };
+
+  fnVM vm = fnVM();
+  fnVMValue result = vm.run(instructions, (size_t)5);
+  REQUIRE(result.asBool == true);
+}
+
+TEST_CASE("OR true false") {
+  fnByte instructions[5] = {
+    FN_OP_TRUE,
+    FN_OP_FALSE,
+    FN_OP_OR, 0, 1
+  };
+
+  fnVM vm = fnVM();
+  fnVMValue result = vm.run(instructions, (size_t)5);
+  REQUIRE(result.asBool == true);
+}
+
+TEST_CASE("OR false true") {
+  fnByte instructions[5] = {
+    FN_OP_FALSE,
+    FN_OP_TRUE,
+    FN_OP_OR, 0, 1
+  };
+
+  fnVM vm = fnVM();
+  fnVMValue result = vm.run(instructions, (size_t)5);
+  REQUIRE(result.asBool == true);
+}
+
+TEST_CASE("OR false false") {
+  fnByte instructions[5] = {
+    FN_OP_FALSE,
+    FN_OP_FALSE,
+    FN_OP_OR, 0, 1
+  };
+
+  fnVM vm = fnVM();
+  fnVMValue result = vm.run(instructions, (size_t)5);
+  REQUIRE(result.asBool == false);
+}
+
 TEST_CASE("NOT true") {
   fnByte instructions[3] = {
     FN_OP_TRUE,

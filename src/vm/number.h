@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cmath>
+
 typedef signed char fnExponent;
 typedef signed long long int fnCoefficient;
 
@@ -37,6 +39,50 @@ public:
     result.coefficient = lhs.coefficient / rhs.coefficient;
 
     // TODO: Divide by 0?
+
+    return result;
+  }
+
+  friend fnVMNumber operator+(fnVMNumber lhs, fnVMNumber rhs) {
+    fnVMNumber result;
+
+    // Get both numbers to the same base.
+    fnExponent exponentDifference = lhs.exponent - rhs.exponent;
+    fnCoefficient coefficientMultiplier = (int)pow(10, abs(exponentDifference));
+
+    if (exponentDifference < 0) {
+      rhs.coefficient *= coefficientMultiplier;
+      result.exponent = lhs.exponent;
+    } else {
+      lhs.coefficient *= coefficientMultiplier;
+      result.exponent = rhs.exponent;
+    }
+    
+    result.coefficient = lhs.coefficient + rhs.coefficient;
+
+    // TODO: Detect overflow and correct
+
+    return result;
+  }
+
+  friend fnVMNumber operator-(fnVMNumber lhs, fnVMNumber rhs) {
+    fnVMNumber result;
+
+    // Get both numbers to the same base.
+    fnExponent exponentDifference = lhs.exponent - rhs.exponent;
+    fnCoefficient coefficientMultiplier = (int)pow(10, abs(exponentDifference));
+
+    if (exponentDifference < 0) {
+      rhs.coefficient *= coefficientMultiplier;
+      result.exponent = lhs.exponent;
+    } else {
+      lhs.coefficient *= coefficientMultiplier;
+      result.exponent = rhs.exponent;
+    }
+    
+    result.coefficient = lhs.coefficient - rhs.coefficient;
+
+    // TODO: Detect overflow and correct
 
     return result;
   }

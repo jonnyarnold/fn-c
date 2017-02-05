@@ -133,7 +133,7 @@ watch-linux:
 
 ### VM STUFF ###
 
-obj/vm.o: src/vm/vm.cpp src/vm/vm.h
+obj/vm.o: src/vm/vm.cpp src/vm/vm.h src/vm/number.h
 	g++ -c -o $@ src/vm/vm.cpp $(CPP_FLAGS) $(INCLUDES)
 
 obj/bool.spec.o: spec/spec.cpp spec/spec.h spec/vm/bool.spec.cpp
