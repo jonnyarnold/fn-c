@@ -16,6 +16,10 @@ VM::~VM() {
   this->values.clear();
 }
 
+vm::Value VM::run(bytecode::CodeBlob* instructions) {
+  return this->run(instructions->asBytes(), instructions->size());
+}
+
 vm::Value VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
   size_t counter = 0;
   vm::Value* returnValue = NULL;
@@ -108,20 +112,20 @@ vm::Value* VM::declareBool(bool value) {
 //
 // Allocates a new numeric constant.
 vm::Value* VM::declareNumber(bytecode::CodeByte value[]) {
-  vm::number::Exponent exponent = (vm::number::Exponent)value[1];
-  vm::number::Coefficient coefficient = (vm::number::Coefficient)value[2];
+  Exponent exponent = (Exponent)value[1];
+  Coefficient coefficient = (Coefficient)value[2];
 
   DEBUG("DECLARE_NUMBER(" << (int)coefficient << " * 10^" << (int)exponent << ")");
 
   vm::Value* n = new vm::Value;
-  n->asNumber = vm::Number(exponent, coefficient);
+  n->asNumber = Number(exponent, coefficient);
 
   this->values.push_back(n);
 
   return n;
 }
 
-vm::Value* VM::declareNumber(vm::Number value) {
+vm::Value* VM::declareNumber(Number value) {
   DEBUG("DECLARE_NUMBER(" << (int)value.coefficient << " * 10^" << (int)value.exponent << ")");
 
   vm::Value* n = new vm::Value;
@@ -197,12 +201,12 @@ vm::Value* VM::fnNot(bytecode::CodeByte value[]) {
 //
 // Returns the product of two numeric values.
 vm::Value* VM::fnMultiply(bytecode::CodeByte value[]) {
-  vm::Number first = this->value(value[1])->asNumber;
-  vm::Number second = this->value(value[2])->asNumber;
+  Number first = this->value(value[1])->asNumber;
+  Number second = this->value(value[2])->asNumber;
 
   DEBUG("MULTIPLY(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
 
-  vm::Number product = first * second;
+  Number product = first * second;
 
   return this->declareNumber(product);
 }
@@ -212,12 +216,12 @@ vm::Value* VM::fnMultiply(bytecode::CodeByte value[]) {
 //
 // Returns the fraction of two numeric values.
 vm::Value* VM::fnDivide(bytecode::CodeByte value[]) {
-  vm::Number first = this->value(value[1])->asNumber;
-  vm::Number second = this->value(value[2])->asNumber;
+  Number first = this->value(value[1])->asNumber;
+  Number second = this->value(value[2])->asNumber;
 
   DEBUG("DIVIDE(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
 
-  vm::Number fraction = first / second;
+  Number fraction = first / second;
 
   return this->declareNumber(fraction);
 }
@@ -227,12 +231,12 @@ vm::Value* VM::fnDivide(bytecode::CodeByte value[]) {
 //
 // Returns the sum of two numeric values.
 vm::Value* VM::fnAdd(bytecode::CodeByte value[]) {
-  vm::Number first = this->value(value[1])->asNumber;
-  vm::Number second = this->value(value[2])->asNumber;
+  Number first = this->value(value[1])->asNumber;
+  Number second = this->value(value[2])->asNumber;
 
   DEBUG("ADD(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
 
-  vm::Number sum = first + second;
+  Number sum = first + second;
 
   return this->declareNumber(sum);
 }
@@ -242,12 +246,12 @@ vm::Value* VM::fnAdd(bytecode::CodeByte value[]) {
 //
 // Returns the difference of two numeric values.
 vm::Value* VM::fnSubtract(bytecode::CodeByte value[]) {
-  vm::Number first = this->value(value[1])->asNumber;
-  vm::Number second = this->value(value[2])->asNumber;
+  Number first = this->value(value[1])->asNumber;
+  Number second = this->value(value[2])->asNumber;
 
   DEBUG("SUBTRACT(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
 
-  vm::Number difference = first - second;
+  Number difference = first - second;
 
   return this->declareNumber(difference);
 }

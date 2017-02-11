@@ -13,8 +13,7 @@ namespace fn {
 
     // Instructions -> Result
     VM vm = fn::VM(debug);
-    vm::Value result = vm.run(generator.instructions, generator.instructionByteCount);
-    
+    vm::Value result = vm.run(generator.instructions);
 
     delete program;
     return result;
@@ -23,7 +22,7 @@ namespace fn {
   vm::Value Execution::exec(std::string code) {
     ast::Block* program = parser.parseCode(code);
     generator.digest(program);
-    return vm.run(generator.instructions, generator.instructionByteCount);
+    return vm.run(generator.instructions);
   }
 
 }

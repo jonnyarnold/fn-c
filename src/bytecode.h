@@ -4,6 +4,12 @@
 
 #pragma once
 
+#include <vector>
+#include <array>
+#include <initializer_list>
+
+#include "src/number.h"
+
 namespace fn { namespace bytecode {
 
   // The smallest unit of instruction.
@@ -28,6 +34,43 @@ namespace fn { namespace bytecode {
 
   #define FN_OP_STRING (fn::bytecode::OpCode)(10)
 
-  // TODO: Instruction generators
+  // References to values are given by this type.
+  typedef CodeByte ValueIndex;
 
+  // A CodeBlob is a contiguous list of CodeBytes.
+  class CodeBlob : public std::vector<CodeByte> {
+
+  public:
+    CodeBlob(std::initializer_list<CodeByte> bytes) : std::vector<CodeByte>(bytes) {}
+    ~CodeBlob() { this->clear(); }
+
+    // Special constructor taking a list of CodeBlobs.
+    // Stores the concatenation of all given CodeBlobs.
+    CodeBlob(std::initializer_list<CodeBlob> blobs) : std::vector<CodeByte>() { 
+      for (auto argBlob : blobs) {
+        this->insert(this->end(), argBlob.begin(), argBlob.end());
+      }
+    }
+
+    // Create a CodeBlob from an array.
+    template<size_t S>
+    CodeBlob(std::array<CodeByte, S> bytes) : std::vector<CodeByte>(bytes.begin(), bytes.end()) {}
+
+    // Use asBytes() and size() to work with the bytes directly
+    // as a C-array.
+    CodeByte* asBytes() { return &this->front(); }
+  };
+
+  // Instruction Generators
+  CodeBlob iFalse();
+  CodeBlob iTrue();
+  CodeBlob iAnd(ValueIndex first, ValueIndex second);
+  CodeBlob iOr(ValueIndex first, ValueIndex second);
+  CodeBlob iNot(ValueIndex idx);
+
+  CodeBlob iNumber(Coefficient coefficient, Exponent exponent);
+  CodeBlob iMultiply(ValueIndex first, ValueIndex second);
+  CodeBlob iDivide(ValueIndex first, ValueIndex second);
+  CodeBlob iAdd(ValueIndex first, ValueIndex second);
+  CodeBlob iSubtract(ValueIndex first, ValueIndex second);
 }}

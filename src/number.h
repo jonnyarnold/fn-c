@@ -7,20 +7,18 @@
 
 #include <cmath> // pow, abs, ...
 
-namespace fn { namespace vm {
+namespace fn {
 
-  namespace number {
-    // Types for the exponent and coefficient of a Number.
-    typedef signed char Exponent;
-    typedef signed long long int Coefficient;
-  }
+  // Types for the exponent and coefficient of a Number.
+  typedef signed char Exponent;
+  typedef signed long long int Coefficient;
 
   class Number {
   public:
-    number::Exponent exponent;
-    number::Coefficient coefficient;
+    Exponent exponent;
+    Coefficient coefficient;
 
-    Number(number::Exponent exponent, number::Coefficient coefficient) {
+    Number(Exponent exponent, Coefficient coefficient) {
       this->exponent = exponent;
       this->coefficient = coefficient;
     }
@@ -53,8 +51,8 @@ namespace fn { namespace vm {
       Number result;
 
       // Get both numbers to the same base.
-      number::Exponent exponentDifference = lhs.exponent - rhs.exponent;
-      number::Coefficient coefficientMultiplier = (int)pow(10, abs(exponentDifference));
+      Exponent exponentDifference = lhs.exponent - rhs.exponent;
+      Coefficient coefficientMultiplier = (int)pow(10, abs(exponentDifference));
 
       if (exponentDifference < 0) {
         rhs.coefficient *= coefficientMultiplier;
@@ -75,8 +73,8 @@ namespace fn { namespace vm {
       Number result;
 
       // Get both numbers to the same base.
-      number::Exponent exponentDifference = lhs.exponent - rhs.exponent;
-      number::Coefficient coefficientMultiplier = (int)pow(10, abs(exponentDifference));
+      Exponent exponentDifference = lhs.exponent - rhs.exponent;
+      Coefficient coefficientMultiplier = (int)pow(10, abs(exponentDifference));
 
       if (exponentDifference < 0) {
         rhs.coefficient *= coefficientMultiplier;
@@ -93,8 +91,5 @@ namespace fn { namespace vm {
       return result;
     }
   };
-  
 
-}}
-
-
+}

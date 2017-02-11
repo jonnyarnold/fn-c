@@ -3,7 +3,7 @@
 #pragma once
 
 #include <string> // std::string
-#include "src/vm/number.h" // Number
+#include "src/number.h" // Number
 
 namespace fn { namespace vm {
   

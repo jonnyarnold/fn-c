@@ -2,8 +2,6 @@
 #include <algorithm>
 
 #include "src/ast.h"
-#include "src/interpreter/runtime.h"
-#include "src/interpreter/machine.h"
 
 fnValue* astId::execute(fnMachine* context) {
   return context->getValueByName(this->name);

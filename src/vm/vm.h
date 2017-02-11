@@ -9,7 +9,7 @@
 
 #include "src/bytecode.h" // CodeByte
 #include "src/vm/value.h" // vm::Value
-#include "src/vm/number.h" // vm::Number
+#include "src/number.h" // Number
 
 namespace fn {
 
@@ -23,6 +23,7 @@ namespace fn {
 
     // Executes a number of instructions.
     // Returns the pointer to the return value.
+    vm::Value run(bytecode::CodeBlob* instructions);
     vm::Value run(bytecode::CodeByte instructions[], size_t num_bytes);
 
   protected:
@@ -39,7 +40,7 @@ namespace fn {
     vm::Value* fnNot(bytecode::CodeByte value[]);
 
     vm::Value* declareNumber(bytecode::CodeByte value[]);
-    vm::Value* declareNumber(vm::Number value);
+    vm::Value* declareNumber(Number value);
 
     vm::Value* fnMultiply(bytecode::CodeByte value[]);
     vm::Value* fnDivide(bytecode::CodeByte value[]);

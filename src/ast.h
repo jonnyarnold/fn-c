@@ -11,15 +11,11 @@
 #include <string> // std::string
 #include <vector> // std::vector
 
-// #include "src/bytecode.h" // CodeByte
-// #include "src/codegen.h" // Generator
-
 namespace fn { namespace ast {
 
   // Base class for all statements.
   class Statement {
   public:
-    //virtual bytecode::CodeByte* codegen(codegen::Generator*) = 0;
     virtual std::string asString(int indent) = 0;
     std::string asString() { return this->asString(0); }
   };
@@ -28,7 +24,6 @@ namespace fn { namespace ast {
   // that refer to values.
   class Value : public Statement {
   public:
-    //virtual bytecode::CodeByte* codegen(codegen::Generator*) = 0;
     virtual std::string asString(int indent) = 0;
   };
 
@@ -36,7 +31,6 @@ namespace fn { namespace ast {
   // that alias defined values.
   class Reference : public Value {
   public:
-    //virtual bytecode::CodeByte* codegen(codegen::Generator*) = 0;
     virtual std::string asString(int indent) = 0;
   };
 
@@ -46,8 +40,6 @@ namespace fn { namespace ast {
     std::string name;
     Id(std::string name) { this->name = name; }
     ~Id() = default;
-
-    //bytecode::CodeByte* codegen(codegen::Generator*) override;
 
     std::string asString(int indent) override { 
       return "(ID " + this->name + ")"; 
@@ -65,8 +57,6 @@ namespace fn { namespace ast {
       this->child = child; 
     }
     ~Deref() { delete this->child; delete this->parent; }
-
-    //bytecode::CodeByte* codegen(codegen::Generator*) override;
 
     std::string asString(int indent) override {
       return "(DEREF parent:" + 
@@ -87,8 +77,6 @@ namespace fn { namespace ast {
     }
     ~Assignment() { delete this->value; delete this->key; }
 
-    //bytecode::CodeByte* codegen(codegen::Generator*) override;
-
     virtual std::string asString(int indent) override {
       return "(ASSIGNMENT id:" + this->key->asString(indent) + " value:" + this->value->asString(indent) + ")";
     }
@@ -106,9 +94,6 @@ namespace fn { namespace ast {
     Block(std::vector<Statement*> statements) { this->statements = statements; }
     Block() { this->statements = std::vector<Statement*>(); }
     ~Block() { this->statements.clear(); }
-
-    //bytecode::CodeByte* codegen(codegen::Generator*) override;
-    //bytecode::CodeByte* executeStatements(codegen::Generator*);
 
     std::string asString(int indent) override {
       std::string result = "(BLOCK [\n";
@@ -133,8 +118,6 @@ namespace fn { namespace ast {
     Bool(bool value) { this->value = value; }
     ~Bool() = default;
 
-    //bytecode::CodeByte* codegen(codegen::Generator*) override;
-
     std::string asString(int indent) override {
       return "(BOOL " + std::to_string(this->value) + ")";
     }
@@ -148,8 +131,6 @@ namespace fn { namespace ast {
     Number(double value) { this->value = value; }
     ~Number() = default;
 
-    //bytecode::CodeByte* codegen(codegen::Generator*) override;
-
     std::string asString(int indent) override {
       return "(NUMBER " + std::to_string(this->value) + ")";
     }
@@ -162,8 +143,6 @@ namespace fn { namespace ast {
   public:
     String(std::string value) { this->value = value; }
     ~String() = default;
-
-    //bytecode::CodeByte* codegen(codegen::Generator*) override;
 
     std::string asString(int indent) override {
       return "(STRING " + this->value + ")";
@@ -182,8 +161,6 @@ namespace fn { namespace ast {
     }
     ~Call() { this->args.clear(); delete this->target; }
     
-    //bytecode::CodeByte* codegen(codegen::Generator*) override;
-
     std::string asString(int indent) override {
       std::string result = "(CALL target:" + 
         this->target->asString(indent) + 
@@ -210,8 +187,6 @@ namespace fn { namespace ast {
       this->body = body; 
     }
     ~Def() { delete this->body; }
-
-    //bytecode::CodeByte* codegen(codegen::Generator*) override;
 
     virtual std::string asString(int indent) override {
       std::string result = "(DEF params:[\n";
@@ -242,8 +217,6 @@ namespace fn { namespace ast {
     }
     ~Condition() { delete this->body; delete this->test; }
     
-    //bytecode::CodeByte* codegen(codegen::Generator*) override;
-
     std::string asString(int indent) override {
       return "(COND test:" +
         this->test->asString(indent) +
@@ -263,8 +236,6 @@ namespace fn { namespace ast {
     }
     ~Conditional() { this->conditions.clear(); }
     
-    //bytecode::CodeByte* codegen(codegen::Generator*) override;
-
     std::string asString(int indent) override {
       std::string result = "(WHEN [\n";
 

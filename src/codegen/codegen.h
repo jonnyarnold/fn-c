@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <list>
+
 #include "src/ast.h"
 #include "src/bytecode.h"
 
@@ -13,14 +15,28 @@ namespace fn {
     bool debug;
 
   public:
-    bytecode::CodeByte* instructions;
-    unsigned int instructionByteCount;
-
-    CodeGenerator(bool debug) { this->debug = debug; }
+    bytecode::CodeBlob* instructions;
+    
+    CodeGenerator(bool debug) { 
+      this->debug = debug;
+    }
     CodeGenerator() : CodeGenerator(false) {}
 
-    // Return the instructions for the given statement.
-    void digest(ast::Statement* code);
+    // Add the instructions for the given statement
+    // into the existing instructions.
+    void digest(ast::Id* id);
+    void digest(ast::Deref* deref);
+    void digest(ast::Assignment* assignment);
+    void digest(ast::Block* block);
+    void digest(ast::Bool* b);
+    void digest(ast::Number* n);
+    void digest(ast::String* s);
+    void digest(ast::Call* call);
+    void digest(ast::Def* def);
+    void digest(ast::Condition* condition);
+    void digest(ast::Conditional* conditional);
+
+
   };
 
 }

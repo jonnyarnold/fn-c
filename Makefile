@@ -37,7 +37,7 @@ watch-linux:
 # that executes Fn code.
 #
 # TODO: Tidy this up! Can't we get some clever partial compilation somewhere?
-bin/fn: src/main.cpp tmp/cli.o obj/exec.o obj/exec.o obj/parser.o tmp/parse.o obj/codegen.o obj/vm.o tmp/lex.cpp
+bin/fn: src/main.cpp tmp/cli.o obj/exec.o obj/parser.o tmp/parse.o obj/codegen.o obj/bytecode.o obj/vm.o tmp/lex.cpp
 	$(COMPILE_BIN) -o $@ $^
 
 # The Command Line Interface is built as an object to avoid
@@ -76,17 +76,19 @@ tmp/parse.cpp tmp/parse.h: src/parser/bison.cpp
 obj/codegen.o: src/codegen/codegen.cpp src/codegen/codegen.h
 	$(COMPILE_OBJ) -o $@ src/codegen/codegen.cpp
 
+obj/bytecode.o: src/bytecode.cpp src/bytecode.h
+	$(COMPILE_OBJ) -o $@ src/bytecode.cpp
 
 
 # The VM is homegrown, baby!
-obj/vm.o: src/vm/vm.cpp src/vm/vm.h src/vm/number.h
+obj/vm.o: src/vm/vm.cpp src/vm/vm.h src/number.h
 	$(COMPILE_OBJ) -o $@ src/vm/vm.cpp
 
 
 
 # The specs are built with Catch,
 # a cool C++ testing framework.
-tmp/spec: spec/spec.cpp spec/spec.h obj/bool.spec.o obj/number.spec.o obj/vm.o
+tmp/spec: spec/spec.cpp obj/bool.spec.o obj/number.spec.o obj/vm.o obj/bytecode.o
 	$(COMPILE) -o $@ $^
 
 obj/bool.spec.o: spec/spec.cpp spec/spec.h spec/vm/bool.spec.cpp
