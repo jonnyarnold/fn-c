@@ -12,6 +12,7 @@ COMPILE_OBJ=$(COMPILE) -c
 ### Makefile Tasks:
 # `all` is the default, and will build in development mode:
 all: test
+new: clean all
 
 # `test` will compile fn with debugging symbols and build the specs.
 test: COMPILE+=-g

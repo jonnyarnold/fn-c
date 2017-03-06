@@ -10,7 +10,8 @@
 using namespace fn;
 
 int run(const char fileName[], bool debug) {
-  exec(fileName, debug);
+  vm::Value result = exec(fileName, debug);
+  std::cout << result.asBool;
   return 0;
 }
 

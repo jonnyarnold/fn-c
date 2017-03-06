@@ -34,6 +34,9 @@ namespace fn { namespace bytecode {
 
   #define FN_OP_STRING (fn::bytecode::OpCode)(10)
 
+  #define FN_OP_SAVE_LAST_VALUE (fn::bytecode::OpCode)(11)
+  #define FN_OP_LOAD (fn::bytecode::OpCode)(12)
+
   // References to values are given by this type.
   typedef CodeByte ValueIndex;
 
@@ -41,8 +44,9 @@ namespace fn { namespace bytecode {
   class CodeBlob : public std::vector<CodeByte> {
 
   public:
+    CodeBlob() : std::vector<CodeByte>() {}
     CodeBlob(std::initializer_list<CodeByte> bytes) : std::vector<CodeByte>(bytes) {}
-    ~CodeBlob() { this->clear(); }
+    // ~CodeBlob() { this->clear(); }
 
     // Special constructor taking a list of CodeBlobs.
     // Stores the concatenation of all given CodeBlobs.
@@ -56,9 +60,14 @@ namespace fn { namespace bytecode {
     template<size_t S>
     CodeBlob(std::array<CodeByte, S> bytes) : std::vector<CodeByte>(bytes.begin(), bytes.end()) {}
 
+    // Copies one blob to the end of another.
+    void append(CodeBlob blob) {
+      this->insert(this->end(), blob.begin(), blob.end());
+    }
+
     // Use asBytes() and size() to work with the bytes directly
     // as a C-array.
-    CodeByte* asBytes() { return &this->front(); }
+    CodeByte* asBytes() { return this->data(); }
   };
 
   // Instruction Generators
@@ -73,4 +82,7 @@ namespace fn { namespace bytecode {
   CodeBlob iDivide(ValueIndex first, ValueIndex second);
   CodeBlob iAdd(ValueIndex first, ValueIndex second);
   CodeBlob iSubtract(ValueIndex first, ValueIndex second);
+
+  CodeBlob iSaveLastValue(ValueIndex index);
+  CodeBlob iLoad(ValueIndex index);
 }}

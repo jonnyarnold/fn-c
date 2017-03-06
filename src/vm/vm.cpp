@@ -9,7 +9,7 @@ using namespace fn;
 
 VM::VM(bool debug) {
   this->debug = debug;
-  this->values = std::vector<vm::Value*>();
+  this->values = vm::ValueMap();
 }
 
 VM::~VM() {
@@ -75,12 +75,23 @@ vm::Value VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
       counter += 3;
       break;
 
+    case FN_OP_SAVE_LAST_VALUE:
+      returnValue = this->saveLastValue(&instructions[counter]);
+      counter += 2;
+      break;
+
+    case FN_OP_LOAD:
+      returnValue = this->load(&instructions[counter]);
+      counter += 2;
+      break;
+
     default:
       throw "Unexpected opcode"; // TODO: Make this more meaningful
 
     }
   }
 
+  this->lastValue = *returnValue;
   return *returnValue;
 }
 
@@ -103,7 +114,6 @@ vm::Value* VM::declareBool(bool value) {
   vm::Value* b = new vm::Value;
   b->asBool = value;
 
-  this->values.push_back(b);
   return b;
 }
 
@@ -120,8 +130,6 @@ vm::Value* VM::declareNumber(bytecode::CodeByte value[]) {
   vm::Value* n = new vm::Value;
   n->asNumber = Number(exponent, coefficient);
 
-  this->values.push_back(n);
-
   return n;
 }
 
@@ -131,7 +139,6 @@ vm::Value* VM::declareNumber(Number value) {
   vm::Value* n = new vm::Value;
   n->asNumber = value;
 
-  this->values.push_back(n);
   return n;
 }
 
@@ -254,4 +261,25 @@ vm::Value* VM::fnSubtract(bytecode::CodeByte value[]) {
   Number difference = first - second;
 
   return this->declareNumber(difference);
+}
+
+// SAVE_LAST_VALUE [INDEX (1)]
+// (2 bytes)
+//
+// Sets the value at a given index to the last returned value.
+vm::Value* VM::saveLastValue(bytecode::CodeByte value[]) {
+  bytecode::ValueIndex index = value[1];
+
+  DEBUG("SAVE_LAST_VALUE(" << (int)index << ")");
+  return this->values[index] = new vm::Value(this->lastValue);
+}
+
+// LOAD [INDEX (1)]
+// (2 bytes)
+//
+// Returns the value at the given index.
+vm::Value* VM::load(bytecode::CodeByte value[]) {
+  bytecode::ValueIndex index = value[1];
+  DEBUG("LOAD(" << (int)index << ")");
+  return this->value(index);
 }

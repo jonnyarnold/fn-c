@@ -5,13 +5,17 @@
 #pragma once
 
 #include "stdlib.h" // size_t
-#include <vector> // std::vector
+#include <unordered_map> // std::unordered_map
 
 #include "src/bytecode.h" // CodeByte
 #include "src/vm/value.h" // vm::Value
 #include "src/number.h" // Number
 
 namespace fn {
+
+  namespace vm {
+    typedef std::unordered_map<bytecode::ValueIndex, vm::Value*> ValueMap;
+  }
 
   // VM is the virtual machine that instructions are run in.
   class VM {
@@ -29,7 +33,9 @@ namespace fn {
   protected:
     bool debug;
 
-    std::vector<vm::Value*> values;
+    vm::ValueMap values;
+    vm::Value lastValue;
+    
     vm::Value* value(bytecode::CodeByte index);
 
     vm::Value* declareBool(bytecode::CodeByte value);
@@ -46,10 +52,9 @@ namespace fn {
     vm::Value* fnDivide(bytecode::CodeByte value[]);
     vm::Value* fnAdd(bytecode::CodeByte value[]);
     vm::Value* fnSubtract(bytecode::CodeByte value[]);
+
+    vm::Value* saveLastValue(bytecode::CodeByte value[]);
+    vm::Value* load(bytecode::CodeByte value[]);
   };
 
 }
-
-
-
-

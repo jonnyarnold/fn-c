@@ -88,9 +88,9 @@ namespace fn { namespace ast {
   // They can be thought of as zero-arity, immediately executed
   // function closures, if you're feeling masochistic.
   class Block : public Value {
+  public:
     std::vector<Statement*> statements;
 
-  public:
     Block(std::vector<Statement*> statements) { this->statements = statements; }
     Block() { this->statements = std::vector<Statement*>(); }
     ~Block() { this->statements.clear(); }
@@ -112,9 +112,8 @@ namespace fn { namespace ast {
 
   // Represents a boolean value.
   class Bool : public Value {
-    bool value;
-
   public:
+    bool value;
     Bool(bool value) { this->value = value; }
     ~Bool() = default;
 
@@ -125,9 +124,8 @@ namespace fn { namespace ast {
 
   // Represents a numeric value.
   class Number : public Value {
-    double value;
-
   public:
+    double value;
     Number(double value) { this->value = value; }
     ~Number() = default;
 
@@ -138,9 +136,8 @@ namespace fn { namespace ast {
 
   // Represents a string of characters.
   class String : public Value {
-    std::string value;
-
   public:
+    std::string value;
     String(std::string value) { this->value = value; }
     ~String() = default;
 
