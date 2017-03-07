@@ -15,7 +15,7 @@ namespace fn {
     VM vm = fn::VM(debug);
     vm::Value result = vm.run(generator.instructions);
 
-    delete program;
+    // delete program;
     return result;
   }
 

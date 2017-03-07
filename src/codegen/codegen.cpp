@@ -28,18 +28,15 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Statement* statement) {
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Id* id) {
   bytecode::ValueIndex index = this->variableIndices[id->name];
+
+  DEBUG("LOAD " << (int)index)
   return bytecode::iLoad(index);
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Deref* deref) {
-  DEBUG("Start digesting " << deref->asString(0));
-
-  DEBUG("End digesting " << deref->asString(0));
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Assignment* assignment) {
-  DEBUG("Start digesting " << assignment->asString(0));
-
   bytecode::CodeBlob blob;
 
   // TODO: How can we avoid type checking here?
@@ -58,32 +55,31 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Assignment* assignment) {
     ast::Id* id = dynamic_cast<ast::Id*>(assignment->key);
     blob = this->digest(assignment->value);
 
-    bytecode::ValueIndex index = this->reserveIndexFor(id->name);
-    blob.append(bytecode::iSaveLastValue(index));
+    bytecode::ValueIndex index = this->rememberIndexFor(id->name);
   }
-
-  DEBUG("End digesting " << assignment->asString(0));
 
   return blob;
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Block* block) {
-  DEBUG("Start digesting " << block->asString(0));
   bytecode::CodeBlob blockBlob = bytecode::CodeBlob();
 
   for (auto statement : block->statements) {
-    bytecode::CodeBlob statementBlob = this->digest(statement);
-    blockBlob.append(statementBlob);
+    blockBlob.append(this->digest(statement));
   }
 
-  DEBUG("End digesting " << block->asString(0));
   this->instructions->append(blockBlob);
   return blockBlob;
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Bool* b) {
-  DEBUG("Digesting " << b->asString(0));
-  return b->value ? bytecode::iTrue() : bytecode::iFalse();
+  if(b->value) {
+    DEBUG("DECLARE_TRUE");
+    return bytecode::iTrue();
+  } else {
+    DEBUG("DECLARE_FALSE");
+    return bytecode::iFalse();
+  }
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Number* n) {
@@ -110,7 +106,7 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Conditional* conditional) {
 
 }
 
-bytecode::ValueIndex CodeGenerator::reserveIndexFor(std::string name) {
+bytecode::ValueIndex CodeGenerator::rememberIndexFor(std::string name) {
   bytecode::ValueIndex index = this->nextIndex;
   this->variableIndices[name] = index;
   this->nextIndex++;

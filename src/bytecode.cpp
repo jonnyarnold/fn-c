@@ -43,9 +43,9 @@ namespace fn { namespace bytecode {
     return CodeBlob{FN_OP_SUBTRACT, first, second}; 
   }
 
-  CodeBlob iSaveLastValue(ValueIndex index) {
-    return CodeBlob{FN_OP_SAVE_LAST_VALUE, index};
-  }
+  // CodeBlob iSaveLastValue(ValueIndex index) {
+  //   return CodeBlob{FN_OP_SAVE_LAST_VALUE, index};
+  // }
 
   CodeBlob iLoad(ValueIndex index) {
     return CodeBlob{FN_OP_LOAD, index};

@@ -34,8 +34,7 @@ namespace fn { namespace bytecode {
 
   #define FN_OP_STRING (fn::bytecode::OpCode)(10)
 
-  #define FN_OP_SAVE_LAST_VALUE (fn::bytecode::OpCode)(11)
-  #define FN_OP_LOAD (fn::bytecode::OpCode)(12)
+  #define FN_OP_LOAD (fn::bytecode::OpCode)(11)
 
   // References to values are given by this type.
   typedef CodeByte ValueIndex;
@@ -46,7 +45,7 @@ namespace fn { namespace bytecode {
   public:
     CodeBlob() : std::vector<CodeByte>() {}
     CodeBlob(std::initializer_list<CodeByte> bytes) : std::vector<CodeByte>(bytes) {}
-    // ~CodeBlob() { this->clear(); }
+    ~CodeBlob() { this->clear(); }
 
     // Special constructor taking a list of CodeBlobs.
     // Stores the concatenation of all given CodeBlobs.
@@ -83,6 +82,5 @@ namespace fn { namespace bytecode {
   CodeBlob iAdd(ValueIndex first, ValueIndex second);
   CodeBlob iSubtract(ValueIndex first, ValueIndex second);
 
-  CodeBlob iSaveLastValue(ValueIndex index);
   CodeBlob iLoad(ValueIndex index);
 }}

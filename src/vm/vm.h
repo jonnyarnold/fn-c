@@ -34,9 +34,10 @@ namespace fn {
     bool debug;
 
     vm::ValueMap values;
-    vm::Value lastValue;
+    bytecode::ValueIndex nextIndex;
     
     vm::Value* value(bytecode::CodeByte index);
+    vm::Value* declare(vm::Value* value);
 
     vm::Value* declareBool(bytecode::CodeByte value);
     vm::Value* declareBool(bool value);
@@ -53,7 +54,6 @@ namespace fn {
     vm::Value* fnAdd(bytecode::CodeByte value[]);
     vm::Value* fnSubtract(bytecode::CodeByte value[]);
 
-    vm::Value* saveLastValue(bytecode::CodeByte value[]);
     vm::Value* load(bytecode::CodeByte value[]);
   };
 

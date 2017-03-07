@@ -49,7 +49,7 @@ namespace fn {
     bytecode::CodeBlob digest(ast::Condition* condition);
     bytecode::CodeBlob digest(ast::Conditional* conditional);
 
-    bytecode::ValueIndex reserveIndexFor(std::string name);
+    bytecode::ValueIndex rememberIndexFor(std::string name);
   };
 
 }

@@ -10,6 +10,7 @@ using namespace fn;
 VM::VM(bool debug) {
   this->debug = debug;
   this->values = vm::ValueMap();
+  this->nextIndex = 0;
 }
 
 VM::~VM() {
@@ -75,11 +76,6 @@ vm::Value VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
       counter += 3;
       break;
 
-    case FN_OP_SAVE_LAST_VALUE:
-      returnValue = this->saveLastValue(&instructions[counter]);
-      counter += 2;
-      break;
-
     case FN_OP_LOAD:
       returnValue = this->load(&instructions[counter]);
       counter += 2;
@@ -91,7 +87,6 @@ vm::Value VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
     }
   }
 
-  this->lastValue = *returnValue;
   return *returnValue;
 }
 
@@ -99,6 +94,13 @@ vm::Value VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
 vm::Value* VM::value(bytecode::CodeByte index) {
   return this->values[index];
 }
+
+vm::Value* VM::declare(vm::Value* value) {
+  this->values[this->nextIndex] = value;
+  this->nextIndex++;
+  return value;
+}
+
 
 // BOOL_TRUE
 // BOOL_FALSE
@@ -114,7 +116,7 @@ vm::Value* VM::declareBool(bool value) {
   vm::Value* b = new vm::Value;
   b->asBool = value;
 
-  return b;
+  return this->declare(b);
 }
 
 // NUMBER [EXPONENT (1)] [COEFFICIENT (6)]
@@ -125,12 +127,7 @@ vm::Value* VM::declareNumber(bytecode::CodeByte value[]) {
   Exponent exponent = (Exponent)value[1];
   Coefficient coefficient = (Coefficient)value[2];
 
-  DEBUG("DECLARE_NUMBER(" << (int)coefficient << " * 10^" << (int)exponent << ")");
-
-  vm::Value* n = new vm::Value;
-  n->asNumber = Number(exponent, coefficient);
-
-  return n;
+  return this->declareNumber(Number(exponent, coefficient));
 }
 
 vm::Value* VM::declareNumber(Number value) {
@@ -139,7 +136,7 @@ vm::Value* VM::declareNumber(Number value) {
   vm::Value* n = new vm::Value;
   n->asNumber = value;
 
-  return n;
+  return this->declare(n);
 }
 
 // AND [INDEX_1 (1)] [INDEX_2 (1)]
@@ -263,16 +260,16 @@ vm::Value* VM::fnSubtract(bytecode::CodeByte value[]) {
   return this->declareNumber(difference);
 }
 
-// SAVE_LAST_VALUE [INDEX (1)]
-// (2 bytes)
-//
-// Sets the value at a given index to the last returned value.
-vm::Value* VM::saveLastValue(bytecode::CodeByte value[]) {
-  bytecode::ValueIndex index = value[1];
+// // SAVE_LAST_VALUE [INDEX (1)]
+// // (2 bytes)
+// //
+// // Sets the value at a given index to the last returned value.
+// vm::Value* VM::saveLastValue(bytecode::CodeByte value[]) {
+//   bytecode::ValueIndex index = value[1];
 
-  DEBUG("SAVE_LAST_VALUE(" << (int)index << ")");
-  return this->values[index] = new vm::Value(this->lastValue);
-}
+//   DEBUG("SAVE_LAST_VALUE(" << (int)index << ")");
+//   return this->values[index] = new vm::Value(this->lastValue);
+// }
 
 // LOAD [INDEX (1)]
 // (2 bytes)
