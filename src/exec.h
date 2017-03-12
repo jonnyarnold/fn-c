@@ -4,12 +4,14 @@
 
 #pragma once
 
-#include "src/parser/parser.h"
-#include "src/codegen/codegen.h"
-#include "src/vm/vm.h"
+#include <string> // std::string
+#include "src/parser/parser.h" // Parser
+#include "src/codegen/codegen.h" // CodeGenerator
+#include "src/vm/vm.h" // VM
 
 namespace fn {
-  vm::Value exec(const char fileName[], bool debug);
+  vm::Value execFile(const char fileName[]);
+  vm::Value execCode(std::string code);
 
   class Execution {
     bool debug;
@@ -25,8 +27,10 @@ namespace fn {
       this->generator = CodeGenerator(debug);
       this->vm = VM(debug);
     }
+    Execution() : Execution(false) {}
 
-    vm::Value exec(std::string code);
+    vm::Value execFile(const char fileName[]);
+    vm::Value execCode(std::string code);
   };
 }
 

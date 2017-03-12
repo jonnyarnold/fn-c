@@ -2,13 +2,12 @@
 
 #include "vendor/catch.h" // Needed by all specs.
 
-#include "src/bytecode.h"
-#include "src/vm/vm.h"
+#include <string> // std::string
+#include "src/bytecode.h" // CodeBlob
+#include "src/vm/vm.h" // VM, Value
 
 using namespace fn;
 
 // Get the value of a code listing.
 vm::Value resultOf(bytecode::CodeBlob instructions);
-
-// // Expect a code listing to fail.
-// bool failure(const char code[]);
+vm::Value resultOf(std::string code);

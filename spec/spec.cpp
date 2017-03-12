@@ -2,11 +2,17 @@
 
 #include "spec/spec.h"
 
+#include "src/exec.h" // exec
+
 // Include new test files in the Makefile.
 // Include global helpers here.
 
 vm::Value resultOf(bytecode::CodeBlob instructions) {
   return (VM()).run(&instructions);
+}
+
+vm::Value resultOf(std::string code) {
+  return execCode(code);
 }
 
 // bool failure(const char code[]) {

@@ -10,7 +10,8 @@
 using namespace fn;
 
 int run(const char fileName[], bool debug) {
-  vm::Value result = exec(fileName, debug);
+  Execution context = Execution(debug);
+  vm::Value result = context.execFile(fileName);
   std::cout << result.toString();
   return 0;
 }
@@ -28,7 +29,7 @@ int repl(bool debug) {
     std::getline(std::cin, currentLine);
 
     // Eval
-    vm::Value lastReturnValue = context.exec(currentLine);
+    vm::Value lastReturnValue = context.execCode(currentLine);
 
     // Print
     std::cout << lastReturnValue.toString() << std::endl;
