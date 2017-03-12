@@ -11,6 +11,8 @@
 #include <string> // std::string
 #include <vector> // std::vector
 
+#include "src/number.h" // fn::Number
+
 namespace fn { namespace ast {
 
   // Base class for all statements.
@@ -125,12 +127,15 @@ namespace fn { namespace ast {
   // Represents a numeric value.
   class Number : public Value {
   public:
-    double value;
-    Number(double value) { this->value = value; }
+    fn::Number value;
+    Number(std::string value) { 
+      this->value = fn::Number(value);
+    }
+
     ~Number() = default;
 
     std::string asString(int indent) override {
-      return "(NUMBER " + std::to_string(this->value) + ")";
+      return "(NUMBER " + this->value.toString() + ")";
     }
   };
 

@@ -70,10 +70,12 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Assignment* assignment) {
 bytecode::CodeBlob CodeGenerator::digest(ast::Block* block) {
   bytecode::CodeBlob blockBlob = bytecode::CodeBlob();
 
+  // TODO: Push new scope?
   for (auto statement : block->statements) {
     blockBlob.append(this->digest(statement));
   }
-
+  // TODO: Pop scope into variable?
+  
   this->instructions->append(blockBlob);
   return blockBlob;
 }
@@ -89,7 +91,8 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Bool* b) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Number* n) {
-
+  DEBUG("DECLARE_NUMBER(" << n->asString(0) << ")");
+  return bytecode::iNumber(n->value);
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::String* s) {

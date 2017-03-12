@@ -7,6 +7,8 @@
 
 #include <cstdint> // intXX_t
 #include <cmath> // pow, abs, ...
+#include <string> // std::string, std::string::npos
+#include <iostream>
 
 namespace fn {
 
@@ -24,7 +26,46 @@ namespace fn {
       this->coefficient = coefficient;
     }
 
+    Number(std::string str) {
+      // To work out what the representation is:
+      // 1. The component is the number, without the ".",
+      // 2. The exponent is the distance of the "." from the end of the string
+      //    (or 0 if it's not there).
+      size_t dotPos = str.find(".");
+      if (dotPos == std::string::npos) {
+        this->coefficient = atoi(str.c_str());
+        this->exponent = 0;
+      } else {
+        // Here's an ASCII diagram to explain this one...
+        //
+        // -123.456 = -123456 * 10^(-3)
+        //     ^                     ^
+        // 01234                     ^
+        //     3210                  ^
+        //     ^---------------------^
+        size_t dotPosFromEnd = (str.size() - 1) - dotPos;
+
+        this->exponent = -1 * dotPosFromEnd;
+
+        str.erase(dotPos, 1); // Remove the dot so we can parse the coefficient.
+
+        this->coefficient = atoi(str.c_str());
+      }
+
+
+    }
+
     Number() = default;
+
+    std::string toString() {
+      std::string returnValue = std::to_string(this->coefficient);
+
+      if (this->exponent != 0) {
+        returnValue += " * 10^" + std::to_string(this->exponent);
+      }
+      
+      return returnValue;
+    }
 
     friend Number operator*(Number lhs, Number rhs) {
       Number result;

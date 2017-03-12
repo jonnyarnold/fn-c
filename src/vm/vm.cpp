@@ -101,7 +101,7 @@ vm::Value VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
 
     }
 
-    this->printState();
+    // if (this->debug) { this->printState(); }
   }
 
   return *this->values.back();
@@ -300,7 +300,7 @@ vm::Value* VM::fnSubtract(bytecode::CodeByte value[]) {
 // Returns the value at the given index.
 vm::Value* VM::load(bytecode::CodeByte value[]) {
   bytecode::ValueIndex index = value[1];
-  DEBUG("LOAD(" << (int)index << ")");
+  DEBUG("LOAD(V" << (int)index << ")");
   return this->value(index);
 }
 

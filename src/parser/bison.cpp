@@ -20,9 +20,8 @@
 /* Represents the many different ways we can access our data */
 %union {
   // Literals
-  std::string *v_string;
-  double      v_double;
-  bool        v_bool;
+  std::string* v_string;
+  bool         v_bool;
 
   // AST elements
   fn::ast::Block* v_block;
@@ -46,8 +45,7 @@
 }
 
 // Terminal symbols.
-%token <v_string> TSTRING TINFIX TID
-%token <v_double> TDOUBLE
+%token <v_string> TDOUBLE TSTRING TINFIX TID
 %token <v_bool>   TBOOL
 
 // Non-terminal symbols.
@@ -117,7 +115,7 @@ brackets:
 
 literal:
   TBOOL   { $$ = new fn::ast::Bool($1); }
-| TDOUBLE { $$ = new fn::ast::Number($1); }
+| TDOUBLE { $$ = new fn::ast::Number(*$1); }
 | TSTRING { $$ = new fn::ast::String(*$1); }
   ;
 

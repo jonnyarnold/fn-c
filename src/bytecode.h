@@ -91,6 +91,7 @@ namespace fn { namespace bytecode {
   CodeBlob iOr(ValueIndex first, ValueIndex second);
   CodeBlob iNot(ValueIndex idx);
 
+  CodeBlob iNumber(Number number);
   CodeBlob iNumber(Coefficient coefficient, Exponent exponent);
   CodeBlob iMultiply(ValueIndex first, ValueIndex second);
   CodeBlob iDivide(ValueIndex first, ValueIndex second);

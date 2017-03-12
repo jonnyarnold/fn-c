@@ -18,6 +18,10 @@ namespace fn { namespace bytecode {
     return CodeBlob{FN_OP_NOT, idx}; 
   }
 
+  CodeBlob iNumber(Number number) {
+    return iNumber(number.coefficient, number.exponent);
+  }
+
   CodeBlob iNumber(Coefficient coefficient, Exponent exponent) { 
     std::array<CodeByte, 10> bytes = std::array<CodeByte, 10>();
     bytes[0] = FN_OP_NUMBER;
