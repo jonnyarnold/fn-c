@@ -5,13 +5,14 @@
 
 #pragma once
 
+#include <cstdint> // intXX_t
 #include <cmath> // pow, abs, ...
 
 namespace fn {
 
   // Types for the exponent and coefficient of a Number.
-  typedef signed char Exponent;
-  typedef signed long long int Coefficient;
+  typedef int8_t Exponent;
+  typedef int64_t Coefficient;
 
   class Number {
   public:

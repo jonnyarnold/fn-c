@@ -19,7 +19,7 @@ namespace fn { namespace bytecode {
   }
 
   CodeBlob iNumber(Coefficient coefficient, Exponent exponent) { 
-    std::array<CodeByte, 8> bytes = std::array<CodeByte, 8>();
+    std::array<CodeByte, 10> bytes = std::array<CodeByte, 10>();
     bytes[0] = FN_OP_NUMBER;
     bytes[1] = exponent;
     bytes[2] = coefficient;
@@ -43,12 +43,20 @@ namespace fn { namespace bytecode {
     return CodeBlob{FN_OP_SUBTRACT, first, second}; 
   }
 
-  // CodeBlob iSaveLastValue(ValueIndex index) {
-  //   return CodeBlob{FN_OP_SAVE_LAST_VALUE, index};
-  // }
-
   CodeBlob iLoad(ValueIndex index) {
     return CodeBlob{FN_OP_LOAD, index};
+  }
+
+  CodeBlob iDefHeader(InstructionIndex length) {
+    return CodeBlob{FN_OP_DEF, length};
+  }
+
+  CodeBlob iCall(ValueIndex index) {
+    return CodeBlob{FN_OP_CALL, index};
+  }
+
+  CodeBlob iReturnLast() {
+    return CodeBlob{FN_OP_RETURN_LAST};
   }
 
 }}

@@ -11,7 +11,7 @@ using namespace fn;
 
 int run(const char fileName[], bool debug) {
   vm::Value result = exec(fileName, debug);
-  std::cout << result.asBool;
+  std::cout << result.toString();
   return 0;
 }
 
@@ -19,7 +19,6 @@ int repl(bool debug) {
   Execution context = Execution(debug);
 
   std::string currentLine;
-  vm::Value lastReturnValue;
 
   // Start the REPL loop
   std::cout << "fn REPL\nCTRL+C to exit\n";
@@ -29,7 +28,7 @@ int repl(bool debug) {
     std::getline(std::cin, currentLine);
 
     // Eval
-    lastReturnValue = context.exec(currentLine);
+    vm::Value lastReturnValue = context.exec(currentLine);
 
     // Print
     std::cout << lastReturnValue.toString() << std::endl;

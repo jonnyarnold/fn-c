@@ -5,16 +5,30 @@
 #pragma once
 
 #include "stdlib.h" // size_t
-#include <unordered_map> // std::unordered_map
+#include <vector> // std::vector
+#include <stack> // std::stack
 
 #include "src/bytecode.h" // CodeByte
 #include "src/vm/value.h" // vm::Value
+#include "src/vm/def.h" // vm::Def
 #include "src/number.h" // Number
 
 namespace fn {
 
   namespace vm {
-    typedef std::unordered_map<bytecode::ValueIndex, vm::Value*> ValueMap;
+    typedef std::vector<vm::Value*> ValueMap;
+
+    // CallFrame defines a call frame (an invocation of a function).
+    typedef struct _CallFrame {
+
+      // Denotes the place the program counter will be set to
+      // when RETURN_LAST is hit.
+      bytecode::InstructionIndex returnCounter;
+
+      // Denotes the index that the result of the call will be placed into.
+      bytecode::ValueIndex returnIndex;
+
+    } CallFrame;
   }
 
   // VM is the virtual machine that instructions are run in.
@@ -33,28 +47,40 @@ namespace fn {
   protected:
     bool debug;
 
+    // Program counter.
+    bytecode::InstructionIndex counter;
+
+    // Allows conversion from identifier to index.
     vm::ValueMap values;
-    bytecode::ValueIndex nextIndex;
+
+    // Stores the nesting of function calls.
+    std::stack<vm::CallFrame> callStack;
     
     vm::Value* value(bytecode::CodeByte index);
     vm::Value* declare(vm::Value* value);
+    void printState();
 
-    vm::Value* declareBool(bytecode::CodeByte value);
+    vm::Value* declareBool(bytecode::CodeByte);
     vm::Value* declareBool(bool value);
     
-    vm::Value* fnAnd(bytecode::CodeByte value[]);
-    vm::Value* fnOr(bytecode::CodeByte value[]);
-    vm::Value* fnNot(bytecode::CodeByte value[]);
+    vm::Value* fnAnd(bytecode::CodeByte[]);
+    vm::Value* fnOr(bytecode::CodeByte[]);
+    vm::Value* fnNot(bytecode::CodeByte[]);
 
-    vm::Value* declareNumber(bytecode::CodeByte value[]);
-    vm::Value* declareNumber(Number value);
+    vm::Value* declareNumber(bytecode::CodeByte[]);
+    vm::Value* declareNumber(Number);
 
-    vm::Value* fnMultiply(bytecode::CodeByte value[]);
-    vm::Value* fnDivide(bytecode::CodeByte value[]);
-    vm::Value* fnAdd(bytecode::CodeByte value[]);
-    vm::Value* fnSubtract(bytecode::CodeByte value[]);
+    vm::Value* fnMultiply(bytecode::CodeByte[]);
+    vm::Value* fnDivide(bytecode::CodeByte[]);
+    vm::Value* fnAdd(bytecode::CodeByte[]);
+    vm::Value* fnSubtract(bytecode::CodeByte[]);
 
-    vm::Value* load(bytecode::CodeByte value[]);
+    vm::Value* load(bytecode::CodeByte[]);
+
+    vm::Value* declareDef(bytecode::CodeByte[]);
+    vm::Value* declareDef(vm::Def def);
+    vm::Value* call(bytecode::CodeByte[]);
+    vm::Value* returnLast();
   };
 
 }

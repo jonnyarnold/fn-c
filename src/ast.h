@@ -176,14 +176,16 @@ namespace fn { namespace ast {
   // Represents a function definition (sometimes known as a prototype).
   class Def : public Value {
     std::vector<std::string> params;
+  public:
     Block* body;
 
-  public:
     Def(std::vector<std::string> params, Block* body) { 
       this->params = params; 
       this->body = body; 
     }
     ~Def() { delete this->body; }
+
+    size_t numParams() { return this->params.size(); }
 
     virtual std::string asString(int indent) override {
       std::string result = "(DEF params:[\n";

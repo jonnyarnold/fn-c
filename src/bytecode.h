@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include <vector>
-#include <array>
-#include <initializer_list>
+#include <cstdint> // uintXX_t
+#include <vector> // std::vector
+#include <array> // std::array
+#include <initializer_list> // std::initializer_list
 
 #include "src/number.h"
 
@@ -36,8 +37,22 @@ namespace fn { namespace bytecode {
 
   #define FN_OP_LOAD (fn::bytecode::OpCode)(11)
 
+  #define FN_OP_DEF (fn::bytecode::OpCode)(12)
+  #define FN_OP_CALL (fn::bytecode::OpCode)(13)
+  #define FN_OP_RETURN_LAST (fn::bytecode::OpCode)(14)
+
+  // Values in the VM are indexed.
   // References to values are given by this type.
+  // TODO: Expand to 16-bit.
   typedef CodeByte ValueIndex;
+  #define VALUE_INDEX_BYTES (1)
+  #define MAX_VALUES (UINT8_MAX)
+
+  // Instruction references are given by this type.
+  // TODO: Expand to 32-bit.
+  typedef CodeByte InstructionIndex;
+  #define INSTRUCTION_INDEX_BYTES (1)
+  #define MAX_INSTRUCTIONS (UINT8_MAX)
 
   // A CodeBlob is a contiguous list of CodeBytes.
   class CodeBlob : public std::vector<CodeByte> {
@@ -83,4 +98,8 @@ namespace fn { namespace bytecode {
   CodeBlob iSubtract(ValueIndex first, ValueIndex second);
 
   CodeBlob iLoad(ValueIndex index);
+
+  CodeBlob iDefHeader(InstructionIndex length);
+  CodeBlob iCall(ValueIndex index);
+  CodeBlob iReturnLast();
 }}

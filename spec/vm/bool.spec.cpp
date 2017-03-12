@@ -2,12 +2,12 @@
 
 TEST_CASE("BOOL false") {
   bytecode::CodeBlob instructions = bytecode::iFalse();
-  REQUIRE(resultOf(instructions).asBool == false);
+  REQUIRE(resultOf(instructions).asBool() == false);
 }
 
 TEST_CASE("BOOL true") {
   bytecode::CodeBlob instructions = bytecode::iTrue();
-  REQUIRE(resultOf(instructions).asBool == true);
+  REQUIRE(resultOf(instructions).asBool() == true);
 }
 
 TEST_CASE("AND true true") {
@@ -16,7 +16,7 @@ TEST_CASE("AND true true") {
     bytecode::iAnd(0, 0)
   };
 
-  REQUIRE(resultOf(instructions).asBool == true);
+  REQUIRE(resultOf(instructions).asBool() == true);
 }
 
 TEST_CASE("AND true false") {
@@ -26,7 +26,7 @@ TEST_CASE("AND true false") {
     bytecode::iAnd(0, 1)
   };
 
-  REQUIRE(resultOf(instructions).asBool == false);
+  REQUIRE(resultOf(instructions).asBool() == false);
 }
 
 TEST_CASE("AND false true") {
@@ -36,7 +36,7 @@ TEST_CASE("AND false true") {
     bytecode::iAnd(0, 1)
   };
 
-  REQUIRE(resultOf(instructions).asBool == false);
+  REQUIRE(resultOf(instructions).asBool() == false);
 }
 
 TEST_CASE("AND false false") {
@@ -45,7 +45,7 @@ TEST_CASE("AND false false") {
     bytecode::iAnd(0, 0)
   };
 
-  REQUIRE(resultOf(instructions).asBool == false);
+  REQUIRE(resultOf(instructions).asBool() == false);
 }
 
 TEST_CASE("OR true true") {
@@ -54,7 +54,7 @@ TEST_CASE("OR true true") {
     bytecode::iOr(0, 0)
   };
 
-  REQUIRE(resultOf(instructions).asBool == true);
+  REQUIRE(resultOf(instructions).asBool() == true);
 }
 
 TEST_CASE("OR true false") {
@@ -64,7 +64,7 @@ TEST_CASE("OR true false") {
     bytecode::iOr(0, 1)
   };
 
-  REQUIRE(resultOf(instructions).asBool == true);
+  REQUIRE(resultOf(instructions).asBool() == true);
 }
 
 TEST_CASE("OR false true") {
@@ -74,7 +74,7 @@ TEST_CASE("OR false true") {
     bytecode::iOr(0, 1)
   };
 
-  REQUIRE(resultOf(instructions).asBool == true);
+  REQUIRE(resultOf(instructions).asBool() == true);
 }
 
 TEST_CASE("OR false false") {
@@ -83,7 +83,7 @@ TEST_CASE("OR false false") {
     bytecode::iOr(0, 0)
   };
 
-  REQUIRE(resultOf(instructions).asBool == false);
+  REQUIRE(resultOf(instructions).asBool() == false);
 }
 
 TEST_CASE("NOT true") {
@@ -92,7 +92,7 @@ TEST_CASE("NOT true") {
     bytecode::iNot(0)
   };
 
-  REQUIRE(resultOf(instructions).asBool == false);
+  REQUIRE(resultOf(instructions).asBool() == false);
 }
 
 TEST_CASE("NOT false") {
@@ -101,5 +101,5 @@ TEST_CASE("NOT false") {
     bytecode::iNot(0)
   };
 
-  REQUIRE(resultOf(instructions).asBool == true);
+  REQUIRE(resultOf(instructions).asBool() == true);
 }

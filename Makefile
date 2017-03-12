@@ -89,7 +89,7 @@ obj/vm.o: src/vm/vm.cpp src/vm/vm.h src/number.h
 
 # The specs are built with Catch,
 # a cool C++ testing framework.
-tmp/spec: spec/spec.cpp obj/bool.spec.o obj/number.spec.o obj/assignment.spec.o obj/vm.o obj/bytecode.o
+tmp/spec: spec/spec.cpp obj/bool.spec.o obj/number.spec.o obj/load.spec.o obj/call.spec.o obj/vm.o obj/bytecode.o
 	$(COMPILE) -o $@ $^
 
 obj/bool.spec.o: spec/spec.cpp spec/spec.h spec/vm/bool.spec.cpp
@@ -98,5 +98,8 @@ obj/bool.spec.o: spec/spec.cpp spec/spec.h spec/vm/bool.spec.cpp
 obj/number.spec.o: spec/spec.cpp spec/spec.h spec/vm/number.spec.cpp
 	$(COMPILE_OBJ) -o $@ spec/vm/number.spec.cpp
 
-obj/assignment.spec.o: spec/spec.cpp spec/spec.h spec/vm/assignment.spec.cpp
-	$(COMPILE_OBJ) -o $@ spec/vm/assignment.spec.cpp
+obj/load.spec.o: spec/spec.cpp spec/spec.h spec/vm/load.spec.cpp
+	$(COMPILE_OBJ) -o $@ spec/vm/load.spec.cpp
+
+obj/call.spec.o: spec/spec.cpp spec/spec.h spec/vm/call.spec.cpp
+	$(COMPILE_OBJ) -o $@ spec/vm/call.spec.cpp

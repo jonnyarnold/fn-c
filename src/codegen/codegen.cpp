@@ -34,6 +34,12 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Id* id) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Deref* deref) {
+  bytecode::CodeBlob blob = this->digest(deref->parent);
+  // TODO: Push scope!
+  blob.append(this->digest(deref->child));
+  // TODO: Pop scope!
+
+  return blob;
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Assignment* assignment) {
@@ -43,11 +49,11 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Assignment* assignment) {
   ast::Deref* ref = dynamic_cast<ast::Deref*>(assignment->key);
   if(ref != NULL) {
 
-    // Set context as that of parent before setting.
     blob = this->digest(ref->parent);
     // TODO: Push scope!
     blob.append(this->digest(ref->child));
     // TODO: Pop scope!
+    return blob;
 
   } else {
 
@@ -95,7 +101,15 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Call* call) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Def* def) {
+  bytecode::CodeBlob blockBlob = bytecode::CodeBlob();
+  for (auto statement : def->body->statements) {
+    blockBlob.append(this->digest(statement));
+  }
 
+  this->instructions->append(bytecode::iDefHeader(blockBlob.size()));
+  this->instructions->append(blockBlob);
+  this->instructions->append(bytecode::iReturnLast());
+  return blockBlob;
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Condition* condition) {

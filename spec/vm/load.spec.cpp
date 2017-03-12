@@ -6,5 +6,5 @@ TEST_CASE("LOAD") {
     bytecode::iLoad(0)
   };
 
-  REQUIRE(resultOf(instructions).asBool == true);
+  REQUIRE(resultOf(instructions).asBool() == true);
 }
