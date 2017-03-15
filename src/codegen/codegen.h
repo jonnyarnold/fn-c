@@ -23,19 +23,20 @@ namespace fn {
     bytecode::ValueIndex nextIndex;
 
   public:
-    bytecode::CodeBlob* instructions;
+    bytecode::CodeBlob instructions;
     
     CodeGenerator(bool debug) { 
       this->debug = debug;
       this->nextIndex = 0;
-      this->instructions = new bytecode::CodeBlob();
+      this->instructions = bytecode::CodeBlob();
       this->variableIndices = ValueIndexMap();
     }
     CodeGenerator() : CodeGenerator(false) {}
-    ~CodeGenerator() { this->variableIndices.clear(); }
 
     // Add the instructions for the given statement
     // into the existing instructions.
+    bytecode::CodeBlob digestTopLevel(ast::Statement* statement);
+    
     bytecode::CodeBlob digest(ast::Statement* statement);
     bytecode::CodeBlob digest(ast::Id* id);
     bytecode::CodeBlob digest(ast::Deref* deref);
@@ -50,6 +51,7 @@ namespace fn {
     bytecode::CodeBlob digest(ast::Conditional* conditional);
 
     bytecode::ValueIndex rememberIndexFor(std::string name);
+    bytecode::ValueIndex getIndexFor(ast::Reference* reference);
   };
 
 }

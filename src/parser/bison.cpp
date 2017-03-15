@@ -165,8 +165,8 @@ functionDef:
 
 params:
   /* empty */    { $$ = new std::vector<std::string>(); }
-| TID            { $$ = new std::vector<std::string>{*$1}; }
-| TID ',' params { std::string* str = new std::string(*$1); ($3)->push_back(*str); $$ = $3; }
+| TID            { $$ = new std::vector<std::string>{*$1}; delete $1; }
+| TID ',' params { std::string str = std::string(*$1); ($3)->push_back(str); $$ = $3; delete $1; }
 
 block:
   '{' statements '}' { $$ = new fn::ast::Block(*$2); }

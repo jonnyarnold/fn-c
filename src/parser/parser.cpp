@@ -10,6 +10,7 @@ ast::Block* Parser::parseFile(const char* filename) {
   fclose(yyin);
 
   if(this->debug) { std::cout << programBlock->asString(0) << std::endl; }
+  this->parsedBlock = programBlock;
 
   return programBlock;
 }
@@ -20,6 +21,7 @@ ast::Block* Parser::parseCode(std::string code) {
   yy_delete_buffer(buffer);
 
   if(this->debug) { std::cout << programBlock->asString(0) << std::endl; }
+  this->parsedBlock = programBlock;
 
   return programBlock;
 }

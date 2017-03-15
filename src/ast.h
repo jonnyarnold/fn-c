@@ -153,10 +153,10 @@ namespace fn { namespace ast {
 
   // Represents a call (request to execute) to a function.
   class Call : public Value {
+  public:
     Reference* target;
     std::vector<Value*> args;
-
-  public:
+    
     Call(Reference* target, std::vector<Value*> args) { 
       this->target = target; 
       this->args = args; 

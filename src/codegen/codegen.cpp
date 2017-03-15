@@ -9,6 +9,12 @@ using namespace fn;
 // Shorthand for CodeGenerator::digest(ast::Statement*)
 #define try_digest_as(type) if (type* cast = dynamic_cast<type*>(statement)) { return this->digest(cast); }
 
+bytecode::CodeBlob CodeGenerator::digestTopLevel(ast::Statement* statement) {
+  bytecode::CodeBlob topLevelInstructions = this->digest(statement);
+  this->instructions.append(topLevelInstructions);
+  return topLevelInstructions;
+}
+
 bytecode::CodeBlob CodeGenerator::digest(ast::Statement* statement) {
   // TODO: Can we avoid this kind of forced polymorphism?
   try_digest_as(ast::Id);
@@ -76,7 +82,6 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Block* block) {
   }
   // TODO: Pop scope into variable?
   
-  this->instructions->append(blockBlob);
   return blockBlob;
 }
 
@@ -100,19 +105,18 @@ bytecode::CodeBlob CodeGenerator::digest(ast::String* s) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Call* call) {
-
+  bytecode::ValueIndex index = this->getIndexFor(call->target);
+  return bytecode::iCall(index);
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Def* def) {
-  bytecode::CodeBlob blockBlob = bytecode::CodeBlob();
-  for (auto statement : def->body->statements) {
-    blockBlob.append(this->digest(statement));
-  }
+  bytecode::CodeBlob blockBlob = this->digest(def->body);
+  blockBlob.append(bytecode::iReturnLast());
 
-  this->instructions->append(bytecode::iDefHeader(blockBlob.size()));
-  this->instructions->append(blockBlob);
-  this->instructions->append(bytecode::iReturnLast());
-  return blockBlob;
+  bytecode::CodeBlob defBlob = bytecode::iDefHeader(blockBlob.size());
+  defBlob.append(blockBlob);
+
+  return defBlob;
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Condition* condition) {
@@ -124,8 +128,19 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Conditional* conditional) {
 }
 
 bytecode::ValueIndex CodeGenerator::rememberIndexFor(std::string name) {
+  DEBUG(name << " => V" << std::to_string(this->nextIndex));
+
   bytecode::ValueIndex index = this->nextIndex;
   this->variableIndices[name] = index;
   this->nextIndex++;
   return index;
+}
+
+bytecode::ValueIndex CodeGenerator::getIndexFor(ast::Reference* reference) {
+  if (ast::Id* id = dynamic_cast<ast::Id*>(reference)) {
+    bytecode::ValueIndex index = this->variableIndices[id->name]; 
+    DEBUG("V" << std::to_string(index) << " => " << id->name);
+    return index;
+  }
+  else { throw "Not yet implemented!"; }
 }
