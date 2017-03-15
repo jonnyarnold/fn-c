@@ -82,7 +82,7 @@
 %%
 
 program:
-  statements { programBlock = new fn::ast::Block(*$1); }
+  statements { programBlock = new fn::ast::Block(*$1); delete $1; }
 
 statements:
   /* empty */                     { $$ = new std::vector<fn::ast::Statement*>(); }
@@ -115,8 +115,8 @@ brackets:
 
 literal:
   TBOOL   { $$ = new fn::ast::Bool($1); }
-| TDOUBLE { $$ = new fn::ast::Number(*$1); }
-| TSTRING { $$ = new fn::ast::String(*$1); }
+| TDOUBLE { $$ = new fn::ast::Number(*$1); delete $1; }
+| TSTRING { $$ = new fn::ast::String(*$1); delete $1; }
   ;
 
 infixOperation:
@@ -124,6 +124,8 @@ infixOperation:
     $$ = new fn::ast::Call(
       new fn::ast::Deref($1, new fn::ast::Id(*$2)), 
       std::vector<fn::ast::Value*>{$3}); 
+
+    delete $2;
   }
 
 reference:
@@ -133,8 +135,8 @@ reference:
   ;
 
 identifier:
-  TID    { $$ = new fn::ast::Id(*$1); }
-| TINFIX { $$ = new fn::ast::Id(*$1); }
+  TID    { $$ = new fn::ast::Id(*$1); delete $1; }
+| TINFIX { $$ = new fn::ast::Id(*$1); delete $1; }
   ;
 
 deref:
@@ -147,6 +149,7 @@ functionCall:
     std::reverse(($3)->begin(), ($3)->end());
 
     $$ = new fn::ast::Call($1, *$3);
+    delete $3;
   }
 
 args:
@@ -161,6 +164,7 @@ functionDef:
     std::reverse(($3)->begin(), ($3)->end());
 
     $$ = new fn::ast::Def(*$3, $5);
+    delete $3;
   }
 
 params:
@@ -169,10 +173,10 @@ params:
 | TID ',' params { std::string str = std::string(*$1); ($3)->push_back(str); $$ = $3; delete $1; }
 
 block:
-  '{' statements '}' { $$ = new fn::ast::Block(*$2); }
+  '{' statements '}' { $$ = new fn::ast::Block(*$2); delete $2; }
 
 conditional:
-  TWHEN '{' conditions '}' { $$ = new fn::ast::Conditional(*$3); }
+  TWHEN '{' conditions '}' { $$ = new fn::ast::Conditional(*$3); delete $3; }
 
 conditions:
   /* empty */          { $$ = new std::vector<fn::ast::Condition*>(); }

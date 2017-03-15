@@ -9,8 +9,6 @@
 #include <array> // std::array
 #include <initializer_list> // std::initializer_list
 
-#include <iostream>
-
 #include "src/number.h"
 
 namespace fn { namespace bytecode {
@@ -65,12 +63,10 @@ namespace fn { namespace bytecode {
 
     CodeBlob() {
       this->bytes = std::vector<CodeByte>{};
-      std::cout << "C1\n" << std::to_string(this->bytes.size()) << "\n";
     }
 
     CodeBlob(std::initializer_list<CodeByte> bytes) {
       this->bytes = std::vector<CodeByte>(bytes);
-      std::cout << "C2\n" << std::to_string(this->bytes.size()) << "\n";
     }
 
     // Special constructor taking a list of CodeBlobs.
@@ -80,21 +76,18 @@ namespace fn { namespace bytecode {
         this->append(argBlob);
       }
 
-      std::cout << "C3\n" << std::to_string(this->bytes.size()) << "\n";
     }
 
     // Create a CodeBlob from an array.
     template<size_t S>
     CodeBlob(std::array<CodeByte, S> bytes) {
       this->bytes = std::vector<CodeByte>(bytes.begin(), bytes.end());
-      std::cout << "C4\n" << std::to_string(this->bytes.size()) << "\n";
     }
 
     // Copies one blob to the end of another.
     void append(CodeBlob blob) {
       this->bytes.reserve(blob.size());
       this->bytes.insert(this->bytes.end(), blob.bytes.begin(), blob.bytes.end());
-      std::cout << "append\n" << std::to_string(this->bytes.size()) << "\n";
     }
 
     // Use asBytes() and size() to work with the bytes directly

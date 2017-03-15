@@ -15,12 +15,14 @@ namespace fn {
   vm::Value Execution::execFile(const char fileName[]) {
     ast::Block* program = this->parser.parseFile(fileName);
     this->generator.digestTopLevel(program);
+    delete program;
     return this->vm.run(&(this->generator.instructions));
   }
 
   vm::Value Execution::execCode(std::string code) {
     ast::Block* program = this->parser.parseCode(code);
     this->generator.digestTopLevel(program);
+    delete program;
     return this->vm.run(&(this->generator.instructions));
   }
 

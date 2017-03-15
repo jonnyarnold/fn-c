@@ -19,18 +19,12 @@ namespace fn {
 
   class Parser {
     bool debug;
-    ast::Block* parsedBlock;
 
   public:
     Parser(bool debug) { 
-      this->debug = debug; 
-      this->parsedBlock = NULL;
+      this->debug = debug;
     }
     Parser() : Parser(false) {}
-    
-    ~Parser() {
-      if (this->parsedBlock != NULL) { delete this->parsedBlock; }
-    }
 
     // Return the AST for the given file.
     ast::Block* parseFile(const char* filename);

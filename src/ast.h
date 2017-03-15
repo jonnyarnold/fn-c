@@ -18,6 +18,7 @@ namespace fn { namespace ast {
   // Base class for all statements.
   class Statement {
   public:
+    virtual ~Statement() {}
     virtual std::string asString(int indent) = 0;
     std::string asString() { return this->asString(0); }
   };
@@ -26,6 +27,7 @@ namespace fn { namespace ast {
   // that refer to values.
   class Value : public Statement {
   public:
+    virtual ~Value() {}
     virtual std::string asString(int indent) = 0;
   };
 
@@ -33,6 +35,7 @@ namespace fn { namespace ast {
   // that alias defined values.
   class Reference : public Value {
   public:
+    virtual ~Reference() {}
     virtual std::string asString(int indent) = 0;
   };
 
