@@ -40,12 +40,13 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Id* id) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Deref* deref) {
-  bytecode::CodeBlob blob = this->digest(deref->parent);
+  // bytecode::CodeBlob blob = this->digest(deref->parent);
   // TODO: Push scope!
-  blob.append(this->digest(deref->child));
+  // blob.append(this->digest(deref->child));
   // TODO: Pop scope!
-
-  return blob;
+  // return blob;
+  
+  return this->digest(deref->child);
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Assignment* assignment) {
