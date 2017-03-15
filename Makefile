@@ -24,6 +24,7 @@ test: bin/fn tmp/spec
 # `clean` removes all build artifacts and temporary files.
 clean:
 	rm -rf tmp/* obj/* bin/*
+	mkdir obj/vm obj/e2e
 
 # There are two `watch` tasks, depending on the environment.
 # (Sorry Windows, nothing for you here.)
@@ -89,17 +90,14 @@ obj/vm.o: src/vm/vm.cpp src/vm/vm.h src/number.h
 
 # The specs are built with Catch,
 # a cool C++ testing framework.
-tmp/spec: spec/spec.cpp obj/bool.spec.o obj/number.spec.o obj/load.spec.o obj/call.spec.o tmp/cli.o obj/exec.o obj/parser.o tmp/parse.o obj/codegen.o obj/bytecode.o obj/vm.o tmp/lex.cpp
+VM_SPECS=obj/vm/bool.spec.o obj/vm/number.spec.o obj/vm/load.spec.o obj/vm/call.spec.o
+E2E_SPECS=obj/e2e/bool.spec.o obj/e2e/language.spec.o obj/e2e/number.spec.o
+
+tmp/spec: spec/spec.cpp $(VM_SPECS) $(E2E_SPECS) tmp/cli.o obj/exec.o obj/parser.o tmp/parse.o obj/codegen.o obj/bytecode.o obj/vm.o tmp/lex.cpp
 	$(COMPILE) -o $@ $^
 
-obj/bool.spec.o: spec/spec.cpp spec/spec.h spec/vm/bool.spec.cpp
-	$(COMPILE_OBJ) -o $@ spec/vm/bool.spec.cpp
+obj/vm/%.spec.o: spec/vm/%.spec.cpp spec/spec.cpp spec/spec.h
+	$(COMPILE_OBJ) -o $@ $<
 
-obj/number.spec.o: spec/spec.cpp spec/spec.h spec/vm/number.spec.cpp
-	$(COMPILE_OBJ) -o $@ spec/vm/number.spec.cpp
-
-obj/load.spec.o: spec/spec.cpp spec/spec.h spec/vm/load.spec.cpp
-	$(COMPILE_OBJ) -o $@ spec/vm/load.spec.cpp
-
-obj/call.spec.o: spec/spec.cpp spec/spec.h spec/vm/call.spec.cpp
-	$(COMPILE_OBJ) -o $@ spec/vm/call.spec.cpp
+obj/e2e/%.spec.o: spec/e2e/%.spec.cpp spec/spec.cpp spec/spec.h
+	$(COMPILE_OBJ) -o $@ $<
