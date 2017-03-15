@@ -1,6 +1,5 @@
 %{
   #include <string> // std::string
-  #include <iostream> // std::cout
   #include <algorithm> // std::reverse
 
   #include "tmp/lex.h"

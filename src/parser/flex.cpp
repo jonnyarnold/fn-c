@@ -18,7 +18,7 @@
 
 \n                               { line++; }
 
-[0-9]+(\.[0-9]*)?                { yylval.v_string = new std::string(yytext); return TDOUBLE; }
+\-?[0-9]+(\.[0-9]*)?                { yylval.v_string = new std::string(yytext); return TDOUBLE; }
 
 \"[^\"]*\"                       {
   std::string* workingString = new std::string(yytext);

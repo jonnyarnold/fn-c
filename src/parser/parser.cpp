@@ -5,8 +5,6 @@
 using namespace fn;
 
 ast::Block* Parser::parseFile(const char* filename) {
-  if (programBlock != NULL) { delete programBlock; }
-
   yyin = fopen(filename,"r");
   yyparse();
   fclose(yyin);
@@ -16,9 +14,7 @@ ast::Block* Parser::parseFile(const char* filename) {
   return programBlock;
 }
 
-ast::Block* Parser::parseCode(std::string code) {
-  if (programBlock != NULL) { delete programBlock; }
-  
+ast::Block* Parser::parseCode(std::string code) {  
   YY_BUFFER_STATE buffer = yy_scan_string(code.c_str());
   yyparse();
   yy_delete_buffer(buffer);

@@ -132,6 +132,31 @@ namespace fn {
 
       return result;
     }
+
+    friend bool operator==(Number lhs, Number rhs) {
+      // Get both numbers to the same base.
+      //
+      // Here's an example:
+      // lhs = 200 * 10^3
+      // rhs = 2   * 10^5
+      // exponentDifference = 3 - 5 = -2
+      // so we multiply rhs.coefficient by 100 and drop the coefficient...
+      // lhs = 200 * 10^5
+      // rhs = 200 * 10^5
+      Exponent exponentDifference = lhs.exponent - rhs.exponent;
+      Coefficient coefficientMultiplier = (int)pow(10, abs(exponentDifference));
+
+      if (exponentDifference < 0) {
+        rhs.coefficient *= coefficientMultiplier;
+        rhs.exponent = lhs.exponent;
+      } else {
+        lhs.coefficient *= coefficientMultiplier;
+        lhs.exponent = rhs.exponent;
+      }
+
+      return lhs.coefficient == rhs.coefficient
+        && lhs.exponent == rhs.exponent;
+    }
   };
 
 }
