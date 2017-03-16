@@ -37,7 +37,7 @@ namespace fn {
 
     VM(bool debug);
     VM() : VM(false) {};
-    // ~VM();
+    ~VM();
 
     // Executes a number of instructions.
     // Returns the pointer to the return value.

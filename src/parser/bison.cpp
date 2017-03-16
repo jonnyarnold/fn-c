@@ -81,7 +81,10 @@
 %%
 
 program:
-  statements { programBlock = new fn::ast::Block(*$1); delete $1; }
+  statements { 
+    programBlock = new fn::ast::Block(*$1);
+    delete $1; 
+  }
 
 statements:
   /* empty */                     { $$ = new std::vector<fn::ast::Statement*>(); }
@@ -148,6 +151,7 @@ functionCall:
     std::reverse(($3)->begin(), ($3)->end());
 
     $$ = new fn::ast::Call($1, *$3);
+    for(auto arg : (*$3)) { delete arg; }
     delete $3;
   }
 
@@ -163,6 +167,7 @@ functionDef:
     std::reverse(($3)->begin(), ($3)->end());
 
     $$ = new fn::ast::Def(*$3, $5);
+    ($3)->clear();
     delete $3;
   }
 
@@ -172,10 +177,17 @@ params:
 | TID ',' params { std::string str = std::string(*$1); ($3)->push_back(str); $$ = $3; delete $1; }
 
 block:
-  '{' statements '}' { $$ = new fn::ast::Block(*$2); delete $2; }
+  '{' statements '}' { 
+    $$ = new fn::ast::Block(*$2);
+    delete $2; 
+  }
 
 conditional:
-  TWHEN '{' conditions '}' { $$ = new fn::ast::Conditional(*$3); delete $3; }
+  TWHEN '{' conditions '}' { 
+    $$ = new fn::ast::Conditional(*$3); 
+    for(auto condition : (*$3)) { delete condition; }
+    delete $3; 
+  }
 
 conditions:
   /* empty */          { $$ = new std::vector<fn::ast::Condition*>(); }

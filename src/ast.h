@@ -98,7 +98,9 @@ namespace fn { namespace ast {
 
     Block(std::vector<Statement*> statements) { this->statements = statements; }
     Block() { this->statements = std::vector<Statement*>(); }
-    ~Block() { this->statements.clear(); }
+    ~Block() { 
+      for(auto statement : this->statements) { delete statement; } 
+    }
 
     std::string asString(int indent) override {
       std::string result = "(BLOCK [\n";
@@ -164,7 +166,11 @@ namespace fn { namespace ast {
       this->target = target; 
       this->args = args; 
     }
-    ~Call() { this->args.clear(); delete this->target; }
+
+    ~Call() { 
+      for(auto arg : this->args) { delete arg; }
+      delete this->target; 
+    }
     
     std::string asString(int indent) override {
       std::string result = "(CALL target:" + 
@@ -241,7 +247,9 @@ namespace fn { namespace ast {
     Conditional(std::vector<Condition*> conditions) { 
       this->conditions = conditions; 
     }
-    ~Conditional() { this->conditions.clear(); }
+    ~Conditional() { 
+      for(auto condition : this->conditions) { delete condition; } 
+    }
     
     std::string asString(int indent) override {
       std::string result = "(WHEN [\n";

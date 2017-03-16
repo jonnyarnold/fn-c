@@ -13,10 +13,9 @@ VM::VM(bool debug) {
   this->callStack = std::stack<vm::CallFrame>();
 }
 
-// VM::~VM() {
-//   this->values.clear();
-//   while(!this->callStack.empty()) { this->callStack.pop(); }
-// }
+VM::~VM() {
+  for(auto value : this->values) { delete value; }
+}
 
 vm::Value VM::run(bytecode::CodeBlob* instructions) {
   return this->run(instructions->asBytes(), instructions->size());
