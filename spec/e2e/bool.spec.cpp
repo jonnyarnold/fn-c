@@ -4,12 +4,12 @@ TEST_CASE("Boolean set/get") {
   REQUIRE(resultOf("x = true; x")->asBool() == true);
 }
 
-// TEST_CASE("and") {
-//   REQUIRE(resultOf("true and true") == "true");
-//   REQUIRE(resultOf("true and false") == "false");
-//   REQUIRE(resultOf("false and true") == "false");
-//   REQUIRE(resultOf("false and false") == "false");
-// }
+TEST_CASE("and") {
+  REQUIRE(resultOf("true and true")->asBool() == true);
+  REQUIRE(resultOf("true and false")->asBool() == false);
+  REQUIRE(resultOf("false and true")->asBool() == false);
+  REQUIRE(resultOf("false and false")->asBool() == false);
+}
 
 // TEST_CASE("or") {
 //   REQUIRE(resultOf("true or true") == "true");
