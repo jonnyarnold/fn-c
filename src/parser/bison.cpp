@@ -151,7 +151,6 @@ functionCall:
     std::reverse(($3)->begin(), ($3)->end());
 
     $$ = new fn::ast::Call($1, *$3);
-    for(auto arg : (*$3)) { delete arg; }
     delete $3;
   }
 
@@ -167,7 +166,6 @@ functionDef:
     std::reverse(($3)->begin(), ($3)->end());
 
     $$ = new fn::ast::Def(*$3, $5);
-    ($3)->clear();
     delete $3;
   }
 
@@ -185,7 +183,6 @@ block:
 conditional:
   TWHEN '{' conditions '}' { 
     $$ = new fn::ast::Conditional(*$3); 
-    for(auto condition : (*$3)) { delete condition; }
     delete $3; 
   }
 

@@ -118,7 +118,7 @@ vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
 
     }
 
-    this->printState();
+    // this->printState();
   }
 
   return this->values.back();

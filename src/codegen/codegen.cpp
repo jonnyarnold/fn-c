@@ -124,6 +124,16 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Call* call) {
       callBlob.append(bytecode::iAnd(args[0], args[1]));
       return callBlob;
     }
+
+    if (id->name == "or") {
+      callBlob.append(bytecode::iOr(args[0], args[1]));
+      return callBlob;
+    }
+
+    if (id->name == "not") {
+      callBlob.append(bytecode::iNot(args[0]));
+      return callBlob;
+    }
   }
 
   throw "Undefined: " + call->target->asString(0);
