@@ -41,8 +41,8 @@ namespace fn {
 
     // Executes a number of instructions.
     // Returns the pointer to the return value.
-    vm::Value run(bytecode::CodeBlob* instructions);
-    vm::Value run(bytecode::CodeByte instructions[], size_t num_bytes);
+    vm::Value* run(bytecode::CodeBlob* instructions);
+    vm::Value* run(bytecode::CodeByte instructions[], size_t num_bytes);
 
   protected:
     bool debug;
@@ -55,32 +55,32 @@ namespace fn {
 
     // Stores the nesting of function calls.
     std::stack<vm::CallFrame> callStack;
-    
+
     vm::Value* value(bytecode::CodeByte index);
-    vm::Value* declare(vm::Value* value);
+    bytecode::ValueIndex declare(vm::Value* value);
     void printState();
 
-    vm::Value* declareBool(bytecode::CodeByte);
-    vm::Value* declareBool(bool value);
-    
-    vm::Value* fnAnd(bytecode::CodeByte[]);
-    vm::Value* fnOr(bytecode::CodeByte[]);
-    vm::Value* fnNot(bytecode::CodeByte[]);
+    void declareBool(bytecode::CodeByte);
+    void declareBool(bool value);
 
-    vm::Value* declareNumber(bytecode::CodeByte[]);
-    vm::Value* declareNumber(Number);
+    void fnAnd(bytecode::CodeByte[]);
+    void fnOr(bytecode::CodeByte[]);
+    void fnNot(bytecode::CodeByte[]);
 
-    vm::Value* fnMultiply(bytecode::CodeByte[]);
-    vm::Value* fnDivide(bytecode::CodeByte[]);
-    vm::Value* fnAdd(bytecode::CodeByte[]);
-    vm::Value* fnSubtract(bytecode::CodeByte[]);
+    void declareNumber(bytecode::CodeByte[]);
+    void declareNumber(Number);
 
-    vm::Value* load(bytecode::CodeByte[]);
+    void fnMultiply(bytecode::CodeByte[]);
+    void fnDivide(bytecode::CodeByte[]);
+    void fnAdd(bytecode::CodeByte[]);
+    void fnSubtract(bytecode::CodeByte[]);
 
-    vm::Value* declareDef(bytecode::CodeByte[]);
-    vm::Value* declareDef(vm::Def def);
-    vm::Value* call(bytecode::CodeByte[]);
-    vm::Value* returnLast();
+    void load(bytecode::CodeByte[]);
+
+    void declareDef(bytecode::CodeByte[]);
+    void declareDef(vm::Def def);
+    void call(bytecode::CodeByte[]);
+    void returnLast();
   };
 
 }

@@ -5,7 +5,7 @@ TEST_CASE("CALL builtin") {
     bytecode::iFalse()
   };
 
-  REQUIRE(resultOf(instructions).asBool() == false);
+  REQUIRE(resultOf(instructions)->asBool() == false);
 }
 
 TEST_CASE("CALL def") {
@@ -13,8 +13,8 @@ TEST_CASE("CALL def") {
     bytecode::iDefHeader(2),
     bytecode::iFalse(),
     bytecode::iReturnLast(),
-    bytecode::iCall(0)
+    bytecode::iCall(1)
   };
 
-  REQUIRE(resultOf(instructions).asBool() == false);
+  REQUIRE(resultOf(instructions)->asBool() == false);
 }

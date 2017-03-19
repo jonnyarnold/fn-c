@@ -1,7 +1,7 @@
 #include "spec/spec.h"
 
 TEST_CASE("Boolean set/get") {
-  REQUIRE(resultOf("x = true; x").asBool() == true);
+  REQUIRE(resultOf("x = true; x")->asBool() == true);
 }
 
 // TEST_CASE("and") {

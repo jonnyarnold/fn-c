@@ -1,19 +1,19 @@
 #include "spec/spec.h"
 
 TEST_CASE("Positive integer set/get") {
-  REQUIRE(resultOf("x = 1; x").asNumber() == fn::Number(0, 1));
+  REQUIRE(resultOf("x = 1; x")->asNumber() == fn::Number(0, 1));
 }
 
 TEST_CASE("Negative integer set/get") {
-  REQUIRE(resultOf("x = -1; x").asNumber() == fn::Number(0, -1));
+  REQUIRE(resultOf("x = -1; x")->asNumber() == fn::Number(0, -1));
 }
 
 TEST_CASE("Positive decimal set/get") {
-  REQUIRE(resultOf("x = 1.23; x").asNumber() == fn::Number(-2, 123));
+  REQUIRE(resultOf("x = 1.23; x")->asNumber() == fn::Number(-2, 123));
 }
 
 TEST_CASE("Negative decimal set/get") {
-  REQUIRE(resultOf("x = -1.23; x").asNumber() == fn::Number(-2, -123));
+  REQUIRE(resultOf("x = -1.23; x")->asNumber() == fn::Number(-2, -123));
 }
 
 // TODO: Mathematical precedence

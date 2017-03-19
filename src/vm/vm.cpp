@@ -9,19 +9,30 @@ using namespace fn;
 
 VM::VM(bool debug) {
   this->debug = debug;
+
+  // Because 0 is used by CodeGen for errors,
+  // we push a NULL onto the ValueMap to sync.
   this->values = vm::ValueMap();
+  this->values.push_back(NULL);
+
   this->callStack = std::stack<vm::CallFrame>();
 }
 
 VM::~VM() {
-  for(auto value : this->values) { delete value; }
+  // Save the last value,
+  // so it can be used externally.
+  vm::Value* lastValue = this->values.back();
+
+  for(auto value : this->values) {
+    if (value != NULL && value != lastValue) { delete value; }
+  }
 }
 
-vm::Value VM::run(bytecode::CodeBlob* instructions) {
+vm::Value* VM::run(bytecode::CodeBlob* instructions) {
   return this->run(instructions->asBytes(), instructions->size());
 }
 
-vm::Value VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
+vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
   this->counter = 0;
 
   while(counter < num_bytes) {
@@ -100,10 +111,10 @@ vm::Value VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
 
     }
 
-    // if (this->debug) { this->printState(); }
+    // this->printState();
   }
 
-  return *this->values.back();
+  return this->values.back();
 }
 
 // Get a value by index.
@@ -111,10 +122,11 @@ vm::Value* VM::value(bytecode::CodeByte index) {
   return this->values[index];
 }
 
-vm::Value* VM::declare(vm::Value* value) {
-  DEBUG("DECLARE(" << value->toString() << ") [V" << this->values.size() << "]");
+bytecode::ValueIndex VM::declare(vm::Value* value) {
+  bytecode::ValueIndex index = this->values.size();
+  DEBUG("DECLARE(" << value->toString() << ") [V" << index << "]");
   this->values.push_back(value);
-  return value;
+  return index;
 }
 
 void VM::printState() {
@@ -123,7 +135,7 @@ void VM::printState() {
   std::cout << "VM State:\n";
   std::cout << "counter: I" << std::to_string(this->counter) <<"\n";
   std::cout << "values:\n";
-  for (uint i = 0; i < this->values.size(); i++) {
+  for (uint i = 1; i < this->values.size(); i++) {
     std::cout << "V" << i << ": " << this->values[i]->toString() << "\n";
   }
   std::cout << "call stack size: " << this->callStack.size() << "\n";
@@ -138,27 +150,27 @@ void VM::printState() {
 // (1 byte)
 //
 // Allocates a new boolean constant.
-vm::Value* VM::declareBool(bytecode::CodeByte value) {
-  return this->declareBool((bool)value);
+void VM::declareBool(bytecode::CodeByte value) {
+  this->declareBool((bool)value);
 }
 
-vm::Value* VM::declareBool(bool value) {
-  return this->declare(new vm::Value((bool)value));
+void VM::declareBool(bool value) {
+  this->declare(new vm::BoolValue(value));
 }
 
 // NUMBER [EXPONENT (1)] [COEFFICIENT (8)]
 // (10 bytes)
 //
 // Allocates a new numeric constant.
-vm::Value* VM::declareNumber(bytecode::CodeByte value[]) {
+void VM::declareNumber(bytecode::CodeByte value[]) {
   Exponent exponent = (Exponent)value[1];
   Coefficient coefficient = (Coefficient)value[2];
 
-  return this->declareNumber(Number(exponent, coefficient));
+  this->declareNumber(Number(exponent, coefficient));
 }
 
-vm::Value* VM::declareNumber(Number value) {
-  return this->declare(new vm::Value(value));
+void VM::declareNumber(Number value) {
+  this->declare(new vm::NumberValue(value));
 }
 
 // AND [INDEX_1 (1)] [INDEX_2 (1)]
@@ -166,22 +178,24 @@ vm::Value* VM::declareNumber(Number value) {
 //
 // Returns true if both arguments are true,
 // false otherwise.
-vm::Value* VM::fnAnd(bytecode::CodeByte value[]) {
-  
+void VM::fnAnd(bytecode::CodeByte value[]) {
+
   bool first = this->value(value[1])->asBool();
   if (!first) {
     DEBUG("AND(false, ???)");
-    return this->declareBool(FN_OP_FALSE);
+    this->declareBool(FN_OP_FALSE);
+    return;
   }
 
   bool second = this->value(value[2])->asBool();
   if (!second) {
     DEBUG("AND(true, false)");
-    return this->declareBool(FN_OP_FALSE);
+    this->declareBool(FN_OP_FALSE);
+    return;
   }
 
   DEBUG("AND(true, true)");
-  return this->declareBool(FN_OP_TRUE);
+  this->declareBool(FN_OP_TRUE);
 }
 
 // OR [INDEX_1 (1)] [INDEX_2 (1)]
@@ -189,21 +203,23 @@ vm::Value* VM::fnAnd(bytecode::CodeByte value[]) {
 //
 // Returns true if either arguments are true,
 // false otherwise.
-vm::Value* VM::fnOr(bytecode::CodeByte value[]) {
+void VM::fnOr(bytecode::CodeByte value[]) {
   bool first = this->value(value[1])->asBool();
   if (first) {
     DEBUG("OR(true, ???)");
-    return this->declareBool(FN_OP_TRUE);
+    this->declareBool(FN_OP_TRUE);
+    return;
   }
 
   bool second = this->value(value[2])->asBool();
   if (second) {
     DEBUG("OR(false, true)");
-    return this->declareBool(FN_OP_TRUE);
+    this->declareBool(FN_OP_TRUE);
+    return;
   }
 
   DEBUG("OR(false, false)");
-  return this->declareBool(FN_OP_FALSE);
+  this->declareBool(FN_OP_FALSE);
 }
 
 // NOT [INDEX (1)]
@@ -211,22 +227,20 @@ vm::Value* VM::fnOr(bytecode::CodeByte value[]) {
 //
 // Returns true if the argument is false
 // and vice versa.
-vm::Value* VM::fnNot(bytecode::CodeByte value[]) {
+void VM::fnNot(bytecode::CodeByte value[]) {
   bool arg = this->value(value[1])->asBool();
   DEBUG("NOT(" << arg << ")");
 
-  if (arg) {
-    return this->declareBool(FN_OP_FALSE);
-  } else {
-    return this->declareBool(FN_OP_TRUE);
-  }
+  arg ?
+    this->declareBool(FN_OP_FALSE) :
+    this->declareBool(FN_OP_TRUE);
 }
 
 // MULTIPLY [INDEX_1 (1)] [INDEX_2 (1)]
 // (3 bytes)
 //
 // Returns the product of two numeric values.
-vm::Value* VM::fnMultiply(bytecode::CodeByte value[]) {
+void VM::fnMultiply(bytecode::CodeByte value[]) {
   Number first = this->value(value[1])->asNumber();
   Number second = this->value(value[2])->asNumber();
 
@@ -234,14 +248,14 @@ vm::Value* VM::fnMultiply(bytecode::CodeByte value[]) {
 
   Number product = first * second;
 
-  return this->declareNumber(product);
+  this->declareNumber(product);
 }
 
 // DIVIDE [INDEX_1 (1)] [INDEX_2 (1)]
 // (3 bytes)
 //
 // Returns the fraction of two numeric values.
-vm::Value* VM::fnDivide(bytecode::CodeByte value[]) {
+void VM::fnDivide(bytecode::CodeByte value[]) {
   Number first = this->value(value[1])->asNumber();
   Number second = this->value(value[2])->asNumber();
 
@@ -249,14 +263,14 @@ vm::Value* VM::fnDivide(bytecode::CodeByte value[]) {
 
   Number fraction = first / second;
 
-  return this->declareNumber(fraction);
+  this->declareNumber(fraction);
 }
 
 // ADD [INDEX_1 (1)] [INDEX_2 (1)]
 // (3 bytes)
 //
 // Returns the sum of two numeric values.
-vm::Value* VM::fnAdd(bytecode::CodeByte value[]) {
+void VM::fnAdd(bytecode::CodeByte value[]) {
   Number first = this->value(value[1])->asNumber();
   Number second = this->value(value[2])->asNumber();
 
@@ -264,14 +278,14 @@ vm::Value* VM::fnAdd(bytecode::CodeByte value[]) {
 
   Number sum = first + second;
 
-  return this->declareNumber(sum);
+  this->declareNumber(sum);
 }
 
 // SUBTRACT [INDEX_1 (1)] [INDEX_2 (1)]
 // (3 bytes)
 //
 // Returns the difference of two numeric values.
-vm::Value* VM::fnSubtract(bytecode::CodeByte value[]) {
+void VM::fnSubtract(bytecode::CodeByte value[]) {
   Number first = this->value(value[1])->asNumber();
   Number second = this->value(value[2])->asNumber();
 
@@ -279,28 +293,17 @@ vm::Value* VM::fnSubtract(bytecode::CodeByte value[]) {
 
   Number difference = first - second;
 
-  return this->declareNumber(difference);
+  this->declareNumber(difference);
 }
-
-// // SAVE_LAST_VALUE [INDEX (1)]
-// // (2 bytes)
-// //
-// // Sets the value at a given index to the last returned value.
-// vm::Value* VM::saveLastValue(bytecode::CodeByte value[]) {
-//   bytecode::ValueIndex index = value[1];
-
-//   DEBUG("SAVE_LAST_VALUE(" << (int)index << ")");
-//   return this->values[index] = new vm::Value(this->lastValue);
-// }
 
 // LOAD [INDEX (1)]
 // (2 bytes)
 //
 // Returns the value at the given index.
-vm::Value* VM::load(bytecode::CodeByte value[]) {
+void VM::load(bytecode::CodeByte value[]) {
   bytecode::ValueIndex index = value[1];
   DEBUG("LOAD(V" << (int)index << ")");
-  return this->value(index);
+  this->declare(this->value(index));
 }
 
 #define DECLARE_DEF_BYTES (1 + INSTRUCTION_INDEX_BYTES)
@@ -309,23 +312,21 @@ vm::Value* VM::load(bytecode::CodeByte value[]) {
 //
 // Starts a Def declaration. Reads the body of the Def
 // and stores it in a pointer value.
-vm::Value* VM::declareDef(bytecode::CodeByte value[]) {
+void VM::declareDef(bytecode::CodeByte value[]) {
   bytecode::InstructionIndex length = value[1];
   bytecode::InstructionIndex counterStart = this->counter + DECLARE_DEF_BYTES;
 
   vm::Def def = vm::Def();
   def.length = length;
   def.counterStart = counterStart;
-  vm::Value* returnValue = this->declareDef(def);
+  this->declareDef(def);
 
   // Skip over the Def body.
   this->counter += (length + DECLARE_DEF_BYTES);
-
-  return returnValue;
 }
 
-vm::Value* VM::declareDef(vm::Def value) {
-  return this->declare(new vm::Value(value));
+void VM::declareDef(vm::Def value) {
+  this->declare(new vm::DefValue(value));
 }
 
 #define CALL_BYTES (1 + INSTRUCTION_INDEX_BYTES)
@@ -333,12 +334,12 @@ vm::Value* VM::declareDef(vm::Def value) {
 // (2 bytes)
 //
 // Runs the code pointed to at the given index.
-vm::Value* VM::call(bytecode::CodeByte value[]) {
+void VM::call(bytecode::CodeByte value[]) {
   bytecode::ValueIndex index = value[1];
-  vm::Def def = this->value(index)->asDef();
+  vm::Value* def = this->value(index);
 
   DEBUG("CALL(" << (int)index << ")");
-  
+
   // Push a CallFrame onto the stack.
   vm::CallFrame frame = vm::CallFrame();
   frame.returnCounter = this->counter + CALL_BYTES;
@@ -346,16 +347,15 @@ vm::Value* VM::call(bytecode::CodeByte value[]) {
   this->callStack.push(frame);
 
   // Set the program counter.
-  this->counter = def.counterStart;
-
-  return NULL; // FIXME!
+  bytecode::InstructionIndex newCounterPos = def->getCallCounterPos();
+  this->counter = newCounterPos;
 }
 
 // RETURN_LAST
 // (1 byte)
 //
 // Denotes the end of a call. Returns the last defined value.
-vm::Value* VM::returnLast() {
+void VM::returnLast() {
   DEBUG("RETURN_LAST()");
 
   vm::Value* returnValue = this->values.back();
@@ -367,9 +367,7 @@ vm::Value* VM::returnLast() {
   // Delete all variables used for calculating the return value,
   // and place the return value in the index given by the call frame.
   while (this->values.size() > frame.returnIndex) { this->values.pop_back(); }
-  this->values.push_back(returnValue);
+  this->declare(returnValue);
 
   this->counter = frame.returnCounter;
-
-  return returnValue;
 }

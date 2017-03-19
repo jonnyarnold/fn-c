@@ -45,7 +45,7 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Deref* deref) {
   // blob.append(this->digest(deref->child));
   // TODO: Pop scope!
   // return blob;
-  
+
   return this->digest(deref->child);
 }
 
@@ -82,7 +82,7 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Block* block) {
     blockBlob.append(this->digest(statement));
   }
   // TODO: Pop scope into variable?
-  
+
   return blockBlob;
 }
 
@@ -128,6 +128,13 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Conditional* conditional) {
 
 }
 
+bytecode::ValueIndex CodeGenerator::rememberIndexFor(ast::Reference* reference) {
+  if (ast::Id* id = dynamic_cast<ast::Id*>(reference)) {
+    return this->rememberIndexFor(id->name);
+  }
+  else { throw "Not yet implemented!"; }
+}
+
 bytecode::ValueIndex CodeGenerator::rememberIndexFor(std::string name) {
   DEBUG(name << " => V" << std::to_string(this->nextIndex));
 
@@ -139,9 +146,14 @@ bytecode::ValueIndex CodeGenerator::rememberIndexFor(std::string name) {
 
 bytecode::ValueIndex CodeGenerator::getIndexFor(ast::Reference* reference) {
   if (ast::Id* id = dynamic_cast<ast::Id*>(reference)) {
-    bytecode::ValueIndex index = this->variableIndices[id->name]; 
-    DEBUG("V" << std::to_string(index) << " => " << id->name);
-    return index;
+    return this->getIndexFor(id->name);
   }
   else { throw "Not yet implemented!"; }
+}
+
+bytecode::ValueIndex CodeGenerator::getIndexFor(std::string name) {
+  bytecode::ValueIndex index = this->variableIndices[name];
+
+  DEBUG("V" << std::to_string(index) << " => " << name);
+  return index;
 }

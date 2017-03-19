@@ -9,7 +9,7 @@
 // }
 
 TEST_CASE("Semicolons") {
-  REQUIRE(resultOf("x = true; x").asBool() == true);
+  REQUIRE(resultOf("x = true; x")->asBool() == true);
 }
 
 // TEST_CASE("Brackets") {

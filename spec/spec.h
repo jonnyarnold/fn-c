@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include "vendor/catch.h" // Needed by all specs.
 
@@ -9,5 +9,5 @@
 using namespace fn;
 
 // Get the value of a code listing.
-vm::Value resultOf(bytecode::CodeBlob instructions);
-vm::Value resultOf(std::string code);
+vm::Value* resultOf(bytecode::CodeBlob instructions);
+vm::Value* resultOf(std::string code);

@@ -3,8 +3,8 @@
 TEST_CASE("LOAD") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iTrue(),
-    bytecode::iLoad(0)
+    bytecode::iLoad(1)
   };
 
-  REQUIRE(resultOf(instructions).asBool() == true);
+  REQUIRE(resultOf(instructions)->asBool() == true);
 }

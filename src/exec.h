@@ -10,8 +10,8 @@
 #include "src/vm/vm.h" // VM
 
 namespace fn {
-  vm::Value execFile(const char fileName[]);
-  vm::Value execCode(std::string code);
+  vm::Value* execFile(const char fileName[]);
+  vm::Value* execCode(std::string code);
 
   class Execution {
     bool debug;
@@ -20,8 +20,8 @@ namespace fn {
     VM vm;
 
   public:
-    Execution(bool debug) { 
-      this->debug = debug; 
+    Execution(bool debug) {
+      this->debug = debug;
 
       this->parser = Parser(debug);
       this->generator = CodeGenerator(debug);
@@ -29,8 +29,8 @@ namespace fn {
     }
     Execution() : Execution(false) {}
 
-    vm::Value execFile(const char fileName[]);
-    vm::Value execCode(std::string code);
+    vm::Value* execFile(const char fileName[]);
+    vm::Value* execCode(std::string code);
   };
 }
 
