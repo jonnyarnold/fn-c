@@ -2,6 +2,7 @@
 
 #include <iostream> // std::cout
 #include <bitset> // std::bitset
+#include <unordered_set> // std::unordered_set
 
 using namespace fn;
 
@@ -21,10 +22,16 @@ VM::VM(bool debug) {
 VM::~VM() {
   // Save the last value,
   // so it can be used externally.
-  vm::Value* lastValue = this->values.back();
+  std::unordered_set<vm::Value*> deletedValues = std::unordered_set<vm::Value*>{
+    NULL,
+    this->values.back() 
+  };
 
   for(auto value : this->values) {
-    if (value != NULL && value != lastValue) { delete value; }
+    if (deletedValues.find(value) == deletedValues.end()) { 
+      deletedValues.insert(value);
+      delete value; 
+    }
   }
 }
 
@@ -111,7 +118,7 @@ vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
 
     }
 
-    // this->printState();
+    this->printState();
   }
 
   return this->values.back();
@@ -124,7 +131,7 @@ vm::Value* VM::value(bytecode::CodeByte index) {
 
 bytecode::ValueIndex VM::declare(vm::Value* value) {
   bytecode::ValueIndex index = this->values.size();
-  DEBUG("DECLARE(" << value->toString() << ") [V" << index << "]");
+  DEBUG("DECLARE(" << value->toString() << ") [V" << std::to_string(index) << "]");
   this->values.push_back(value);
   return index;
 }

@@ -20,7 +20,7 @@ namespace fn {
 
     // A table mapping variable names to indices in the value list.
     ValueIndexMap variableIndices;
-    bytecode::ValueIndex nextIndex;
+    bytecode::ValueIndex lastIndex;
 
   public:
     bytecode::CodeBlob instructions;
@@ -30,10 +30,9 @@ namespace fn {
       this->instructions = bytecode::CodeBlob();
       this->variableIndices = ValueIndexMap();
 
-      // We choose 1 as our starting index.
-      // This is because 0 is the value returned
-      // when we can't find a key in our map.
-      this->nextIndex = 1;
+      // Returns the index of the last defined value.
+      // Used for assignment.
+      this->lastIndex = 0;
     }
     CodeGenerator() : CodeGenerator(false) {}
 

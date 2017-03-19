@@ -124,8 +124,8 @@ literal:
 infixOperation:
   value TINFIX value { 
     $$ = new fn::ast::Call(
-      new fn::ast::Deref($1, new fn::ast::Id(*$2)), 
-      std::vector<fn::ast::Value*>{$3}); 
+      new fn::ast::Id(*$2), 
+      std::vector<fn::ast::Value*>{$1, $3}); 
 
     delete $2;
   }
