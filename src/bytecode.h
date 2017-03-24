@@ -21,6 +21,7 @@ namespace fn { namespace bytecode {
   // The first byte of any instruction is an OpCode.
   // It tells the VM the operation to perform.
   typedef CodeByte OpCode;
+
   #define FN_OP_FALSE (fn::bytecode::OpCode)(0)
   #define FN_OP_TRUE (fn::bytecode::OpCode)(1)
   #define FN_OP_AND (fn::bytecode::OpCode)(2)
@@ -33,13 +34,16 @@ namespace fn { namespace bytecode {
   #define FN_OP_ADD (fn::bytecode::OpCode)(8)
   #define FN_OP_SUBTRACT (fn::bytecode::OpCode)(9)
 
-  #define FN_OP_STRING (fn::bytecode::OpCode)(10)
-
-  #define FN_OP_LOAD (fn::bytecode::OpCode)(11)
-
   #define FN_OP_DEF (fn::bytecode::OpCode)(12)
   #define FN_OP_CALL (fn::bytecode::OpCode)(13)
   #define FN_OP_RETURN_LAST (fn::bytecode::OpCode)(14)
+
+  #define FN_OP_STRING (fn::bytecode::OpCode)(10)
+
+  #define FN_OP_EQ (fn::bytecode::OpCode)(15)
+
+  #define FN_OP_LOAD (fn::bytecode::OpCode)(11)
+
 
   // Values in the VM are indexed.
   // References to values are given by this type.
@@ -112,9 +116,12 @@ namespace fn { namespace bytecode {
   CodeBlob iAdd(ValueIndex first, ValueIndex second);
   CodeBlob iSubtract(ValueIndex first, ValueIndex second);
 
-  CodeBlob iLoad(ValueIndex index);
-
   CodeBlob iDefHeader(InstructionIndex length);
   CodeBlob iCall(ValueIndex index);
   CodeBlob iReturnLast();
+
+  CodeBlob iEq(ValueIndex first, ValueIndex second);
+
+  CodeBlob iLoad(ValueIndex index);
+
 }}

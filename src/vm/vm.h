@@ -59,6 +59,7 @@ namespace fn {
     vm::Value* value(bytecode::CodeByte index);
     bytecode::ValueIndex declare(vm::Value* value);
     void printState();
+    void fold(bytecode::ValueIndex returnIndex, vm::Value* returnValue);
 
     void declareBool(bytecode::CodeByte);
     void declareBool(bool value);
@@ -74,6 +75,8 @@ namespace fn {
     void fnDivide(bytecode::CodeByte[]);
     void fnAdd(bytecode::CodeByte[]);
     void fnSubtract(bytecode::CodeByte[]);
+
+    void fnEq(bytecode::CodeByte[]);
 
     void load(bytecode::CodeByte[]);
 

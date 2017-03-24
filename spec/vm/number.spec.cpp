@@ -136,6 +136,19 @@ TEST_CASE("DIVIDE 20 2") {
   REQUIRE(result.exponent == 1);
 }
 
+// FIXME
+// TEST_CASE("DIVIDE 10 4") {
+//   bytecode::CodeBlob instructions = bytecode::CodeBlob{
+//     bytecode::iNumber(1, 1),
+//     bytecode::iNumber(4, 0),
+//     bytecode::iDivide(1, 2)
+//   };
+
+//   Number result = resultOf(instructions)->asNumber();
+//   REQUIRE(result.coefficient == 25);
+//   REQUIRE(result.exponent == -1);
+// }
+
 TEST_CASE("DIVIDE 0.2 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(2, -1),

@@ -12,9 +12,9 @@ TEST_CASE("Semicolons") {
   REQUIRE(resultOf("x = true; x")->asBool() == true);
 }
 
-// TEST_CASE("Brackets") {
-//   REQUIRE(resultOf("2 * (1 + 2)") == "6");
-// }
+TEST_CASE("Brackets") {
+  REQUIRE(resultOf("2 * (1 + 2)")->asNumber() == fn::Number(0, 6));
+}
 
 // TEST_CASE("Variable redefinition not allowed") {
 //   REQUIRE(failure("a = 1; a = 2"));

@@ -36,7 +36,7 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Id* id) {
   bytecode::ValueIndex index = this->variableIndices[id->name];
   if (index == 0) { throw "Undefined: " + id->name; }
 
-  DEBUG("LOAD " << (int)index)
+  this->lastIndex += 1;
   return bytecode::iLoad(index);
 }
 
@@ -102,7 +102,7 @@ bytecode::CodeBlob CodeGenerator::digest(ast::String* s) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Call* call) {
-  bytecode::CodeBlob callBlob = bytecode::CodeBlob();        
+  bytecode::CodeBlob callBlob = bytecode::CodeBlob();
   std::vector<bytecode::ValueIndex> args = std::vector<bytecode::ValueIndex>();
 
   // Digest the arguments
@@ -111,13 +111,16 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Call* call) {
     args.push_back(this->lastIndex);
   }
 
+  // Every call returns a value
+  this->lastIndex += 1;
+
   bytecode::ValueIndex defIndex = this->getIndexFor(call->target);
-  if (defIndex) { 
+  if (defIndex) {
     // FIXME: Pass args!
     callBlob.append(bytecode::iCall(defIndex));
     return callBlob;
   }
-  
+
   // Check builtins
   if (ast::Id* id = dynamic_cast<ast::Id*>(call->target)) {
     if (id->name == "and") {
@@ -132,6 +135,31 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Call* call) {
 
     if (id->name == "not") {
       callBlob.append(bytecode::iNot(args[0]));
+      return callBlob;
+    }
+
+    if (id->name == "+") {
+      callBlob.append(bytecode::iAdd(args[0], args[1]));
+      return callBlob;
+    }
+
+    if (id->name == "-") {
+      callBlob.append(bytecode::iSubtract(args[0], args[1]));
+      return callBlob;
+    }
+
+    if (id->name == "*") {
+      callBlob.append(bytecode::iMultiply(args[0], args[1]));
+      return callBlob;
+    }
+
+    if (id->name == "/") {
+      callBlob.append(bytecode::iDivide(args[0], args[1]));
+      return callBlob;
+    }
+
+    if (id->name == "eq") {
+      callBlob.append(bytecode::iEq(args[0], args[1]));
       return callBlob;
     }
   }

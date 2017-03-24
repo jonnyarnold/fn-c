@@ -1,3 +1,4 @@
-x = true
-y = false
-x and y
+x = 2
+y = x * x
+z = y * y * y
+z

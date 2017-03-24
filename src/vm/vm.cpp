@@ -24,13 +24,13 @@ VM::~VM() {
   // so it can be used externally.
   std::unordered_set<vm::Value*> deletedValues = std::unordered_set<vm::Value*>{
     NULL,
-    this->values.back() 
+    this->values.back()
   };
 
   for(auto value : this->values) {
-    if (deletedValues.find(value) == deletedValues.end()) { 
+    if (deletedValues.find(value) == deletedValues.end()) {
       deletedValues.insert(value);
-      delete value; 
+      delete value;
     }
   }
 }
@@ -93,6 +93,11 @@ vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
       this->counter += 3;
       break;
 
+    case FN_OP_EQ:
+      this->fnEq(&instructions[counter]);
+      this->counter += 3;
+      break;
+
     case FN_OP_LOAD:
       this->load(&instructions[counter]);
       this->counter += 2;
@@ -152,6 +157,14 @@ void VM::printState() {
   }
 }
 
+// A "fold" is a kind of garbage collection
+// that deletes every value up to returnIndex
+// and then fills returnIndex with returnValue.
+void VM::fold(bytecode::ValueIndex returnIndex, vm::Value* returnValue) {
+  while (this->values.size() > returnIndex) { this->values.pop_back(); }
+  this->declare(returnValue);
+}
+
 // BOOL_TRUE
 // BOOL_FALSE
 // (1 byte)
@@ -189,19 +202,19 @@ void VM::fnAnd(bytecode::CodeByte value[]) {
 
   bool first = this->value(value[1])->asBool();
   if (!first) {
-    DEBUG("AND(false, ???)");
+    DEBUG("AND(V" << std::to_string(value[1]) << " = false, <unexecuted>)");
     this->declareBool(FN_OP_FALSE);
     return;
   }
 
   bool second = this->value(value[2])->asBool();
   if (!second) {
-    DEBUG("AND(true, false)");
+    DEBUG("AND(V" << std::to_string(value[1]) << " = true, V" << std::to_string(value[2]) << " = true)");
     this->declareBool(FN_OP_FALSE);
     return;
   }
 
-  DEBUG("AND(true, true)");
+  DEBUG("OR(V" << std::to_string(value[1]) << " = true, V" << std::to_string(value[2]) << " = true)");
   this->declareBool(FN_OP_TRUE);
 }
 
@@ -213,19 +226,19 @@ void VM::fnAnd(bytecode::CodeByte value[]) {
 void VM::fnOr(bytecode::CodeByte value[]) {
   bool first = this->value(value[1])->asBool();
   if (first) {
-    DEBUG("OR(true, ???)");
+    DEBUG("OR(V" << std::to_string(value[1]) << " = true, <unexecuted>)");
     this->declareBool(FN_OP_TRUE);
     return;
   }
 
   bool second = this->value(value[2])->asBool();
   if (second) {
-    DEBUG("OR(false, true)");
+    DEBUG("OR(V" << std::to_string(value[1]) << " = false, V" << std::to_string(value[2]) << " = true)");
     this->declareBool(FN_OP_TRUE);
     return;
   }
 
-  DEBUG("OR(false, false)");
+  DEBUG("OR(V" << std::to_string(value[1]) << " = false, V" << std::to_string(value[2]) << " = false)");
   this->declareBool(FN_OP_FALSE);
 }
 
@@ -236,7 +249,7 @@ void VM::fnOr(bytecode::CodeByte value[]) {
 // and vice versa.
 void VM::fnNot(bytecode::CodeByte value[]) {
   bool arg = this->value(value[1])->asBool();
-  DEBUG("NOT(" << arg << ")");
+  DEBUG("NOT(V" << std::to_string(value[1]) << " = " << arg << ")");
 
   arg ?
     this->declareBool(FN_OP_FALSE) :
@@ -301,6 +314,19 @@ void VM::fnSubtract(bytecode::CodeByte value[]) {
   Number difference = first - second;
 
   this->declareNumber(difference);
+}
+
+// EQ [INDEX_1 (1)] [INDEX_2 (1)]
+// (3 bytes)
+//
+// Returns true if the two values are equal,
+// false otherwise.
+void VM::fnEq(bytecode::CodeByte value[]) {
+  vm::Value* first = this->value(value[1]);
+  vm::Value* second = this->value(value[2]);
+
+  bool eq = first->eq(second);
+  this->declareBool(eq);
 }
 
 // LOAD [INDEX (1)]
@@ -371,10 +397,6 @@ void VM::returnLast() {
   vm::CallFrame frame = this->callStack.top();
   this->callStack.pop();
 
-  // Delete all variables used for calculating the return value,
-  // and place the return value in the index given by the call frame.
-  while (this->values.size() > frame.returnIndex) { this->values.pop_back(); }
-  this->declare(returnValue);
-
+  this->fold(frame.returnIndex, returnValue);
   this->counter = frame.returnCounter;
 }
