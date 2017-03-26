@@ -1,8 +1,8 @@
 #include "spec/spec.h"
 
-// TEST_CASE("Fn set/call") {
-//   REQUIRE(resultOf("x = fn (a) { a + 1 }; x(1)") == "2");
-// }
+TEST_CASE("Fn set/call") {
+  REQUIRE(resultOf("x = fn (a) { a + 1 }; x(1)")->asNumber() == fn::Number(0, 2));
+}
 
 // TEST_CASE("Empty Fn") {
 //   REQUIRE(resultOf("x = fn () {}; x()") == "{}");
@@ -26,10 +26,10 @@
 
 // TEST_CASE("Fn call within block") {
 //   REQUIRE(resultOf(R"(
-//     x = fn(a) { 
+//     x = fn(a) {
 //       foo = fn(b) { a + b }
 //     }
-    
+
 //     (x(1)).foo(1)
 //   )") == "2");
 // }

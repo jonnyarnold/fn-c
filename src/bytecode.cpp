@@ -1,5 +1,7 @@
 #include "src/bytecode.h"
 
+#include <cstdarg>
+
 namespace fn { namespace bytecode {
 
   CodeBlob iFalse() { return CodeBlob{FN_OP_FALSE}; }
@@ -59,8 +61,28 @@ namespace fn { namespace bytecode {
     return CodeBlob{FN_OP_DEF, length};
   }
 
+  CodeBlob iCall(ValueIndex index, ValueIndex numArgs, ValueIndex argIndices[]) {
+    CodeBlob blob = CodeBlob{FN_OP_CALL, index, numArgs};
+    for(uint i = 0; i < numArgs; i++) {
+      blob.append(argIndices[i]);
+    }
+
+    return blob;
+  }
+
+  CodeBlob iCall(ValueIndex index, ValueIndex numArgs, ...) {
+    ValueIndex argIndexArray[numArgs];
+    va_list argIndexVa;
+    va_start(argIndexVa, numArgs);
+    for (uint i = 0; i < numArgs; i++) {
+      argIndexArray[i] = va_arg(argIndexVa, ValueIndex);
+    }
+
+    return iCall(index, numArgs, argIndexArray);
+  }
+
   CodeBlob iCall(ValueIndex index) {
-    return CodeBlob{FN_OP_CALL, index};
+    return iCall(index, 0, NULL);
   }
 
   CodeBlob iReturnLast() {

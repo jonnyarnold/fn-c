@@ -8,7 +8,7 @@
 // Include global helpers here.
 
 vm::Value* resultOf(bytecode::CodeBlob instructions) {
-  return (VM()).run(&instructions);
+  return (VM(true)).run(&instructions);
 }
 
 vm::Value* resultOf(std::string code) {

@@ -46,8 +46,8 @@ namespace fn { namespace ast {
     Id(std::string name) { this->name = name; }
     ~Id() = default;
 
-    std::string asString(int indent) override { 
-      return "(ID " + this->name + ")"; 
+    std::string asString(int indent) override {
+      return "(ID " + this->name + ")";
     }
   };
 
@@ -57,16 +57,16 @@ namespace fn { namespace ast {
   public:
     Value* parent;
     Value* child;
-    Deref(Value* parent, Value* child) { 
-      this->parent = parent; 
-      this->child = child; 
+    Deref(Value* parent, Value* child) {
+      this->parent = parent;
+      this->child = child;
     }
     ~Deref() { delete this->child; delete this->parent; }
 
     std::string asString(int indent) override {
-      return "(DEREF parent:" + 
-        this->parent->asString(indent) + 
-        " child:" + 
+      return "(DEREF parent:" +
+        this->parent->asString(indent) +
+        " child:" +
         this->child->asString(indent) + ")";
     }
   };
@@ -76,9 +76,9 @@ namespace fn { namespace ast {
   public:
     Reference* key;
     Value* value;
-    Assignment(Reference* key, Value* value) { 
-      this->key = key; 
-      this->value = value; 
+    Assignment(Reference* key, Value* value) {
+      this->key = key;
+      this->value = value;
     }
     ~Assignment() { delete this->value; delete this->key; }
 
@@ -98,16 +98,16 @@ namespace fn { namespace ast {
 
     Block(std::vector<Statement*> statements) { this->statements = statements; }
     Block() { this->statements = std::vector<Statement*>(); }
-    ~Block() { 
-      for(auto statement : this->statements) { delete statement; } 
+    ~Block() {
+      for(auto statement : this->statements) { delete statement; }
     }
 
     std::string asString(int indent) override {
       std::string result = "(BLOCK [\n";
 
       for(auto statement: this->statements) {
-        result += std::string(indent + 2, ' ') + 
-          statement->asString(indent + 2) + 
+        result += std::string(indent + 2, ' ') +
+          statement->asString(indent + 2) +
           "\n";
       }
 
@@ -133,7 +133,7 @@ namespace fn { namespace ast {
   class Number : public Value {
   public:
     fn::Number value;
-    Number(std::string value) { 
+    Number(std::string value) {
       this->value = fn::Number(value);
     }
 
@@ -161,20 +161,20 @@ namespace fn { namespace ast {
   public:
     Reference* target;
     std::vector<Value*> args;
-    
-    Call(Reference* target, std::vector<Value*> args) { 
-      this->target = target; 
-      this->args = args; 
+
+    Call(Reference* target, std::vector<Value*> args) {
+      this->target = target;
+      this->args = args;
     }
 
-    ~Call() { 
+    ~Call() {
       for(auto arg : this->args) { delete arg; }
-      delete this->target; 
+      delete this->target;
     }
-    
+
     std::string asString(int indent) override {
-      std::string result = "(CALL target:" + 
-        this->target->asString(indent) + 
+      std::string result = "(CALL target:" +
+        this->target->asString(indent) +
         " args:[\n";
 
       for(auto arg: this->args) {
@@ -189,13 +189,13 @@ namespace fn { namespace ast {
 
   // Represents a function definition (sometimes known as a prototype).
   class Def : public Value {
-    std::vector<std::string> params;
   public:
+    std::vector<std::string> params;
     Block* body;
 
-    Def(std::vector<std::string> params, Block* body) { 
-      this->params = params; 
-      this->body = body; 
+    Def(std::vector<std::string> params, Block* body) {
+      this->params = params;
+      this->body = body;
     }
     ~Def() { delete this->body; }
 
@@ -208,9 +208,9 @@ namespace fn { namespace ast {
         result += std::string(indent + 2, ' ') + param + "\n";
       }
 
-      result += std::string(indent, ' ') + 
-        "] body:" + 
-        this->body->asString(indent) + 
+      result += std::string(indent, ' ') +
+        "] body:" +
+        this->body->asString(indent) +
         ")";
 
       return result;
@@ -224,12 +224,12 @@ namespace fn { namespace ast {
     Block* body;
 
   public:
-    Condition(Value* test, Block* body) { 
-      this->test = test; 
-      this->body = body; 
+    Condition(Value* test, Block* body) {
+      this->test = test;
+      this->body = body;
     }
     ~Condition() { delete this->body; delete this->test; }
-    
+
     std::string asString(int indent) override {
       return "(COND test:" +
         this->test->asString(indent) +
@@ -244,19 +244,19 @@ namespace fn { namespace ast {
     std::vector<Condition*> conditions;
 
   public:
-    Conditional(std::vector<Condition*> conditions) { 
-      this->conditions = conditions; 
+    Conditional(std::vector<Condition*> conditions) {
+      this->conditions = conditions;
     }
-    ~Conditional() { 
-      for(auto condition : this->conditions) { delete condition; } 
+    ~Conditional() {
+      for(auto condition : this->conditions) { delete condition; }
     }
-    
+
     std::string asString(int indent) override {
       std::string result = "(WHEN [\n";
 
       for(auto condition: this->conditions) {
-        result += std::string(indent + 2, ' ') + 
-          condition->asString(indent + 2) + 
+        result += std::string(indent + 2, ' ') +
+          condition->asString(indent + 2) +
           "\n";
       }
 

@@ -18,17 +18,34 @@ namespace fn {
   namespace vm {
     typedef std::vector<vm::Value*> ValueMap;
 
-    // CallFrame defines a call frame (an invocation of a function).
-    typedef struct _CallFrame {
-
+    class CallFrame {
+    public:
       // Denotes the place the program counter will be set to
       // when RETURN_LAST is hit.
       bytecode::InstructionIndex returnCounter;
 
-      // Denotes the index that the result of the call will be placed into.
-      bytecode::ValueIndex returnIndex;
+      // The values defined in the given frame.
+      vm::ValueMap values;
 
-    } CallFrame;
+      CallFrame(bytecode::InstructionIndex returnCounter) {
+        this->returnCounter = returnCounter;
+
+        // The [] operator returns 0 if a value
+        // is not found. To make sure that's not
+        // confused with the first element, we push
+        // a NULL value to the 0 position.
+        this->values = vm::ValueMap();
+        this->values.push_back(NULL);
+      }
+
+      CallFrame() : CallFrame(-1) {}
+
+      ~CallFrame() {
+        for(auto value : this->values) {
+          if (value != NULL && value != this->values.back()) { delete value; }
+        }
+      }
+    };
   }
 
   // VM is the virtual machine that instructions are run in.
@@ -50,16 +67,15 @@ namespace fn {
     // Program counter.
     bytecode::InstructionIndex counter;
 
-    // Allows conversion from identifier to index.
-    vm::ValueMap values;
-
     // Stores the nesting of function calls.
-    std::stack<vm::CallFrame> callStack;
+    std::stack<vm::CallFrame*> callStack;
+    vm::CallFrame* currentFrame() { return this->callStack.top(); }
 
     vm::Value* value(bytecode::CodeByte index);
     bytecode::ValueIndex declare(vm::Value* value);
     void printState();
     void fold(bytecode::ValueIndex returnIndex, vm::Value* returnValue);
+    vm::Value* lastValue();
 
     void declareBool(bytecode::CodeByte);
     void declareBool(bool value);

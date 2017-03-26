@@ -3,6 +3,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <stack>
 
 #include "src/ast.h"
 #include "src/bytecode.h"
@@ -11,6 +12,39 @@ namespace fn {
 
   typedef std::unordered_map<std::string, bytecode::ValueIndex> ValueIndexMap;
 
+  class ValueIndexTable {
+  private:
+    ValueIndexMap valueIndexMap;
+    bytecode::ValueIndex _lastIndex;
+
+  public:
+    ValueIndexTable() {
+      this->valueIndexMap = ValueIndexMap();
+      this->_lastIndex = 0;
+    }
+
+    bytecode::ValueIndex get(std::string name) {
+      return this->valueIndexMap[name];
+    }
+
+    void set(std::string name, bytecode::ValueIndex index) {
+      this->valueIndexMap[name] = index;
+    }
+
+    void set(std::string name) {
+      this->_lastIndex += 1;
+      this->valueIndexMap[name] = this->_lastIndex;
+    }
+
+    void advanceIndex() {
+      this->_lastIndex += 1;
+    }
+
+    bytecode::ValueIndex lastIndex() {
+      return this->_lastIndex;
+    }
+  };
+
   // A Generator is used to generate instructions
   // from a Fn AST.
   class CodeGenerator {
@@ -18,9 +52,10 @@ namespace fn {
     // Enables debug messages.
     bool debug;
 
-    // A table mapping variable names to indices in the value list.
-    ValueIndexMap variableIndices;
-    bytecode::ValueIndex lastIndex;
+    // fn bytecode only has indices for values, and no names.
+    // We need to keep track of the index for each named variable.
+    // We need a new table for each block.
+    std::stack<ValueIndexTable*> valueIndexStack;
 
   public:
     bytecode::CodeBlob instructions;
@@ -28,13 +63,18 @@ namespace fn {
     CodeGenerator(bool debug) {
       this->debug = debug;
       this->instructions = bytecode::CodeBlob();
-      this->variableIndices = ValueIndexMap();
-
-      // Returns the index of the last defined value.
-      // Used for assignment.
-      this->lastIndex = 0;
+      this->valueIndexStack = std::stack<ValueIndexTable*>();
+      this->valueIndexStack.push(new ValueIndexTable());
     }
     CodeGenerator() : CodeGenerator(false) {}
+
+    ~CodeGenerator() {
+      // while(!this->valueIndexStack.empty()) {
+      //   ValueIndexTable* table = this->valueIndexStack.top();
+      //   delete table;
+      //   this->valueIndexStack.pop();
+      // }
+    }
 
     // Add the instructions for the given statement
     // into the existing instructions.
@@ -57,6 +97,8 @@ namespace fn {
     bytecode::ValueIndex getIndexFor(ast::Reference* reference);
     bytecode::ValueIndex rememberIndexFor(std::string name);
     bytecode::ValueIndex getIndexFor(std::string name);
+
+    ValueIndexTable* currentTable();
   };
 
 }

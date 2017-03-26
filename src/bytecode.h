@@ -94,6 +94,10 @@ namespace fn { namespace bytecode {
       this->bytes.insert(this->bytes.end(), blob.bytes.begin(), blob.bytes.end());
     }
 
+    void append(CodeByte byte) {
+      this->bytes.push_back(byte);
+    }
+
     // Use asBytes() and size() to work with the bytes directly
     // as a C-array.
     CodeByte* asBytes() { return this->bytes.data(); }
@@ -117,6 +121,8 @@ namespace fn { namespace bytecode {
   CodeBlob iSubtract(ValueIndex first, ValueIndex second);
 
   CodeBlob iDefHeader(InstructionIndex length);
+  CodeBlob iCall(ValueIndex index, ValueIndex numArgs, ValueIndex argIndices[]);
+  CodeBlob iCall(ValueIndex index, ValueIndex numArgs, ...);
   CodeBlob iCall(ValueIndex index);
   CodeBlob iReturnLast();
 

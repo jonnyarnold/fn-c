@@ -10,29 +10,23 @@ using namespace fn;
 
 VM::VM(bool debug) {
   this->debug = debug;
-
-  // Because 0 is used by CodeGen for errors,
-  // we push a NULL onto the ValueMap to sync.
-  this->values = vm::ValueMap();
-  this->values.push_back(NULL);
-
-  this->callStack = std::stack<vm::CallFrame>();
+  this->callStack = std::stack<vm::CallFrame*>();
 }
 
 VM::~VM() {
   // Save the last value,
   // so it can be used externally.
-  std::unordered_set<vm::Value*> deletedValues = std::unordered_set<vm::Value*>{
-    NULL,
-    this->values.back()
-  };
+  // std::unordered_set<vm::Value*> deletedValues = std::unordered_set<vm::Value*>{
+  //   NULL,
+  //   this->currentFrame()->values.back()
+  // };
 
-  for(auto value : this->values) {
-    if (deletedValues.find(value) == deletedValues.end()) {
-      deletedValues.insert(value);
-      delete value;
-    }
-  }
+  // for(auto value : this->currentFrame()->values) {
+  //   if (deletedValues.find(value) == deletedValues.end()) {
+  //     deletedValues.insert(value);
+  //     delete value;
+  //   }
+  // }
 }
 
 vm::Value* VM::run(bytecode::CodeBlob* instructions) {
@@ -41,6 +35,7 @@ vm::Value* VM::run(bytecode::CodeBlob* instructions) {
 
 vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
   this->counter = 0;
+  this->callStack.push(new vm::CallFrame());
 
   while(counter < num_bytes) {
     bytecode::CodeByte opcode = instructions[counter];
@@ -126,18 +121,18 @@ vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
     // this->printState();
   }
 
-  return this->values.back();
+  return this->lastValue();
 }
 
 // Get a value by index.
 vm::Value* VM::value(bytecode::CodeByte index) {
-  return this->values[index];
+  return this->currentFrame()->values[index];
 }
 
 bytecode::ValueIndex VM::declare(vm::Value* value) {
-  bytecode::ValueIndex index = this->values.size();
+  bytecode::ValueIndex index = this->currentFrame()->values.size();
   DEBUG("DECLARE(" << value->toString() << ") [V" << std::to_string(index) << "]");
-  this->values.push_back(value);
+  this->currentFrame()->values.push_back(value);
   return index;
 }
 
@@ -147,22 +142,17 @@ void VM::printState() {
   std::cout << "VM State:\n";
   std::cout << "counter: I" << std::to_string(this->counter) <<"\n";
   std::cout << "values:\n";
-  for (uint i = 1; i < this->values.size(); i++) {
-    std::cout << "V" << i << ": " << this->values[i]->toString() << "\n";
+  for (uint i = 1; i < this->currentFrame()->values.size(); i++) {
+    std::cout << "V" << i << ": " << this->currentFrame()->values[i]->toString() << "\n";
   }
   std::cout << "call stack size: " << this->callStack.size() << "\n";
   if (this->callStack.size() > 0) {
-    std::cout << "top frame: at exit, returnInto@V" << std::to_string(this->callStack.top().returnIndex)
-      << ", returnTo@I" << std::to_string(this->callStack.top().returnCounter) << "\n";
+    std::cout << "top frame: at exit, returnTo@I" << std::to_string(this->currentFrame()->returnCounter) << "\n";
   }
 }
 
-// A "fold" is a kind of garbage collection
-// that deletes every value up to returnIndex
-// and then fills returnIndex with returnValue.
-void VM::fold(bytecode::ValueIndex returnIndex, vm::Value* returnValue) {
-  while (this->values.size() > returnIndex) { this->values.pop_back(); }
-  this->declare(returnValue);
+vm::Value* VM::lastValue() {
+  return this->currentFrame()->values.back();
 }
 
 // BOOL_TRUE
@@ -362,21 +352,27 @@ void VM::declareDef(vm::Def value) {
   this->declare(new vm::DefValue(value));
 }
 
-#define CALL_BYTES (1 + INSTRUCTION_INDEX_BYTES)
-// CALL [INDEX (1)]
-// (2 bytes)
+// CALL [INDEX (1)] [NUM_ARGS (1)] [ARG_INDEX (1)*]
+// (3 + NUM_ARGS bytes)
 //
 // Runs the code pointed to at the given index.
 void VM::call(bytecode::CodeByte value[]) {
   bytecode::ValueIndex index = value[1];
+  bytecode::ValueIndex numArgs = value[2];
+  bytecode::ValueIndex* argIndices = &value[3];
+  bytecode::ValueIndex headerBytes = 3 + numArgs;
+
+  DEBUG("CALL (V" << std::to_string(index) << " with " << std::to_string(numArgs) << " args)");
+
   vm::Value* def = this->value(index);
 
-  DEBUG("CALL(" << (int)index << ")");
-
   // Push a CallFrame onto the stack.
-  vm::CallFrame frame = vm::CallFrame();
-  frame.returnCounter = this->counter + CALL_BYTES;
-  frame.returnIndex = this->values.size();
+  vm::CallFrame* frame = new vm::CallFrame();
+  frame->returnCounter = this->counter + headerBytes;
+  for(uint i = 0; i < numArgs; i++) {
+    frame->values.push_back(this->value(argIndices[i]));
+  }
+
   this->callStack.push(frame);
 
   // Set the program counter.
@@ -391,12 +387,16 @@ void VM::call(bytecode::CodeByte value[]) {
 void VM::returnLast() {
   DEBUG("RETURN_LAST()");
 
-  vm::Value* returnValue = this->values.back();
+  vm::Value* returnValue = this->currentFrame()->values.back();
+
+  this->counter = this->currentFrame()->returnCounter;
 
   // Pop the top CallFrame and free memory used by it.
-  vm::CallFrame frame = this->callStack.top();
+  // vm::CallFrame* frame = this->currentFrame();
   this->callStack.pop();
 
-  this->fold(frame.returnIndex, returnValue);
-  this->counter = frame.returnCounter;
+  // Declare the return value in the new current frame.
+  this->declare(returnValue);
+
+  // delete frame;
 }

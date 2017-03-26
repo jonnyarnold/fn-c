@@ -33,10 +33,10 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Statement* statement) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Id* id) {
-  bytecode::ValueIndex index = this->variableIndices[id->name];
+  bytecode::ValueIndex index = this->getIndexFor(id->name);
   if (index == 0) { throw "Undefined: " + id->name; }
 
-  this->lastIndex += 1;
+  this->currentTable()->advanceIndex();
   return bytecode::iLoad(index);
 }
 
@@ -68,8 +68,7 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Assignment* assignment) {
     // If we don't have an astDeref, we have an astId.
     ast::Id* id = dynamic_cast<ast::Id*>(assignment->key);
     blob = this->digest(assignment->value);
-
-    bytecode::ValueIndex index = this->rememberIndexFor(id->name);
+    this->rememberIndexFor(id->name);
   }
 
   return blob;
@@ -88,12 +87,12 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Block* block) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Bool* b) {
-  this->lastIndex += 1;
+  this->currentTable()->advanceIndex();
   return b->value ? bytecode::iTrue() : bytecode::iFalse();
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Number* n) {
-  this->lastIndex += 1;
+  this->currentTable()->advanceIndex();
   return bytecode::iNumber(n->value);
 }
 
@@ -108,20 +107,20 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Call* call) {
   // Digest the arguments
   for (auto arg : call->args) {
     callBlob.append(this->digest(arg));
-    args.push_back(this->lastIndex);
+    args.push_back(this->currentTable()->lastIndex());
   }
 
   // Every call returns a value
-  this->lastIndex += 1;
+  this->currentTable()->advanceIndex();
 
   bytecode::ValueIndex defIndex = this->getIndexFor(call->target);
   if (defIndex) {
-    // FIXME: Pass args!
-    callBlob.append(bytecode::iCall(defIndex));
+    callBlob.append(bytecode::iCall(defIndex, args.size(), &args[0]));
     return callBlob;
   }
 
   // Check builtins
+  // TODO: Can we get rid of this?
   if (ast::Id* id = dynamic_cast<ast::Id*>(call->target)) {
     if (id->name == "and") {
       callBlob.append(bytecode::iAnd(args[0], args[1]));
@@ -168,12 +167,25 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Call* call) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Def* def) {
+
+  // Ensure the arguments and defined names
+  // get the right index.
+  // TODO: Inject externals
+  ValueIndexTable defTable = ValueIndexTable();
+  for(auto param : def->params) {
+    defTable.set(param);
+  }
+  this->valueIndexStack.push(&defTable);
+
   bytecode::CodeBlob blockBlob = this->digest(def->body);
   blockBlob.append(bytecode::iReturnLast());
 
   bytecode::CodeBlob defBlob = bytecode::iDefHeader(blockBlob.size());
   defBlob.append(blockBlob);
 
+  this->valueIndexStack.pop();
+
+  this->currentTable()->advanceIndex();
   return defBlob;
 }
 
@@ -193,10 +205,10 @@ bytecode::ValueIndex CodeGenerator::rememberIndexFor(ast::Reference* reference) 
 }
 
 bytecode::ValueIndex CodeGenerator::rememberIndexFor(std::string name) {
-  bytecode::ValueIndex index = this->lastIndex;
+  bytecode::ValueIndex index = this->currentTable()->lastIndex();
+  this->currentTable()->set(name, index);
   DEBUG(name << " => V" << std::to_string(index));
 
-  this->variableIndices[name] = index;
   return index;
 }
 
@@ -211,12 +223,16 @@ bytecode::ValueIndex CodeGenerator::getIndexFor(ast::Reference* reference) {
     }
   }
 
-  else { throw "Not yet implemented!"; }
+  throw "Not yet implemented!";
 }
 
 bytecode::ValueIndex CodeGenerator::getIndexFor(std::string name) {
-  bytecode::ValueIndex index = this->variableIndices[name];
-
+  bytecode::ValueIndex index = this->currentTable()->get(name);
   DEBUG("V" << std::to_string(index) << " => " << name);
+
   return index;
+}
+
+ValueIndexTable* CodeGenerator::currentTable() {
+  return this->valueIndexStack.top();
 }

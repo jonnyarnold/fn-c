@@ -52,14 +52,14 @@ tmp/cli.o: src/cli.cpp src/cli.h obj/exec.o
 # - parser: convert Fn code to an AST.
 # - codegen: convert an AST into VM instructions.
 # - vm: execute VM instructions.
-obj/exec.o: src/exec.cpp src/exec.h obj/parser.o obj/codegen.o obj/vm.o 
+obj/exec.o: src/exec.cpp src/exec.h obj/parser.o obj/codegen.o obj/vm.o
 	$(COMPILE_OBJ) -o $@ src/exec.cpp
 
 
 
 # The parser uses Flex and Bison to build a parser;
 # we tack a C++ interface onto it.
-obj/parser.o: src/parser/parser.cpp src/parser/parser.h tmp/parse.o 
+obj/parser.o: src/parser/parser.cpp src/parser/parser.h tmp/parse.o
 	$(COMPILE_OBJ) -o $@ src/parser/parser.cpp
 
 tmp/parse.o: tmp/parse.cpp tmp/parse.h tmp/lex.cpp tmp/lex.h
@@ -90,8 +90,8 @@ obj/vm.o: src/vm/vm.cpp src/vm/vm.h src/number.h
 
 # The specs are built with Catch,
 # a cool C++ testing framework.
-VM_SPECS=obj/vm/bool.spec.o obj/vm/number.spec.o obj/vm/load.spec.o obj/vm/call.spec.o
-E2E_SPECS=obj/e2e/bool.spec.o obj/e2e/language.spec.o obj/e2e/number.spec.o
+VM_SPECS=obj/vm/bool.spec.o obj/vm/number.spec.o obj/vm/load.spec.o obj/vm/call.spec.o obj/vm/eq.spec.o
+E2E_SPECS=obj/e2e/bool.spec.o obj/e2e/language.spec.o obj/e2e/number.spec.o obj/e2e/value.spec.o obj/e2e/def.spec.o
 
 tmp/spec: spec/spec.cpp $(VM_SPECS) $(E2E_SPECS) tmp/cli.o obj/exec.o obj/parser.o tmp/parse.o obj/codegen.o obj/bytecode.o obj/vm.o tmp/lex.cpp
 	$(COMPILE) -o $@ $^
