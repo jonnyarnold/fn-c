@@ -70,17 +70,6 @@ namespace fn { namespace bytecode {
     return blob;
   }
 
-  CodeBlob iCall(ValueIndex index, ValueIndex numArgs, ...) {
-    ValueIndex argIndexArray[numArgs];
-    va_list argIndexVa;
-    va_start(argIndexVa, numArgs);
-    for (uint i = 0; i < numArgs; i++) {
-      argIndexArray[i] = va_arg(argIndexVa, ValueIndex);
-    }
-
-    return iCall(index, numArgs, argIndexArray);
-  }
-
   CodeBlob iCall(ValueIndex index) {
     return iCall(index, 0, NULL);
   }

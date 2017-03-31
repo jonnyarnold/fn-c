@@ -42,7 +42,7 @@ namespace fn {
 
       ~CallFrame() {
         for(auto value : this->values) {
-          if (value != NULL && value != this->values.back()) { delete value; }
+          if (value != NULL) { delete value; }
         }
       }
     };
@@ -54,7 +54,7 @@ namespace fn {
 
     VM(bool debug);
     VM() : VM(false) {};
-    ~VM();
+    // ~VM();
 
     // Executes a number of instructions.
     // Returns the pointer to the return value.

@@ -19,7 +19,7 @@
 //     }
 
 //     Utils.Math.area(3)
-//   )") == "9");
+//   )")->asNumber() == fn::Number(0, 9));
 // }
 
 // TODO: .keys

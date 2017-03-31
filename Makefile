@@ -91,7 +91,7 @@ obj/vm.o: src/vm/vm.cpp src/vm/vm.h src/number.h
 # The specs are built with Catch,
 # a cool C++ testing framework.
 VM_SPECS=obj/vm/bool.spec.o obj/vm/number.spec.o obj/vm/load.spec.o obj/vm/call.spec.o obj/vm/eq.spec.o
-E2E_SPECS=obj/e2e/bool.spec.o obj/e2e/language.spec.o obj/e2e/number.spec.o obj/e2e/value.spec.o obj/e2e/def.spec.o
+E2E_SPECS=obj/e2e/bool.spec.o obj/e2e/language.spec.o obj/e2e/number.spec.o obj/e2e/value.spec.o obj/e2e/def.spec.o obj/e2e/block.spec.o
 
 tmp/spec: spec/spec.cpp $(VM_SPECS) $(E2E_SPECS) tmp/cli.o obj/exec.o obj/parser.o tmp/parse.o obj/codegen.o obj/bytecode.o obj/vm.o tmp/lex.cpp
 	$(COMPILE) -o $@ $^

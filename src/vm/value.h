@@ -14,8 +14,6 @@ namespace fn { namespace vm {
   typedef std::vector<vm::Value*> ValueMap;
 
   class Value {
-  protected:
-
   public:
     virtual ~Value() {};
     virtual bool asBool() { return true; }

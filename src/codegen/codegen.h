@@ -55,7 +55,7 @@ namespace fn {
     // fn bytecode only has indices for values, and no names.
     // We need to keep track of the index for each named variable.
     // We need a new table for each block.
-    std::stack<ValueIndexTable*> valueIndexStack;
+    std::stack<ValueIndexTable> valueIndexStack;
 
   public:
     bytecode::CodeBlob instructions;
@@ -63,18 +63,10 @@ namespace fn {
     CodeGenerator(bool debug) {
       this->debug = debug;
       this->instructions = bytecode::CodeBlob();
-      this->valueIndexStack = std::stack<ValueIndexTable*>();
-      this->valueIndexStack.push(new ValueIndexTable());
+      this->valueIndexStack = std::stack<ValueIndexTable>();
+      this->valueIndexStack.push(ValueIndexTable());
     }
     CodeGenerator() : CodeGenerator(false) {}
-
-    ~CodeGenerator() {
-      // while(!this->valueIndexStack.empty()) {
-      //   ValueIndexTable* table = this->valueIndexStack.top();
-      //   delete table;
-      //   this->valueIndexStack.pop();
-      // }
-    }
 
     // Add the instructions for the given statement
     // into the existing instructions.

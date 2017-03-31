@@ -122,7 +122,6 @@ namespace fn { namespace bytecode {
 
   CodeBlob iDefHeader(InstructionIndex length);
   CodeBlob iCall(ValueIndex index, ValueIndex numArgs, ValueIndex argIndices[]);
-  CodeBlob iCall(ValueIndex index, ValueIndex numArgs, ...);
   CodeBlob iCall(ValueIndex index);
   CodeBlob iReturnLast();
 

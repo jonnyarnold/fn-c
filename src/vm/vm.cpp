@@ -13,22 +13,6 @@ VM::VM(bool debug) {
   this->callStack = std::stack<vm::CallFrame*>();
 }
 
-VM::~VM() {
-  // Save the last value,
-  // so it can be used externally.
-  // std::unordered_set<vm::Value*> deletedValues = std::unordered_set<vm::Value*>{
-  //   NULL,
-  //   this->currentFrame()->values.back()
-  // };
-
-  // for(auto value : this->currentFrame()->values) {
-  //   if (deletedValues.find(value) == deletedValues.end()) {
-  //     deletedValues.insert(value);
-  //     delete value;
-  //   }
-  // }
-}
-
 vm::Value* VM::run(bytecode::CodeBlob* instructions) {
   return this->run(instructions->asBytes(), instructions->size());
 }
@@ -387,16 +371,20 @@ void VM::call(bytecode::CodeByte value[]) {
 void VM::returnLast() {
   DEBUG("RETURN_LAST()");
 
+  // We transfer ownership of the value from the inner call to the outer call.
   vm::Value* returnValue = this->currentFrame()->values.back();
+  this->currentFrame()->values.pop_back();
 
   this->counter = this->currentFrame()->returnCounter;
 
   // Pop the top CallFrame and free memory used by it.
-  // vm::CallFrame* frame = this->currentFrame();
+  vm::CallFrame* frame = this->currentFrame();
   this->callStack.pop();
 
   // Declare the return value in the new current frame.
   this->declare(returnValue);
 
+  // TODO: How do we make sure that args don't get deleted,
+  // or that deleting them doesn't destroy them on the parent?
   // delete frame;
 }

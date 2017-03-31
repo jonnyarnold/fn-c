@@ -20,12 +20,14 @@ TEST_CASE("CALL def") {
 }
 
 TEST_CASE("CALL def with args") {
+  bytecode::ValueIndex args[] = {2};
+
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iDefHeader(3), // V1
     bytecode::iLoad(1),      // V1.V1 = arg1
     bytecode::iReturnLast(),
     bytecode::iTrue(), // V2
-    bytecode::iCall(1, 1, 2) // fn = V1, 1 arg = V2
+    bytecode::iCall(1, 1, args) // fn = V1, 1 arg = V2
   };
 
   REQUIRE(resultOf(instructions)->asBool() == true);

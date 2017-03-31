@@ -175,7 +175,7 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Def* def) {
   for(auto param : def->params) {
     defTable.set(param);
   }
-  this->valueIndexStack.push(&defTable);
+  this->valueIndexStack.push(defTable);
 
   bytecode::CodeBlob blockBlob = this->digest(def->body);
   blockBlob.append(bytecode::iReturnLast());
@@ -234,5 +234,5 @@ bytecode::ValueIndex CodeGenerator::getIndexFor(std::string name) {
 }
 
 ValueIndexTable* CodeGenerator::currentTable() {
-  return this->valueIndexStack.top();
+  return &(this->valueIndexStack.top());
 }
