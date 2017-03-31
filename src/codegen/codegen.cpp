@@ -191,9 +191,39 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Def* def) {
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Condition* condition) {
 
+  bytecode::CodeBlob testBlob = this->digest(condition->test);
+  bytecode::CodeBlob bodyBlob = this->digest(condition->body);
+  bodyBlob.append(bytecode::iReturnLast());
+  
+  bytecode::CodeBlob condBlob = testBlob;
+  condBlob.append(bytecode::iJumpIfLastFalse(bodyBlob.size()));
+  condBlob.append(bodyBlob);
+
+  return condBlob;
+  
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Conditional* conditional) {
+
+  // Ensure the arguments and defined names
+  // get the right index.
+  // TODO: Inject externals
+  ValueIndexTable whenTable = ValueIndexTable();
+  this->valueIndexStack.push(whenTable);
+
+  bytecode::CodeBlob conditionBlob = bytecode::CodeBlob();
+
+  for (auto condition : conditional->conditions) {
+    conditionBlob.append(this->digest(condition));
+  }
+
+  bytecode::CodeBlob whenBlob = bytecode::iWhenHeader(conditionBlob.size());
+  whenBlob.append(conditionBlob);
+
+  this->valueIndexStack.pop();
+
+  this->currentTable()->advanceIndex();
+  return whenBlob;
 
 }
 

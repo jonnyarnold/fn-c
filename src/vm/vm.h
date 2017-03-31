@@ -100,6 +100,9 @@ namespace fn {
     void declareDef(vm::Def def);
     void call(bytecode::CodeByte[]);
     void returnLast();
+
+    void beginWhen(bytecode::CodeByte[]);
+    void jumpIfLastFalse(bytecode::CodeByte[]);
   };
 
 }

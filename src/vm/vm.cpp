@@ -97,6 +97,16 @@ vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
       // counter is moved by returnLast
       break;
 
+    case FN_OP_WHEN_HEADER:
+      this->beginWhen(&instructions[counter]);
+      // counter is moved by beginWhen
+      break;
+
+    case FN_OP_FALSE_JUMP:
+      this->jumpIfLastFalse(&instructions[counter]);
+      // counter is moved by jumpIfLastFalse
+      break;
+
     default:
       throw "Unexpected opcode"; // TODO: Make this more meaningful
 
@@ -300,6 +310,9 @@ void VM::fnEq(bytecode::CodeByte value[]) {
   vm::Value* second = this->value(value[2]);
 
   bool eq = first->eq(second);
+
+  DEBUG("EQ(" << first->toString() << ", " << second->toString() << ") = " << std::to_string(eq));
+
   this->declareBool(eq);
 }
 
@@ -387,4 +400,42 @@ void VM::returnLast() {
   // TODO: How do we make sure that args don't get deleted,
   // or that deleting them doesn't destroy them on the parent?
   // delete frame;
+}
+
+// WHEN_HEADER [LENGTH (8)]
+// (9 bytes)
+//
+// Denotes the start of a conditional.
+#define WHEN_HEADER_BYTES (1 + INSTRUCTION_INDEX_BYTES)
+void VM::beginWhen(bytecode::CodeByte value[]) {
+  bytecode::InstructionIndex length = value[1];
+
+  DEBUG("WHEN_HEADER(" << std::to_string(length) << ")");
+
+  // Push a CallFrame onto the stack.
+  vm::CallFrame* frame = new vm::CallFrame();
+  frame->returnCounter = this->counter + WHEN_HEADER_BYTES + length;
+  // TODO: Access to parent variables?
+  this->callStack.push(frame);
+
+  this->counter += WHEN_HEADER_BYTES;
+}
+
+// FALSE_JUMP [OFFSET (8)]
+// (9 bytes)
+//
+// If the last value was false, jump the number of bytes given.
+#define FALSE_JUMP_BYTES (1 + INSTRUCTION_INDEX_BYTES)
+void VM::jumpIfLastFalse(bytecode::CodeByte value[]) {
+  bytecode::InstructionIndex jump = value[1];
+
+  if(this->lastValue()->asBool() == false) {
+    DEBUG("FALSE_JUMP(" << std::to_string(jump) << ") = JUMP");
+    this->counter += FALSE_JUMP_BYTES + jump;
+    return;
+  }
+
+  // else...
+  DEBUG("FALSE_JUMP(" << std::to_string(jump) << ") = NO JUMP");
+  this->counter += FALSE_JUMP_BYTES; 
 }

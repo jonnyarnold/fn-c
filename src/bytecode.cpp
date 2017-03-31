@@ -74,8 +74,22 @@ namespace fn { namespace bytecode {
     return iCall(index, 0, NULL);
   }
 
-  CodeBlob iReturnLast() {
-    return CodeBlob{FN_OP_RETURN_LAST};
+  CodeBlob iReturnLast() { return CodeBlob{FN_OP_RETURN_LAST}; }
+
+  CodeBlob iWhenHeader(InstructionIndex length) { 
+    std::array<CodeByte, 2> bytes = std::array<CodeByte, 2>();
+    bytes[0] = FN_OP_WHEN_HEADER;
+    bytes[1] = length;
+
+    return CodeBlob(bytes);
+  }
+
+  CodeBlob iJumpIfLastFalse(InstructionIndex jump) { 
+    std::array<CodeByte, 2> bytes = std::array<CodeByte, 2>();
+    bytes[0] = FN_OP_FALSE_JUMP;
+    bytes[1] = jump;
+
+    return CodeBlob(bytes);
   }
 
 }}

@@ -28,21 +28,24 @@ namespace fn { namespace bytecode {
   #define FN_OP_OR (fn::bytecode::OpCode)(3)
   #define FN_OP_NOT (fn::bytecode::OpCode)(4)
 
-  #define FN_OP_NUMBER (fn::bytecode::OpCode)(5)
-  #define FN_OP_MULTIPLY (fn::bytecode::OpCode)(6)
-  #define FN_OP_DIVIDE (fn::bytecode::OpCode)(7)
-  #define FN_OP_ADD (fn::bytecode::OpCode)(8)
-  #define FN_OP_SUBTRACT (fn::bytecode::OpCode)(9)
+  #define FN_OP_NUMBER (fn::bytecode::OpCode)(10)
+  #define FN_OP_MULTIPLY (fn::bytecode::OpCode)(11)
+  #define FN_OP_DIVIDE (fn::bytecode::OpCode)(12)
+  #define FN_OP_ADD (fn::bytecode::OpCode)(13)
+  #define FN_OP_SUBTRACT (fn::bytecode::OpCode)(14)
 
-  #define FN_OP_DEF (fn::bytecode::OpCode)(12)
-  #define FN_OP_CALL (fn::bytecode::OpCode)(13)
-  #define FN_OP_RETURN_LAST (fn::bytecode::OpCode)(14)
+  #define FN_OP_DEF (fn::bytecode::OpCode)(20)
+  #define FN_OP_CALL (fn::bytecode::OpCode)(21)
+  #define FN_OP_RETURN_LAST (fn::bytecode::OpCode)(22)
 
-  #define FN_OP_STRING (fn::bytecode::OpCode)(10)
+  #define FN_OP_STRING (fn::bytecode::OpCode)(30)
 
-  #define FN_OP_EQ (fn::bytecode::OpCode)(15)
+  #define FN_OP_EQ (fn::bytecode::OpCode)(40)
 
-  #define FN_OP_LOAD (fn::bytecode::OpCode)(11)
+  #define FN_OP_LOAD (fn::bytecode::OpCode)(50)
+
+  #define FN_OP_WHEN_HEADER (fn::bytecode::OpCode)(60)
+  #define FN_OP_FALSE_JUMP (fn::bytecode::OpCode)(61)
 
 
   // Values in the VM are indexed.
@@ -128,5 +131,8 @@ namespace fn { namespace bytecode {
   CodeBlob iEq(ValueIndex first, ValueIndex second);
 
   CodeBlob iLoad(ValueIndex index);
+
+  CodeBlob iWhenHeader(InstructionIndex length);
+  CodeBlob iJumpIfLastFalse(InstructionIndex jump);
 
 }}

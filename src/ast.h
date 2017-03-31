@@ -220,10 +220,10 @@ namespace fn { namespace ast {
   // Used within Conditionals; represents a test
   // and the code to execute if the test passes.
   class Condition : public Statement {
+  public:
     Value* test;
     Block* body;
 
-  public:
     Condition(Value* test, Block* body) {
       this->test = test;
       this->body = body;
@@ -241,9 +241,9 @@ namespace fn { namespace ast {
   // Represents a collection of Conditions
   // (conditionally executed code paths).
   class Conditional : public Value {
+  public:
     std::vector<Condition*> conditions;
 
-  public:
     Conditional(std::vector<Condition*> conditions) {
       this->conditions = conditions;
     }

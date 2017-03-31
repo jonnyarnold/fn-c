@@ -20,14 +20,14 @@ TEST_CASE("Brackets") {
 //   REQUIRE(failure("a = 1; a = 2"));
 // }
 
-// TEST_CASE("when") {
-//   SECTION("runs code on true") {
-//     REQUIRE(resultOf(R"(
-//       when {
-//         true { false }
-//       }
-//     )") == "false");
-//   }
+TEST_CASE("when") {
+  SECTION("runs code on true") {
+    REQUIRE(resultOf(R"(
+      when {
+        true { false }
+      }
+    )")->asBool() == false);
+  }
 
 //   // TODO: Fix empty when case.
 //   //
@@ -35,21 +35,21 @@ TEST_CASE("Brackets") {
 //   //   REQUIRE(resultOf("when {}") == "false");
 //   // }
 
-//   SECTION("runs the first true condition only") {
-//     REQUIRE(resultOf(R"(
-//       when {
-//         false { 1 }
-//         true { 2 }
-//         false { 3 }
-//       }
-//     )") == "2");
-//   }
+  SECTION("runs the first true condition only") {
+    REQUIRE(resultOf(R"(
+      when {
+        false { 1 }
+        true { 2 }
+        false { 3 }
+      }
+    )")->asNumber() == fn::Number(0, 2));
+  }
 
-//   SECTION("returns false if no conditions match") {
-//     REQUIRE(resultOf(R"(
-//       when {
-//         false { true }
-//       }
-//     )") == "false");
-//   }
-// }
+  // SECTION("returns false if no conditions match") {
+  //   REQUIRE(resultOf(R"(
+  //     when {
+  //       false { true }
+  //     }
+  //   )") == "false");
+  // }
+}
