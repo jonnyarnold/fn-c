@@ -172,6 +172,7 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Def* def) {
   // get the right index.
   // TODO: Inject externals
   ValueIndexTable defTable = ValueIndexTable();
+  defTable.set("self");
   for(auto param : def->params) {
     defTable.set(param);
   }
@@ -207,8 +208,8 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Conditional* conditional) {
 
   // Ensure the arguments and defined names
   // get the right index.
-  // TODO: Inject externals
-  ValueIndexTable whenTable = ValueIndexTable();
+  // TODO: Come up with a better way than copying the parent scope.
+  ValueIndexTable whenTable = ValueIndexTable(this->valueIndexStack.top());
   this->valueIndexStack.push(whenTable);
 
   bytecode::CodeBlob conditionBlob = bytecode::CodeBlob();

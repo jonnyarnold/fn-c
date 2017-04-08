@@ -366,6 +366,11 @@ void VM::call(bytecode::CodeByte value[]) {
   // Push a CallFrame onto the stack.
   vm::CallFrame* frame = new vm::CallFrame();
   frame->returnCounter = this->counter + headerBytes;
+
+  // V1 is the current definition
+  frame->values.push_back(def);
+
+  // Vx are the arguments
   for(uint i = 0; i < numArgs; i++) {
     frame->values.push_back(this->value(argIndices[i]));
   }
@@ -413,9 +418,9 @@ void VM::beginWhen(bytecode::CodeByte value[]) {
   DEBUG("WHEN_HEADER(" << std::to_string(length) << ")");
 
   // Push a CallFrame onto the stack.
-  vm::CallFrame* frame = new vm::CallFrame();
+  // TODO: Do something better than copying the existing call frame.
+  vm::CallFrame* frame = new vm::CallFrame(*this->currentFrame());
   frame->returnCounter = this->counter + WHEN_HEADER_BYTES + length;
-  // TODO: Access to parent variables?
   this->callStack.push(frame);
 
   this->counter += WHEN_HEADER_BYTES;
