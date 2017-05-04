@@ -13,19 +13,19 @@ TEST_CASE("eq") {
     REQUIRE(resultOf("true eq false")->asBool() == false);
   }
 
-//   SECTION("defs are reference-equal") {
-//     REQUIRE(resultOf(R"(
-//       x = fn(a) { a + 1 }
-//       y = fn(a) { a + 1 }
-//       x eq y
-//     )") == "false");
+  SECTION("defs are reference-equal") {
+    REQUIRE(resultOf(R"(
+      x = fn(a) { a + 1 }
+      y = fn(a) { a + 1 }
+      x eq y
+    )")->asBool() == false);
 
-//     REQUIRE(resultOf(R"(
-//       x = fn(a) { a + 1 }
-//       y = x
-//       x eq y
-//     )") == "true");
-//   }
+    REQUIRE(resultOf(R"(
+      x = fn(a) { a + 1 }
+      y = x
+      x eq y
+    )")->asBool() == true);
+  }
 
 //   SECTION("lists are value-equal") {
 //     REQUIRE(resultOf("List(1) eq List(1)") == "true");

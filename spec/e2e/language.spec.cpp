@@ -29,11 +29,11 @@ TEST_CASE("when") {
     )")->asBool() == false);
   }
 
-//   // TODO: Fix empty when case.
-//   //
-//   // SECTION("can be empty") {
-//   //   REQUIRE(resultOf("when {}") == "false");
-//   // }
+  // TODO: Fix empty when case.
+  //
+  // SECTION("can be empty") {
+  //   REQUIRE(resultOf("when {}") == "false");
+  // }
 
   SECTION("runs the first true condition only") {
     REQUIRE(resultOf(R"(
@@ -45,11 +45,11 @@ TEST_CASE("when") {
     )")->asNumber() == fn::Number(0, 2));
   }
 
-  // SECTION("returns false if no conditions match") {
-  //   REQUIRE(resultOf(R"(
-  //     when {
-  //       false { true }
-  //     }
-  //   )") == "false");
-  // }
+  SECTION("returns false if no conditions match") {
+    REQUIRE(resultOf(R"(
+      when {
+        false { true }
+      }
+    )")->asBool() == false);
+  }
 }

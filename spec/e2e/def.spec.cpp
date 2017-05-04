@@ -47,18 +47,18 @@ TEST_CASE("Fn set/call") {
 //     }
 
 //     A(1, 0)
-//   )") == "true");
+//   )")->asBool() == true);
 // }
 
-// TEST_CASE("Fns as arguments") {
-//   REQUIRE(resultOf(R"(
-//     do = fn (func, x) {
-//       func(x)
-//     }
+TEST_CASE("Fns as arguments") {
+  REQUIRE(resultOf(R"(
+    do = fn (func, x) {
+      func(x)
+    }
 
-//     do(fn (x) { x + 1 }, 1)
-//   )") == "2");
-// }
+    do(fn (x) { x + 1 }, 1)
+  )")->asNumber() == fn::Number(0,2));
+}
 
 // TEST_CASE("Fn property get/set") {
 //   REQUIRE(resultOf(R"(
