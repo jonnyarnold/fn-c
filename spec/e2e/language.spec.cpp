@@ -52,4 +52,14 @@ TEST_CASE("when") {
       }
     )")->asBool() == false);
   }
+
+  SECTION("keeps value references") {
+    REQUIRE(resultOf(R"(
+      x = 2
+      when {
+        x eq 1 { 1 }
+        x eq 2 { 2 }
+      }
+    )")->asNumber() == fn::Number(0, 2));
+  }
 }

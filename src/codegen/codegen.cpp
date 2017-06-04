@@ -195,13 +195,13 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Condition* condition) {
   bytecode::CodeBlob testBlob = this->digest(condition->test);
   bytecode::CodeBlob bodyBlob = this->digest(condition->body);
   bodyBlob.append(bytecode::iReturnLast());
-  
+
   bytecode::CodeBlob condBlob = testBlob;
   condBlob.append(bytecode::iJumpIfLastFalse(bodyBlob.size()));
   condBlob.append(bodyBlob);
 
   return condBlob;
-  
+
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Conditional* conditional) {

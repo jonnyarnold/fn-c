@@ -309,9 +309,11 @@ void VM::fnEq(bytecode::CodeByte value[]) {
   vm::Value* first = this->value(value[1]);
   vm::Value* second = this->value(value[2]);
 
+  DEBUG("EQ(V" << std::to_string(value[1]) << ", V" << std::to_string(value[2]) << ")");
+
   bool eq = first->eq(second);
 
-  DEBUG("EQ(" << first->toString() << ", " << second->toString() << ") = " << std::to_string(eq));
+  // DEBUG("EQ(" << first->toString() << ", " << second->toString() << ") = " << std::to_string(eq));
 
   this->declareBool(eq);
 }
@@ -442,5 +444,5 @@ void VM::jumpIfLastFalse(bytecode::CodeByte value[]) {
 
   // else...
   DEBUG("FALSE_JUMP(" << std::to_string(jump) << ") = NO JUMP");
-  this->counter += FALSE_JUMP_BYTES; 
+  this->counter += FALSE_JUMP_BYTES;
 }
