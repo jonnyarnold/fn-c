@@ -1,0 +1,88 @@
+z = 1
+a = fn(x) {
+  b = fn(y) {
+    x + y + z
+  }
+}
+a(1)
+
+
+NUMBER 1
+NAME #z
+
+FN(x)
+  FN(y)
+    GET #x
+    GET #y
+    ADD
+    GET #z
+    ADD
+    RETURN
+  NAME #b
+  GET #b
+  GET #x
+  CALL 1
+  RETURN
+NAME #a
+
+GET #a
+NUMBER 1
+CALL 1
+
+
+
+a = 2
+x = { y = 1; z = a }
+x.y
+
+
+NUMBER 2
+NAME #a
+NEW_FRAME
+  NUMBER 1
+  NAME #y
+  GET #a
+  NAME #z
+  COMPRESS
+NAME #x
+GET #x
+EXPAND
+  GET #y
+  RETURN
+RETURN
+
+
+x = 2
+y = when {
+  x eq 1 { x + 1 }
+  x eq 2 { x - 1 }
+  true   { x }
+}
+y
+
+NUMBER 2
+NAME #a
+NEW_FRAME
+  GET #x
+  NUMBER 1
+  EQ
+  IF
+    GET #x
+    NUMBER 1
+    ADD
+    RETURN
+  GET #x
+  NUMBER 2
+  EQ
+  IF
+    GET #x
+    NUMBER 1
+    SUB
+    RETURN
+  TRUE
+  IF
+    GET #x
+    RETURN
+NAME #y
+GET #y
+RETURN
