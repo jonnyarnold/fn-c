@@ -1,0 +1,10 @@
+fib = fn(x) {
+  when {
+    x eq 0 { 0 }
+    x eq 1 { 1 }
+    true   { fib(x - 1) + fib(x - 2) }
+  }
+}
+
+# print(fib(10))
+fib(25)
