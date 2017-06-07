@@ -33,11 +33,7 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Statement* statement) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Id* id) {
-  bytecode::ValueIndex index = this->getIndexFor(id->name);
-  if (index == 0) { throw "Undefined: " + id->name; }
-
-  this->currentTable()->advanceIndex();
-  return bytecode::iLoad(index);
+  return bytecode::iLoad(id->name);
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Deref* deref) {
@@ -68,7 +64,7 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Assignment* assignment) {
     // If we don't have an astDeref, we have an astId.
     ast::Id* id = dynamic_cast<ast::Id*>(assignment->key);
     blob = this->digest(assignment->value);
-    this->rememberIndexFor(id->name);
+    blob.append(bytecode::iName(id->name));
   }
 
   return blob;
@@ -87,106 +83,86 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Block* block) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Bool* b) {
-  this->currentTable()->advanceIndex();
   return b->value ? bytecode::iTrue() : bytecode::iFalse();
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Number* n) {
-  this->currentTable()->advanceIndex();
   return bytecode::iNumber(n->value);
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::String* s) {
-
+  // TODO
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Call* call) {
   bytecode::CodeBlob callBlob = bytecode::CodeBlob();
-  std::vector<bytecode::ValueIndex> args = std::vector<bytecode::ValueIndex>();
 
-  // Digest the arguments
-  for (auto arg : call->args) {
-    callBlob.append(this->digest(arg));
-    args.push_back(this->currentTable()->lastIndex());
-  }
-
-  // Every call returns a value
-  this->currentTable()->advanceIndex();
-
-  bytecode::ValueIndex defIndex = this->getIndexFor(call->target);
-  if (defIndex) {
-    callBlob.append(bytecode::iCall(defIndex, args.size(), &args[0]));
-    return callBlob;
+  // Digest the arguments.
+  //
+  // Arguments are digested in reverse order,
+  // so they can be popped in order.
+  for(auto arg = call->args.rbegin(); arg != call->args.rend(); ++arg) {
+    callBlob.append(this->digest(*arg));
   }
 
   // Check builtins
   // TODO: Can we get rid of this?
   if (ast::Id* id = dynamic_cast<ast::Id*>(call->target)) {
     if (id->name == "and") {
-      callBlob.append(bytecode::iAnd(args[0], args[1]));
+      callBlob.append(bytecode::iAnd());
       return callBlob;
     }
 
     if (id->name == "or") {
-      callBlob.append(bytecode::iOr(args[0], args[1]));
+      callBlob.append(bytecode::iOr());
       return callBlob;
     }
 
     if (id->name == "not") {
-      callBlob.append(bytecode::iNot(args[0]));
+      callBlob.append(bytecode::iNot());
       return callBlob;
     }
 
     if (id->name == "+") {
-      callBlob.append(bytecode::iAdd(args[0], args[1]));
+      callBlob.append(bytecode::iAdd());
       return callBlob;
     }
 
     if (id->name == "-") {
-      callBlob.append(bytecode::iSubtract(args[0], args[1]));
+      callBlob.append(bytecode::iSubtract());
       return callBlob;
     }
 
     if (id->name == "*") {
-      callBlob.append(bytecode::iMultiply(args[0], args[1]));
+      callBlob.append(bytecode::iMultiply());
       return callBlob;
     }
 
     if (id->name == "/") {
-      callBlob.append(bytecode::iDivide(args[0], args[1]));
+      callBlob.append(bytecode::iDivide());
       return callBlob;
     }
 
     if (id->name == "eq") {
-      callBlob.append(bytecode::iEq(args[0], args[1]));
+      callBlob.append(bytecode::iEq());
       return callBlob;
     }
+
+    callBlob.append(this->digest(call->target));
+    callBlob.append(bytecode::iCall());
+    return callBlob;
   }
 
-  throw "Undefined: " + call->target->asString(0);
+  throw "Uh oh.";
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Def* def) {
-
-  // Ensure the arguments and defined names
-  // get the right index.
-  // TODO: Inject externals
-  ValueIndexTable defTable = ValueIndexTable();
-  defTable.set("self");
-  for(auto param : def->params) {
-    defTable.set(param);
-  }
-  this->valueIndexStack.push(defTable);
-
   bytecode::CodeBlob blockBlob = this->digest(def->body);
   blockBlob.append(bytecode::iReturnLast());
 
-  bytecode::CodeBlob defBlob = bytecode::iDefHeader(blockBlob.size());
+  bytecode::CodeBlob defBlob = bytecode::iDefHeader(blockBlob.size(), def->params);
   defBlob.append(blockBlob);
 
-  this->valueIndexStack.pop();
-
-  this->currentTable()->advanceIndex();
   return defBlob;
 }
 
@@ -205,65 +181,11 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Condition* condition) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Conditional* conditional) {
-
-  // Ensure the arguments and defined names
-  // get the right index.
-  // TODO: Come up with a better way than copying the parent scope.
-  ValueIndexTable whenTable = ValueIndexTable(this->valueIndexStack.top());
-  this->valueIndexStack.push(whenTable);
-
   bytecode::CodeBlob conditionBlob = bytecode::CodeBlob();
 
   for (auto condition : conditional->conditions) {
     conditionBlob.append(this->digest(condition));
   }
 
-  bytecode::CodeBlob whenBlob = bytecode::iWhenHeader(conditionBlob.size());
-  whenBlob.append(conditionBlob);
-
-  this->valueIndexStack.pop();
-
-  this->currentTable()->advanceIndex();
-  return whenBlob;
-
-}
-
-bytecode::ValueIndex CodeGenerator::rememberIndexFor(ast::Reference* reference) {
-  if (ast::Id* id = dynamic_cast<ast::Id*>(reference)) {
-    return this->rememberIndexFor(id->name);
-  }
-  else { throw "Not yet implemented!"; }
-}
-
-bytecode::ValueIndex CodeGenerator::rememberIndexFor(std::string name) {
-  bytecode::ValueIndex index = this->currentTable()->lastIndex();
-  this->currentTable()->set(name, index);
-  DEBUG(name << " => V" << std::to_string(index));
-
-  return index;
-}
-
-bytecode::ValueIndex CodeGenerator::getIndexFor(ast::Reference* reference) {
-  if (ast::Id* id = dynamic_cast<ast::Id*>(reference)) {
-    return this->getIndexFor(id->name);
-  }
-
-  if (ast::Deref* deref = dynamic_cast<ast::Deref*>(reference)) {
-    if (ast::Reference* ref = dynamic_cast<ast::Reference*>(deref->child)) {
-      return this->getIndexFor(ref);
-    }
-  }
-
-  throw "Not yet implemented!";
-}
-
-bytecode::ValueIndex CodeGenerator::getIndexFor(std::string name) {
-  bytecode::ValueIndex index = this->currentTable()->get(name);
-  DEBUG("V" << std::to_string(index) << " => " << name);
-
-  return index;
-}
-
-ValueIndexTable* CodeGenerator::currentTable() {
-  return &(this->valueIndexStack.top());
+  return conditionBlob;
 }

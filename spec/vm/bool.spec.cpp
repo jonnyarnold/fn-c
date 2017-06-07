@@ -13,7 +13,8 @@ TEST_CASE("BOOL true") {
 TEST_CASE("AND true true") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iTrue(),
-    bytecode::iAnd(1, 1)
+    bytecode::iTrue(),
+    bytecode::iAnd()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == true);
@@ -23,7 +24,7 @@ TEST_CASE("AND true false") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iTrue(),
     bytecode::iFalse(),
-    bytecode::iAnd(1, 2)
+    bytecode::iAnd()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == false);
@@ -33,7 +34,7 @@ TEST_CASE("AND false true") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iFalse(),
     bytecode::iTrue(),
-    bytecode::iAnd(1, 2)
+    bytecode::iAnd()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == false);
@@ -42,7 +43,8 @@ TEST_CASE("AND false true") {
 TEST_CASE("AND false false") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iFalse(),
-    bytecode::iAnd(1, 1)
+    bytecode::iFalse(),
+    bytecode::iAnd()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == false);
@@ -51,7 +53,8 @@ TEST_CASE("AND false false") {
 TEST_CASE("OR true true") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iTrue(),
-    bytecode::iOr(1, 1)
+    bytecode::iTrue(),
+    bytecode::iOr()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == true);
@@ -61,7 +64,7 @@ TEST_CASE("OR true false") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iTrue(),
     bytecode::iFalse(),
-    bytecode::iOr(1, 2)
+    bytecode::iOr()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == true);
@@ -71,7 +74,7 @@ TEST_CASE("OR false true") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iFalse(),
     bytecode::iTrue(),
-    bytecode::iOr(1, 2)
+    bytecode::iOr()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == true);
@@ -80,7 +83,8 @@ TEST_CASE("OR false true") {
 TEST_CASE("OR false false") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iFalse(),
-    bytecode::iOr(1, 1)
+    bytecode::iFalse(),
+    bytecode::iOr()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == false);
@@ -89,7 +93,7 @@ TEST_CASE("OR false false") {
 TEST_CASE("NOT true") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iTrue(),
-    bytecode::iNot(1)
+    bytecode::iNot()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == false);
@@ -98,7 +102,7 @@ TEST_CASE("NOT true") {
 TEST_CASE("NOT false") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iFalse(),
-    bytecode::iNot(1)
+    bytecode::iNot()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == true);

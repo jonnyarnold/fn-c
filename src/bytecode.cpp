@@ -4,21 +4,15 @@
 
 namespace fn { namespace bytecode {
 
+  NameHash hashName(std::string name) { 
+    return (NameHash)std::hash<std::string>{}(name);
+  }
+
   CodeBlob iFalse() { return CodeBlob{FN_OP_FALSE}; }
-
   CodeBlob iTrue() { return CodeBlob{FN_OP_TRUE}; }
-
-  CodeBlob iAnd(ValueIndex first, ValueIndex second) {
-    return CodeBlob{FN_OP_AND, first, second};
-  }
-
-  CodeBlob iOr(ValueIndex first, ValueIndex second) {
-    return CodeBlob{FN_OP_OR, first, second};
-  }
-
-  CodeBlob iNot(ValueIndex idx) {
-    return CodeBlob{FN_OP_NOT, idx};
-  }
+  CodeBlob iAnd() { return CodeBlob{FN_OP_AND}; }
+  CodeBlob iOr() { return CodeBlob{FN_OP_OR}; }
+  CodeBlob iNot() { return CodeBlob{FN_OP_NOT}; }
 
   CodeBlob iNumber(Number number) {
     return iNumber(number.coefficient, number.exponent);
@@ -33,63 +27,44 @@ namespace fn { namespace bytecode {
     return CodeBlob(bytes);
   }
 
-  CodeBlob iMultiply(ValueIndex first, ValueIndex second) {
-    return CodeBlob{FN_OP_MULTIPLY, first, second};
+  CodeBlob iMultiply() { return CodeBlob{FN_OP_MULTIPLY}; }
+  CodeBlob iDivide() { return CodeBlob{FN_OP_DIVIDE}; }
+  CodeBlob iAdd() { return CodeBlob{FN_OP_ADD}; }
+  CodeBlob iSubtract() { return CodeBlob{FN_OP_SUBTRACT}; }
+  CodeBlob iEq() { return CodeBlob{FN_OP_EQ}; }
+
+  CodeBlob iName(std::string name) { return iName(hashName(name)); }
+  CodeBlob iName(NameHash name) { return CodeBlob{FN_OP_NAME, name}; }
+  CodeBlob iLoad(std::string name) { return iLoad(hashName(name)); }
+  CodeBlob iLoad(NameHash name) { return CodeBlob{FN_OP_LOAD, name}; }
+
+  CodeBlob iDefHeader(InstructionIndex length, std::vector<std::string> argNames) {
+    
+    std::vector<NameHash> argNameHashes = std::vector<NameHash>();
+    for(auto argName : argNames) {
+      argNameHashes.push_back(hashName(argName));
+    }
+
+    return iDefHeader(length, argNameHashes);
   }
 
-  CodeBlob iDivide(ValueIndex first, ValueIndex second) {
-    return CodeBlob{FN_OP_DIVIDE, first, second};
-  }
+  CodeBlob iDefHeader(InstructionIndex length, std::vector<NameHash> argNames) {
+    CodeBlob blob = CodeBlob{FN_OP_DEF};
+    blob.append(length);
+    
+    NumArgs numArgs = (NumArgs)argNames.size();
+    blob.append(numArgs);
 
-  CodeBlob iAdd(ValueIndex first, ValueIndex second) {
-    return CodeBlob{FN_OP_ADD, first, second};
-  }
-
-  CodeBlob iSubtract(ValueIndex first, ValueIndex second) {
-    return CodeBlob{FN_OP_SUBTRACT, first, second};
-  }
-
-  CodeBlob iEq(ValueIndex first, ValueIndex second) {
-    return CodeBlob{FN_OP_EQ, first, second};
-  }
-
-  CodeBlob iLoad(ValueIndex index) {
-    return CodeBlob{FN_OP_LOAD, index};
-  }
-
-  CodeBlob iDefHeader(InstructionIndex length) {
-    return CodeBlob{FN_OP_DEF, length};
-  }
-
-  CodeBlob iCall(ValueIndex index, ValueIndex numArgs, ValueIndex argIndices[]) {
-    CodeBlob blob = CodeBlob{FN_OP_CALL, index, numArgs};
-    for(uint i = 0; i < numArgs; i++) {
-      blob.append(argIndices[i]);
+    for(auto argName : argNames) {
+      blob.append(argName);
     }
 
     return blob;
   }
-
-  CodeBlob iCall(ValueIndex index) {
-    return iCall(index, 0, NULL);
-  }
-
+  
+  CodeBlob iCall() { return CodeBlob{FN_OP_CALL}; }
   CodeBlob iReturnLast() { return CodeBlob{FN_OP_RETURN_LAST}; }
 
-  CodeBlob iWhenHeader(InstructionIndex length) { 
-    std::array<CodeByte, 2> bytes = std::array<CodeByte, 2>();
-    bytes[0] = FN_OP_WHEN_HEADER;
-    bytes[1] = length;
-
-    return CodeBlob(bytes);
-  }
-
-  CodeBlob iJumpIfLastFalse(InstructionIndex jump) { 
-    std::array<CodeByte, 2> bytes = std::array<CodeByte, 2>();
-    bytes[0] = FN_OP_FALSE_JUMP;
-    bytes[1] = jump;
-
-    return CodeBlob(bytes);
-  }
+  CodeBlob iJumpIfLastFalse(InstructionIndex jump) { return CodeBlob{FN_OP_FALSE_JUMP, jump}; }
 
 }}

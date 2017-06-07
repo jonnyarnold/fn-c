@@ -45,7 +45,8 @@ TEST_CASE("NUMBER -0.1") {
 TEST_CASE("MULTIPLY 2 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(2, 0),
-    bytecode::iMultiply(1, 1)
+    bytecode::iNumber(2, 0),
+    bytecode::iMultiply()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -57,7 +58,7 @@ TEST_CASE("MULTIPLY 2 -2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(2, 0),
     bytecode::iNumber(-2, 0),
-    bytecode::iMultiply(1, 2)
+    bytecode::iMultiply()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -69,7 +70,7 @@ TEST_CASE("MULTIPLY 20 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(2, 1),
     bytecode::iNumber(2, 0),
-    bytecode::iMultiply(1, 2)
+    bytecode::iMultiply()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -81,7 +82,7 @@ TEST_CASE("MULTIPLY 0.2 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(2, -1),
     bytecode::iNumber(2, 0),
-    bytecode::iMultiply(1, 2)
+    bytecode::iMultiply()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -93,7 +94,7 @@ TEST_CASE("MULTIPLY -20 -0.2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(-2, 1),
     bytecode::iNumber(-2, -1),
-    bytecode::iMultiply(1, 2)
+    bytecode::iMultiply()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -104,7 +105,8 @@ TEST_CASE("MULTIPLY -20 -0.2") {
 TEST_CASE("DIVIDE 2 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(2, 0),
-    bytecode::iDivide(1, 1)
+    bytecode::iNumber(2, 0),
+    bytecode::iDivide()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -114,9 +116,9 @@ TEST_CASE("DIVIDE 2 2") {
 
 TEST_CASE("DIVIDE 2 -2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
-    bytecode::iNumber(2, 0),
     bytecode::iNumber(-2, 0),
-    bytecode::iDivide(1, 2)
+    bytecode::iNumber(2, 0),
+    bytecode::iDivide()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -126,9 +128,9 @@ TEST_CASE("DIVIDE 2 -2") {
 
 TEST_CASE("DIVIDE 20 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
-    bytecode::iNumber(2, 1),
     bytecode::iNumber(2, 0),
-    bytecode::iDivide(1, 2)
+    bytecode::iNumber(2, 1),
+    bytecode::iDivide()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -151,9 +153,9 @@ TEST_CASE("DIVIDE 20 2") {
 
 TEST_CASE("DIVIDE 0.2 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
-    bytecode::iNumber(2, -1),
     bytecode::iNumber(2, 0),
-    bytecode::iDivide(1, 2)
+    bytecode::iNumber(2, -1),
+    bytecode::iDivide()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -163,9 +165,9 @@ TEST_CASE("DIVIDE 0.2 2") {
 
 TEST_CASE("DIVIDE -20 -0.2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
-    bytecode::iNumber(-2, 1),
     bytecode::iNumber(-2, -1),
-    bytecode::iDivide(1, 2)
+    bytecode::iNumber(-2, 1),
+    bytecode::iDivide()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -176,7 +178,8 @@ TEST_CASE("DIVIDE -20 -0.2") {
 TEST_CASE("ADD 2 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(2, 0),
-    bytecode::iAdd(1, 1)
+    bytecode::iNumber(2, 0),
+    bytecode::iAdd()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -188,7 +191,7 @@ TEST_CASE("ADD 20 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(2, 1),
     bytecode::iNumber(2, 0),
-    bytecode::iAdd(1, 2)
+    bytecode::iAdd()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -200,7 +203,7 @@ TEST_CASE("ADD 20 0.2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(2, 1),
     bytecode::iNumber(2, -1),
-    bytecode::iAdd(1, 2)
+    bytecode::iAdd()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -212,7 +215,7 @@ TEST_CASE("ADD -2 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(-2, 0),
     bytecode::iNumber(2, 0),
-    bytecode::iAdd(1, 2)
+    bytecode::iAdd()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -224,7 +227,7 @@ TEST_CASE("ADD -20 -0.2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(-2, 1),
     bytecode::iNumber(-2, -1),
-    bytecode::iAdd(1, 2)
+    bytecode::iAdd()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -235,7 +238,8 @@ TEST_CASE("ADD -20 -0.2") {
 TEST_CASE("SUBTRACT 2 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
     bytecode::iNumber(2, 0),
-    bytecode::iSubtract(1, 1)
+    bytecode::iNumber(2, 0),
+    bytecode::iSubtract()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -245,9 +249,9 @@ TEST_CASE("SUBTRACT 2 2") {
 
 TEST_CASE("SUBTRACT 20 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
-    bytecode::iNumber(2, 1),
     bytecode::iNumber(2, 0),
-    bytecode::iSubtract(1, 2)
+    bytecode::iNumber(2, 1),
+    bytecode::iSubtract()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -257,9 +261,9 @@ TEST_CASE("SUBTRACT 20 2") {
 
 TEST_CASE("SUBTRACT 20 0.2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
-    bytecode::iNumber(2, 1),
     bytecode::iNumber(2, -1),
-    bytecode::iSubtract(1, 2)
+    bytecode::iNumber(2, 1),
+    bytecode::iSubtract()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -269,9 +273,9 @@ TEST_CASE("SUBTRACT 20 0.2") {
 
 TEST_CASE("SUBTRACT -2 2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
-    bytecode::iNumber(-2, 0),
     bytecode::iNumber(2, 0),
-    bytecode::iSubtract(1, 2)
+    bytecode::iNumber(-2, 0),
+    bytecode::iSubtract()
   };
 
   Number result = resultOf(instructions)->asNumber();
@@ -281,9 +285,9 @@ TEST_CASE("SUBTRACT -2 2") {
 
 TEST_CASE("SUBTRACT -20 -0.2") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
-    bytecode::iNumber(-2, 1),
     bytecode::iNumber(-2, -1),
-    bytecode::iSubtract(1, 2)
+    bytecode::iNumber(-2, 1),
+    bytecode::iSubtract()
   };
 
   Number result = resultOf(instructions)->asNumber();

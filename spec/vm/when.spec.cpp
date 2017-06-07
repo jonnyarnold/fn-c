@@ -2,8 +2,6 @@
 
 TEST_CASE("WHEN") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
-    bytecode::iWhenHeader(12),
-
     bytecode::iFalse(),
     bytecode::iJumpIfLastFalse(2),
     bytecode::iTrue(),

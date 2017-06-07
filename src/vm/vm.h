@@ -7,6 +7,7 @@
 #include "stdlib.h" // size_t
 #include <vector> // std::vector
 #include <stack> // std::stack
+#include <unordered_map> // std::unordered_map
 
 #include "src/bytecode.h" // CodeByte
 #include "src/vm/value.h" // vm::Value
@@ -17,6 +18,7 @@ namespace fn {
 
   namespace vm {
     typedef std::vector<vm::Value*> ValueMap;
+    typedef std::unordered_map<bytecode::NameHash, vm::Value*> SymbolTable;
 
     class CallFrame {
     public:
@@ -26,6 +28,9 @@ namespace fn {
 
       // The values defined in the given frame.
       vm::ValueMap values;
+
+      // The symbols defined in the given frame.
+      vm::SymbolTable symbols;
 
       CallFrame(bytecode::InstructionIndex returnCounter) {
         this->returnCounter = returnCounter;
@@ -68,40 +73,43 @@ namespace fn {
     bytecode::InstructionIndex counter;
 
     // Stores the nesting of function calls.
-    std::stack<vm::CallFrame*> callStack;
-    vm::CallFrame* currentFrame() { return this->callStack.top(); }
+    std::vector<vm::CallFrame*> callStack;
+    void pushFrame();
+    // void pushFrame(vm::Value* value);
+    vm::Value* popFrame();
+    vm::CallFrame* currentFrame() { return this->callStack.back(); }
 
-    vm::Value* value(bytecode::CodeByte index);
-    bytecode::ValueIndex declare(vm::Value* value);
-    void printState();
-    void fold(bytecode::ValueIndex returnIndex, vm::Value* returnValue);
+    void pushValue(vm::Value* value);
+    vm::Value* popValue();
     vm::Value* lastValue();
+
+    void printState();
 
     void declareBool(bytecode::CodeByte);
     void declareBool(bool value);
 
-    void fnAnd(bytecode::CodeByte[]);
-    void fnOr(bytecode::CodeByte[]);
-    void fnNot(bytecode::CodeByte[]);
+    void fnAnd();
+    void fnOr();
+    void fnNot();
 
     void declareNumber(bytecode::CodeByte[]);
     void declareNumber(Number);
 
-    void fnMultiply(bytecode::CodeByte[]);
-    void fnDivide(bytecode::CodeByte[]);
-    void fnAdd(bytecode::CodeByte[]);
-    void fnSubtract(bytecode::CodeByte[]);
+    void fnMultiply();
+    void fnDivide();
+    void fnAdd();
+    void fnSubtract();
 
-    void fnEq(bytecode::CodeByte[]);
+    void fnEq();
 
+    void name(bytecode::CodeByte value[]);
     void load(bytecode::CodeByte[]);
 
     void declareDef(bytecode::CodeByte[]);
     void declareDef(vm::Def def);
-    void call(bytecode::CodeByte[]);
+    void call();
     void returnLast();
 
-    void beginWhen(bytecode::CodeByte[]);
     void jumpIfLastFalse(bytecode::CodeByte[]);
   };
 

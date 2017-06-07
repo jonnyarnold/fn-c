@@ -10,7 +10,7 @@ using namespace fn;
 
 VM::VM(bool debug) {
   this->debug = debug;
-  this->callStack = std::stack<vm::CallFrame*>();
+  this->callStack = std::vector<vm::CallFrame*>();
 }
 
 vm::Value* VM::run(bytecode::CodeBlob* instructions) {
@@ -19,7 +19,7 @@ vm::Value* VM::run(bytecode::CodeBlob* instructions) {
 
 vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
   this->counter = 0;
-  this->callStack.push(new vm::CallFrame());
+  this->callStack.push_back(new vm::CallFrame(num_bytes));
 
   while(counter < num_bytes) {
     bytecode::CodeByte opcode = instructions[counter];
@@ -38,43 +38,48 @@ vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
       break;
 
     case FN_OP_AND:
-      this->fnAnd(&instructions[counter]);
-      this->counter += 3;
+      this->fnAnd();
+      this->counter += 1;
       break;
 
     case FN_OP_OR:
-      this->fnOr(&instructions[counter]);
-      this->counter += 3;
+      this->fnOr();
+      this->counter += 1;
       break;
 
     case FN_OP_NOT:
-      this->fnNot(&instructions[counter]);
-      this->counter += 2;
+      this->fnNot();
+      this->counter += 1;
       break;
 
     case FN_OP_MULTIPLY:
-      this->fnMultiply(&instructions[counter]);
-      this->counter += 3;
+      this->fnMultiply();
+      this->counter += 1;
       break;
 
     case FN_OP_DIVIDE:
-      this->fnDivide(&instructions[counter]);
-      this->counter += 3;
+      this->fnDivide();
+      this->counter += 1;
       break;
 
     case FN_OP_ADD:
-      this->fnAdd(&instructions[counter]);
-      this->counter += 3;
+      this->fnAdd();
+      this->counter += 1;
       break;
 
     case FN_OP_SUBTRACT:
-      this->fnSubtract(&instructions[counter]);
-      this->counter += 3;
+      this->fnSubtract();
+      this->counter += 1;
       break;
 
     case FN_OP_EQ:
-      this->fnEq(&instructions[counter]);
-      this->counter += 3;
+      this->fnEq();
+      this->counter += 1;
+      break;
+
+    case FN_OP_NAME:
+      this->name(&instructions[counter]);
+      this->counter += 2;
       break;
 
     case FN_OP_LOAD:
@@ -88,18 +93,13 @@ vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
       break;
 
     case FN_OP_CALL:
-      this->call(&instructions[counter]);
+      this->call();
       // counter is moved by call
       break;
 
     case FN_OP_RETURN_LAST:
       this->returnLast();
       // counter is moved by returnLast
-      break;
-
-    case FN_OP_WHEN_HEADER:
-      this->beginWhen(&instructions[counter]);
-      // counter is moved by beginWhen
       break;
 
     case FN_OP_FALSE_JUMP:
@@ -118,16 +118,15 @@ vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
   return this->lastValue();
 }
 
-// Get a value by index.
-vm::Value* VM::value(bytecode::CodeByte index) {
-  return this->currentFrame()->values[index];
+void VM::pushValue(vm::Value* value) {
+  DEBUG("PUSH(" << value->toString() << ")");
+  this->currentFrame()->values.push_back(value);
 }
 
-bytecode::ValueIndex VM::declare(vm::Value* value) {
-  bytecode::ValueIndex index = this->currentFrame()->values.size();
-  DEBUG("DECLARE(" << value->toString() << ") [V" << std::to_string(index) << "]");
-  this->currentFrame()->values.push_back(value);
-  return index;
+vm::Value* VM::popValue() {
+  vm::Value* value = this->currentFrame()->values.back();
+  this->currentFrame()->values.pop_back();
+  return value;
 }
 
 void VM::printState() {
@@ -159,7 +158,7 @@ void VM::declareBool(bytecode::CodeByte value) {
 }
 
 void VM::declareBool(bool value) {
-  this->declare(new vm::BoolValue(value));
+  this->pushValue(new vm::BoolValue(value));
 }
 
 // NUMBER [EXPONENT (1)] [COEFFICIENT (8)]
@@ -174,213 +173,229 @@ void VM::declareNumber(bytecode::CodeByte value[]) {
 }
 
 void VM::declareNumber(Number value) {
-  this->declare(new vm::NumberValue(value));
+  this->pushValue(new vm::NumberValue(value));
 }
 
-// AND [INDEX_1 (1)] [INDEX_2 (1)]
-// (3 bytes)
+// AND
+// (1 byte)
 //
-// Returns true if both arguments are true,
+// Returns true if the top two values on the stack are true,
 // false otherwise.
-void VM::fnAnd(bytecode::CodeByte value[]) {
+void VM::fnAnd() {
+  bool first = this->popValue()->asBool();
+  bool second = this->popValue()->asBool();
+  DEBUG("AND");
 
-  bool first = this->value(value[1])->asBool();
-  if (!first) {
-    DEBUG("AND(V" << std::to_string(value[1]) << " = false, <unexecuted>)");
+  if (first && second) {
+    this->declareBool(FN_OP_TRUE);
+  } else {
     this->declareBool(FN_OP_FALSE);
-    return;
   }
-
-  bool second = this->value(value[2])->asBool();
-  if (!second) {
-    DEBUG("AND(V" << std::to_string(value[1]) << " = true, V" << std::to_string(value[2]) << " = true)");
-    this->declareBool(FN_OP_FALSE);
-    return;
-  }
-
-  DEBUG("OR(V" << std::to_string(value[1]) << " = true, V" << std::to_string(value[2]) << " = true)");
-  this->declareBool(FN_OP_TRUE);
 }
 
-// OR [INDEX_1 (1)] [INDEX_2 (1)]
-// (3 bytes)
+// OR
+// (1 byte)
 //
-// Returns true if either arguments are true,
+// Returns true if either of the top two values on the stack are true,
 // false otherwise.
-void VM::fnOr(bytecode::CodeByte value[]) {
-  bool first = this->value(value[1])->asBool();
-  if (first) {
-    DEBUG("OR(V" << std::to_string(value[1]) << " = true, <unexecuted>)");
-    this->declareBool(FN_OP_TRUE);
-    return;
-  }
+void VM::fnOr() {
+  bool first = this->popValue()->asBool();
+  bool second = this->popValue()->asBool();
+  DEBUG("OR");
 
-  bool second = this->value(value[2])->asBool();
-  if (second) {
-    DEBUG("OR(V" << std::to_string(value[1]) << " = false, V" << std::to_string(value[2]) << " = true)");
+  if (first || second) {
     this->declareBool(FN_OP_TRUE);
-    return;
+  } else {
+    this->declareBool(FN_OP_FALSE);
   }
-
-  DEBUG("OR(V" << std::to_string(value[1]) << " = false, V" << std::to_string(value[2]) << " = false)");
-  this->declareBool(FN_OP_FALSE);
 }
 
-// NOT [INDEX (1)]
-// (2 bytes)
+// NOT
+// (1 byte)
 //
-// Returns true if the argument is false
+// Returns true if the top value on the stack is false
 // and vice versa.
-void VM::fnNot(bytecode::CodeByte value[]) {
-  bool arg = this->value(value[1])->asBool();
-  DEBUG("NOT(V" << std::to_string(value[1]) << " = " << arg << ")");
+void VM::fnNot() {
+  bool arg = this->popValue()->asBool();
+  DEBUG("NOT");
 
   arg ?
     this->declareBool(FN_OP_FALSE) :
     this->declareBool(FN_OP_TRUE);
 }
 
-// MULTIPLY [INDEX_1 (1)] [INDEX_2 (1)]
-// (3 bytes)
+// MULTIPLY
+// (1 byte)
 //
 // Returns the product of two numeric values.
-void VM::fnMultiply(bytecode::CodeByte value[]) {
-  Number first = this->value(value[1])->asNumber();
-  Number second = this->value(value[2])->asNumber();
+void VM::fnMultiply() {
+  Number first = this->popValue()->asNumber();
+  Number second = this->popValue()->asNumber();
 
-  DEBUG("MULTIPLY(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
+  DEBUG("MULTIPLY");
 
   Number product = first * second;
 
   this->declareNumber(product);
 }
 
-// DIVIDE [INDEX_1 (1)] [INDEX_2 (1)]
-// (3 bytes)
+// DIVIDE
+// (1 byte)
 //
 // Returns the fraction of two numeric values.
-void VM::fnDivide(bytecode::CodeByte value[]) {
-  Number first = this->value(value[1])->asNumber();
-  Number second = this->value(value[2])->asNumber();
+void VM::fnDivide() {
+  Number first = this->popValue()->asNumber();
+  Number second = this->popValue()->asNumber();
 
-  DEBUG("DIVIDE(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
+  DEBUG("DIVIDE");
 
   Number fraction = first / second;
 
   this->declareNumber(fraction);
 }
 
-// ADD [INDEX_1 (1)] [INDEX_2 (1)]
-// (3 bytes)
+// ADD
+// (1 byte)
 //
 // Returns the sum of two numeric values.
-void VM::fnAdd(bytecode::CodeByte value[]) {
-  Number first = this->value(value[1])->asNumber();
-  Number second = this->value(value[2])->asNumber();
+void VM::fnAdd() {
+  Number first = this->popValue()->asNumber();
+  Number second = this->popValue()->asNumber();
 
-  DEBUG("ADD(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
+  DEBUG("ADD");
 
   Number sum = first + second;
 
   this->declareNumber(sum);
 }
 
-// SUBTRACT [INDEX_1 (1)] [INDEX_2 (1)]
-// (3 bytes)
+// SUBTRACT
+// (1 byte)
 //
 // Returns the difference of two numeric values.
-void VM::fnSubtract(bytecode::CodeByte value[]) {
-  Number first = this->value(value[1])->asNumber();
-  Number second = this->value(value[2])->asNumber();
+void VM::fnSubtract() {
+  Number first = this->popValue()->asNumber();
+  Number second = this->popValue()->asNumber();
 
-  DEBUG("SUBTRACT(" << (int)first.coefficient << " * 10^" << (int)first.exponent << ", " << (int)second.coefficient << " * 10^" << (int)second.exponent << ")");
+  DEBUG("SUBTRACT");
 
   Number difference = first - second;
 
   this->declareNumber(difference);
 }
 
-// EQ [INDEX_1 (1)] [INDEX_2 (1)]
-// (3 bytes)
+// EQ
+// (1 byte)
 //
 // Returns true if the two values are equal,
 // false otherwise.
-void VM::fnEq(bytecode::CodeByte value[]) {
-  vm::Value* first = this->value(value[1]);
-  vm::Value* second = this->value(value[2]);
+void VM::fnEq() {
+  vm::Value* first = this->popValue();
+  vm::Value* second = this->popValue();
 
-  DEBUG("EQ(V" << std::to_string(value[1]) << ", V" << std::to_string(value[2]) << ")");
+  DEBUG("EQ");
 
   bool eq = first->eq(second);
-
-  // DEBUG("EQ(" << first->toString() << ", " << second->toString() << ") = " << std::to_string(eq));
 
   this->declareBool(eq);
 }
 
-// LOAD [INDEX (1)]
+// NAME [NAME (1)]
 // (2 bytes)
 //
-// Returns the value at the given index.
-void VM::load(bytecode::CodeByte value[]) {
-  bytecode::ValueIndex index = value[1];
-  DEBUG("LOAD(V" << (int)index << ")");
-  this->declare(this->value(index));
+// Sets a reference to the top of the value stack by the given name.
+#define NAME_BYTES (1 + NAME_HASH_BYTES)
+void VM::name(bytecode::CodeByte value[]) {
+  bytecode::NameHash name = value[1];
+
+  DEBUG("NAME(" << (int)name << ")");
+
+  this->currentFrame()->symbols[name] = this->lastValue();
 }
 
-#define DECLARE_DEF_BYTES (1 + INSTRUCTION_INDEX_BYTES)
-// DECLARE_DEF [LENGTH (8)]
-// (9 + LENGTH bytes)
+
+// LOAD [NAME (1)]
+// (2 bytes)
+//
+// Returns the value defined by the given name.
+// Names are checked in frame order.
+void VM::load(bytecode::CodeByte value[]) {
+  bytecode::NameHash name = value[1];
+
+  DEBUG("LOAD(" << (int)name << ")");
+
+  // Check each frame, top to bottom.
+  vm::Value* foundValue;
+  for(auto frame = this->callStack.rbegin(); frame != this->callStack.rend(); ++frame) {
+    try {
+      foundValue = (*frame)->symbols.at(name);
+      break;
+    } catch (const std::out_of_range& oor) { continue; }
+  }
+
+  if (foundValue != NULL) {
+    this->pushValue(foundValue);
+  } else {
+    throw "Cannot find variable";
+  }
+}
+
+// DECLARE_DEF [LENGTH (1)] [NUM_ARGS (1)] [ARG_NAMES (1)*]
+// (10 + LENGTH + NUM_ARGS bytes)
 //
 // Starts a Def declaration. Reads the body of the Def
 // and stores it in a pointer value.
 void VM::declareDef(bytecode::CodeByte value[]) {
   bytecode::InstructionIndex length = value[1];
-  bytecode::InstructionIndex counterStart = this->counter + DECLARE_DEF_BYTES;
+  bytecode::NumArgs numArgs = value[1 + INSTRUCTION_INDEX_BYTES];
+  DEBUG("DEF(" << (int)length << " bytes, " << (int)numArgs << " args)");
+  
+  std::vector<bytecode::NameHash> args = std::vector<bytecode::NameHash>();
+  for(uint argIndex = 0; argIndex < numArgs; argIndex++) {
+    args.push_back(value[1 + INSTRUCTION_INDEX_BYTES + NUM_ARGS_BYTES + (argIndex * NAME_HASH_BYTES)]);
+  }
+
+  bytecode::InstructionIndex headerSize = 1 + INSTRUCTION_INDEX_BYTES + NUM_ARGS_BYTES + (numArgs * NAME_HASH_BYTES);
+  bytecode::InstructionIndex counterStart = this->counter + headerSize;
 
   vm::Def def = vm::Def();
   def.length = length;
+  def.args = args;
   def.counterStart = counterStart;
   this->declareDef(def);
 
   // Skip over the Def body.
-  this->counter += (length + DECLARE_DEF_BYTES);
+  this->counter += (headerSize + length);
 }
 
 void VM::declareDef(vm::Def value) {
-  this->declare(new vm::DefValue(value));
+  this->pushValue(new vm::DefValue(value));
 }
 
-// CALL [INDEX (1)] [NUM_ARGS (1)] [ARG_INDEX (1)*]
-// (3 + NUM_ARGS bytes)
+// CALL
+// (1 byte)
 //
-// Runs the code pointed to at the given index.
-void VM::call(bytecode::CodeByte value[]) {
-  bytecode::ValueIndex index = value[1];
-  bytecode::ValueIndex numArgs = value[2];
-  bytecode::ValueIndex* argIndices = &value[3];
-  bytecode::ValueIndex headerBytes = 3 + numArgs;
-
-  DEBUG("CALL (V" << std::to_string(index) << " with " << std::to_string(numArgs) << " args)");
-
-  vm::Value* def = this->value(index);
+// Runs the top of the value stack as a function.
+void VM::call() {
+  DEBUG("CALL");
+  vm::Def def = this->popValue()->asDef();
 
   // Push a CallFrame onto the stack.
   vm::CallFrame* frame = new vm::CallFrame();
-  frame->returnCounter = this->counter + headerBytes;
-
-  // V1 is the current definition
-  frame->values.push_back(def);
-
-  // Vx are the arguments
-  for(uint i = 0; i < numArgs; i++) {
-    frame->values.push_back(this->value(argIndices[i]));
+  frame->returnCounter = this->counter + 1;
+  
+  // Set up ValueStack and SymbolTable
+  std::vector<bytecode::NameHash> argNames = def.args;
+  for(auto argName : argNames) {
+    vm::Value* value = this->popValue();
+    frame->values.push_back(value);
+    frame->symbols[argName] = value;
   }
 
-  this->callStack.push(frame);
+  this->callStack.push_back(frame);
 
   // Set the program counter.
-  bytecode::InstructionIndex newCounterPos = def->getCallCounterPos();
+  bytecode::InstructionIndex newCounterPos = def.counterStart;
   this->counter = newCounterPos;
 }
 
@@ -389,7 +404,7 @@ void VM::call(bytecode::CodeByte value[]) {
 //
 // Denotes the end of a call. Returns the last defined value.
 void VM::returnLast() {
-  DEBUG("RETURN_LAST()");
+  DEBUG("RETURN_LAST");
 
   // We transfer ownership of the value from the inner call to the outer call.
   vm::Value* returnValue = this->currentFrame()->values.back();
@@ -399,33 +414,15 @@ void VM::returnLast() {
 
   // Pop the top CallFrame and free memory used by it.
   vm::CallFrame* frame = this->currentFrame();
-  this->callStack.pop();
+
+  if (this->callStack.size() > 1) { this->callStack.pop_back(); }
 
   // Declare the return value in the new current frame.
-  this->declare(returnValue);
+  this->pushValue(returnValue);
 
   // TODO: How do we make sure that args don't get deleted,
   // or that deleting them doesn't destroy them on the parent?
   // delete frame;
-}
-
-// WHEN_HEADER [LENGTH (8)]
-// (9 bytes)
-//
-// Denotes the start of a conditional.
-#define WHEN_HEADER_BYTES (1 + INSTRUCTION_INDEX_BYTES)
-void VM::beginWhen(bytecode::CodeByte value[]) {
-  bytecode::InstructionIndex length = value[1];
-
-  DEBUG("WHEN_HEADER(" << std::to_string(length) << ")");
-
-  // Push a CallFrame onto the stack.
-  // TODO: Do something better than copying the existing call frame.
-  vm::CallFrame* frame = new vm::CallFrame(*this->currentFrame());
-  frame->returnCounter = this->counter + WHEN_HEADER_BYTES + length;
-  this->callStack.push(frame);
-
-  this->counter += WHEN_HEADER_BYTES;
 }
 
 // FALSE_JUMP [OFFSET (8)]

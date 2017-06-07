@@ -8,6 +8,7 @@
 #include <vector> // std::vector
 #include <array> // std::array
 #include <initializer_list> // std::initializer_list
+#include <functional> // std::hash<std::string>
 
 #include "src/number.h"
 
@@ -42,24 +43,28 @@ namespace fn { namespace bytecode {
 
   #define FN_OP_EQ (fn::bytecode::OpCode)(40)
 
-  #define FN_OP_LOAD (fn::bytecode::OpCode)(50)
+  #define FN_OP_NAME (fn::bytecode::OpCode)(50)
+  #define FN_OP_LOAD (fn::bytecode::OpCode)(51)
 
-  #define FN_OP_WHEN_HEADER (fn::bytecode::OpCode)(60)
-  #define FN_OP_FALSE_JUMP (fn::bytecode::OpCode)(61)
+  #define FN_OP_FALSE_JUMP (fn::bytecode::OpCode)(60)
 
-
-  // Values in the VM are indexed.
-  // References to values are given by this type.
-  // TODO: Expand to 16-bit.
-  typedef CodeByte ValueIndex;
-  #define VALUE_INDEX_BYTES (1)
-  #define MAX_VALUES (UINT8_MAX)
 
   // Instruction references are given by this type.
   // TODO: Expand to 32-bit.
   typedef CodeByte InstructionIndex;
   #define INSTRUCTION_INDEX_BYTES (1)
   #define MAX_INSTRUCTIONS (UINT8_MAX)
+
+  // Names are given by hashes.
+  typedef CodeByte NameHash;
+  #define NAME_HASH_BYTES (1)
+
+  // Type for specifying the number of arguments in a function.
+  // If you ever need more than 255, try something else.
+  typedef CodeByte NumArgs;
+  #define NUM_ARGS_BYTES (1)
+
+  NameHash hashName(std::string name);
 
   // A CodeBlob is a contiguous list of CodeBytes.
   class CodeBlob {
@@ -112,27 +117,29 @@ namespace fn { namespace bytecode {
   // Instruction Generators
   CodeBlob iFalse();
   CodeBlob iTrue();
-  CodeBlob iAnd(ValueIndex first, ValueIndex second);
-  CodeBlob iOr(ValueIndex first, ValueIndex second);
-  CodeBlob iNot(ValueIndex idx);
+  CodeBlob iAnd();
+  CodeBlob iOr();
+  CodeBlob iNot();
 
   CodeBlob iNumber(Number number);
   CodeBlob iNumber(Coefficient coefficient, Exponent exponent);
-  CodeBlob iMultiply(ValueIndex first, ValueIndex second);
-  CodeBlob iDivide(ValueIndex first, ValueIndex second);
-  CodeBlob iAdd(ValueIndex first, ValueIndex second);
-  CodeBlob iSubtract(ValueIndex first, ValueIndex second);
+  CodeBlob iMultiply();
+  CodeBlob iDivide();
+  CodeBlob iAdd();
+  CodeBlob iSubtract();
 
-  CodeBlob iDefHeader(InstructionIndex length);
-  CodeBlob iCall(ValueIndex index, ValueIndex numArgs, ValueIndex argIndices[]);
-  CodeBlob iCall(ValueIndex index);
+  CodeBlob iDefHeader(InstructionIndex length, std::vector<std::string> argList);
+  CodeBlob iDefHeader(InstructionIndex length, std::vector<NameHash> argList);
+  CodeBlob iCall();
   CodeBlob iReturnLast();
 
-  CodeBlob iEq(ValueIndex first, ValueIndex second);
+  CodeBlob iEq();
 
-  CodeBlob iLoad(ValueIndex index);
+  CodeBlob iName(std::string name);
+  CodeBlob iName(NameHash hash);
+  CodeBlob iLoad(std::string name);
+  CodeBlob iLoad(NameHash hash);
 
-  CodeBlob iWhenHeader(InstructionIndex length);
   CodeBlob iJumpIfLastFalse(InstructionIndex jump);
 
 }}

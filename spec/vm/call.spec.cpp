@@ -10,33 +10,30 @@ TEST_CASE("CALL builtin") {
 
 TEST_CASE("CALL def") {
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
-    bytecode::iDefHeader(2), // V1
-    bytecode::iFalse(),      // V1.V1
+    bytecode::iDefHeader(2, std::vector<bytecode::NameHash>{}), 
+    bytecode::iFalse(),
     bytecode::iReturnLast(),
-    bytecode::iCall(1)
+    bytecode::iCall()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == false);
 }
 
 TEST_CASE("CALL def with args") {
-  bytecode::ValueIndex args[] = {2};
+  bytecode::NameHash x = bytecode::hashName("x");
 
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
-    bytecode::iDefHeader(3), // V1
-    bytecode::iLoad(1),      // V1.V1 = arg1
+    bytecode::iTrue(),
+    bytecode::iDefHeader(3, std::vector<bytecode::NameHash>{x}),
+    bytecode::iLoad(x),      
     bytecode::iReturnLast(),
-    bytecode::iTrue(), // V2
-    bytecode::iCall(1, 1, args) // fn = V1, 1 arg = V2
+    bytecode::iCall()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == true);
 }
 
 TEST_CASE("CALL def with recursion") {
-  bytecode::ValueIndex outerArgs[] = {2};
-  bytecode::ValueIndex innerArgs[] = {4};
-
   // This is the equivalent of:
   // x = fn(a) { 
   //   when {
@@ -45,24 +42,28 @@ TEST_CASE("CALL def with recursion") {
   // }
   //
   // x(false)
+  bytecode::NameHash a = bytecode::hashName("a");
+  bytecode::NameHash x = bytecode::hashName("x");
   bytecode::CodeBlob instructions = bytecode::CodeBlob{
-    bytecode::iDefHeader(16), // V1 (and V1.V1)
+    bytecode::iDefHeader(13, std::vector<bytecode::NameHash>{a}),
     
-    bytecode::iWhenHeader(13), // V1.V3
-    
-    bytecode::iLoad(2), // V1.V2 = arg1
+    bytecode::iLoad(a),
     bytecode::iJumpIfLastFalse(3),
-    bytecode::iLoad(2), // V1.V3 = arg1
+    bytecode::iLoad(a),
     bytecode::iReturnLast(),
     
-    bytecode::iTrue(), // V1.V4
-    bytecode::iCall(1, 1, innerArgs), // fn = V1.V1, 1 arg = V1.V4
+    bytecode::iTrue(),
+    bytecode::iJumpIfLastFalse(3),
+    bytecode::iLoad(x),
+    bytecode::iCall(),
     bytecode::iReturnLast(),
 
     bytecode::iReturnLast(),
 
-    bytecode::iTrue(), // V2
-    bytecode::iCall(1, 1, outerArgs) // fn = V1, 1 arg = V2
+    bytecode::iName("x"),
+    bytecode::iTrue(),
+    bytecode::iLoad(x),
+    bytecode::iCall()
   };
 
   REQUIRE(resultOf(instructions)->asBool() == true);

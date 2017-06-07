@@ -70,7 +70,10 @@ namespace fn { namespace vm {
       return "fn @ I"
         + std::to_string((uint)this->value.counterStart)
         + ", length "
-        + std::to_string((uint)this->value.length);
+        + std::to_string((uint)this->value.length)
+        + ", "
+        + std::to_string((uint)this->value.args.size())
+        + " args";
     }
     bool eq(Value* other) override {
       if(!other->isDef()) { return false; }
