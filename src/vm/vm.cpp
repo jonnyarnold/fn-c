@@ -325,12 +325,18 @@ void VM::load(bytecode::CodeByte value[]) {
   DEBUG("LOAD(" << (int)name << ")");
 
   // Check each frame, top to bottom.
-  vm::Value* foundValue;
+  vm::Value* foundValue = NULL;
   for(auto frame = this->callStack.rbegin(); frame != this->callStack.rend(); ++frame) {
-    try {
-      foundValue = (*frame)->symbols.at(name);
-      break;
-    } catch (const std::out_of_range& oor) { continue; }
+    // We'd like to use unordered_map::at here,
+    // but it throws an exception when not found
+    // and exceptions are slow.
+    auto foundValueIterator = (*frame)->symbols.find(name);
+    if (foundValueIterator == (*frame)->symbols.end()) {
+      continue;
+    }
+
+    foundValue = (*frame)->symbols[name];
+    break;
   }
 
   if (foundValue != NULL) {

@@ -39,8 +39,7 @@ namespace fn {
         // is not found. To make sure that's not
         // confused with the first element, we push
         // a NULL value to the 0 position.
-        this->values = vm::ValueMap();
-        this->values.push_back(NULL);
+        this->values = vm::ValueMap{ NULL };
       }
 
       CallFrame() : CallFrame(-1) {}
