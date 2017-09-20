@@ -73,10 +73,9 @@ namespace fn {
 
     // Stores the nesting of function calls.
     std::vector<vm::CallFrame*> callStack;
-    void pushFrame();
-    // void pushFrame(vm::Value* value);
-    vm::Value* popFrame();
-    vm::CallFrame* currentFrame() { return this->callStack.back(); }
+    void pushFrame(vm::CallFrame*);
+    void popFrame();
+    vm::CallFrame* currentFrame;
 
     void pushValue(vm::Value* value);
     vm::Value* popValue();

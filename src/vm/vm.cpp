@@ -19,7 +19,7 @@ vm::Value* VM::run(bytecode::CodeBlob* instructions) {
 
 vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
   this->counter = 0;
-  this->callStack.push_back(new vm::CallFrame(num_bytes));
+  this->pushFrame(new vm::CallFrame(num_bytes));
 
   while(counter < num_bytes) {
     bytecode::CodeByte opcode = instructions[counter];
@@ -118,14 +118,24 @@ vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
   return this->lastValue();
 }
 
+void VM::pushFrame(vm::CallFrame* frame) {
+  this->callStack.push_back(frame);
+  this->currentFrame = frame;
+}
+
+void VM::popFrame() {
+  this->callStack.pop_back();
+  this->currentFrame = this->callStack.back();
+}
+
 void VM::pushValue(vm::Value* value) {
   DEBUG("PUSH(" << value->toString() << ")");
-  this->currentFrame()->values.push_back(value);
+  this->currentFrame->values.push_back(value);
 }
 
 vm::Value* VM::popValue() {
-  vm::Value* value = this->currentFrame()->values.back();
-  this->currentFrame()->values.pop_back();
+  vm::Value* value = this->currentFrame->values.back();
+  this->currentFrame->values.pop_back();
   return value;
 }
 
@@ -135,17 +145,17 @@ void VM::printState() {
   std::cout << "VM State:\n";
   std::cout << "counter: I" << std::to_string(this->counter) <<"\n";
   std::cout << "values:\n";
-  for (uint i = 1; i < this->currentFrame()->values.size(); i++) {
-    std::cout << "V" << i << ": " << this->currentFrame()->values[i]->toString() << "\n";
+  for (uint i = 1; i < this->currentFrame->values.size(); i++) {
+    std::cout << "V" << i << ": " << this->currentFrame->values[i]->toString() << "\n";
   }
   std::cout << "call stack size: " << this->callStack.size() << "\n";
   if (this->callStack.size() > 0) {
-    std::cout << "top frame: at exit, returnTo@I" << std::to_string(this->currentFrame()->returnCounter) << "\n";
+    std::cout << "top frame: at exit, returnTo@I" << std::to_string(this->currentFrame->returnCounter) << "\n";
   }
 }
 
 vm::Value* VM::lastValue() {
-  return this->currentFrame()->values.back();
+  return this->currentFrame->values.back();
 }
 
 // BOOL_TRUE
@@ -310,7 +320,7 @@ void VM::name(bytecode::CodeByte value[]) {
 
   DEBUG("NAME(" << (int)name << ")");
 
-  this->currentFrame()->symbols[name] = this->lastValue();
+  this->currentFrame->symbols[name] = this->lastValue();
 }
 
 
@@ -398,7 +408,7 @@ void VM::call() {
     frame->symbols[argName] = value;
   }
 
-  this->callStack.push_back(frame);
+  this->pushFrame(frame);
 
   // Set the program counter.
   bytecode::InstructionIndex newCounterPos = def.counterStart;
@@ -413,15 +423,15 @@ void VM::returnLast() {
   DEBUG("RETURN_LAST");
 
   // We transfer ownership of the value from the inner call to the outer call.
-  vm::Value* returnValue = this->currentFrame()->values.back();
-  this->currentFrame()->values.pop_back();
+  vm::Value* returnValue = this->currentFrame->values.back();
+  this->currentFrame->values.pop_back();
 
-  this->counter = this->currentFrame()->returnCounter;
+  this->counter = this->currentFrame->returnCounter;
 
   // Pop the top CallFrame and free memory used by it.
-  vm::CallFrame* frame = this->currentFrame();
+  vm::CallFrame* frame = this->currentFrame;
 
-  if (this->callStack.size() > 1) { this->callStack.pop_back(); }
+  if (this->callStack.size() > 1) { this->popFrame(); }
 
   // Declare the return value in the new current frame.
   this->pushValue(returnValue);
