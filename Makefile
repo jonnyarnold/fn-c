@@ -23,7 +23,7 @@ test: bin/fn tmp/spec
 
 # `clean` removes all build artifacts and temporary files.
 clean:
-	rm -rf tmp/* obj/* bin/*
+	rm -rf tmp/* tmp/.fuse* obj/* obj/.fuse* bin/* bin/.fuse*
 	mkdir obj/vm obj/e2e
 
 # There are two `watch` tasks, depending on the environment.
@@ -33,7 +33,12 @@ watch-mac:
 watch-linux:
 	while inotifywait -qq -e close_write -r .; do make; done
 
-
+# `profile` will perform a cachegrind clean, make, and run
+profile: all profile-clean cachegrind
+profile-clean: 
+	rm -f callgrind.out.*
+cachegrind: 
+	valgrind --tool=callgrind bin/fn run samples/fibonacci.fn && kcachegrind .
 
 # The fn language binary is a Command Line Interface (CLI)
 # that executes Fn code.
