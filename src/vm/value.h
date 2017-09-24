@@ -9,10 +9,6 @@
 
 namespace fn { namespace vm {
 
-  class Value; // Defined very shortly!
-
-  typedef std::vector<vm::Value*> ValueMap;
-
   class Value {
   public:
     virtual ~Value() {};

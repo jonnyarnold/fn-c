@@ -337,16 +337,10 @@ void VM::load(bytecode::CodeByte value[]) {
   // Check each frame, top to bottom.
   vm::Value* foundValue = NULL;
   for(auto frame = this->callStack.rbegin(); frame != this->callStack.rend(); ++frame) {
-    // We'd like to use unordered_map::at here,
-    // but it throws an exception when not found
-    // and exceptions are slow.
-    auto foundValueIterator = (*frame)->symbols.find(name);
-    if (foundValueIterator == (*frame)->symbols.end()) {
-      continue;
+    if ((*frame)->symbols[name] != NULL) {
+      foundValue = (*frame)->symbols[name];
+      break;
     }
-
-    foundValue = (*frame)->symbols[name];
-    break;
   }
 
   if (foundValue != NULL) {
@@ -404,7 +398,6 @@ void VM::call() {
   std::vector<bytecode::NameHash> argNames = def.args;
   for(auto argName : argNames) {
     vm::Value* value = this->popValue();
-    frame->values.push_back(value);
     frame->symbols[argName] = value;
   }
 
