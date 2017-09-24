@@ -34,21 +34,21 @@ TEST_CASE("Fn set/call") {
 //   )") == "2");
 // }
 
-// // There was a time when we weren't passing params
-// // in the right order, every -other- time. Weird, huh?
-// TEST_CASE("Param ordering is correct every call") {
-//   REQUIRE(resultOf(R"(
-//     A = fn(a,b) {
-//       when {
-//         a eq 0 { false }
-//         a eq 5 { true }
-//         true { A(a+1, b) }
-//       }
-//     }
+// There was a time when we weren't passing params
+// in the right order, every -other- time. Weird, huh?
+TEST_CASE("Param ordering is correct every call") {
+  REQUIRE(resultOf(R"(
+    A = fn(a,b) {
+      when {
+        a eq 0 { false }
+        a eq 5 { true }
+        true { A(a+1, b) }
+      }
+    }
 
-//     A(1, 0)
-//   )")->asBool() == true);
-// }
+    A(1, 0)
+  )")->asBool() == true);
+}
 
 TEST_CASE("Fns as arguments") {
   REQUIRE(resultOf(R"(
