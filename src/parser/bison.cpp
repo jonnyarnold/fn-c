@@ -24,6 +24,7 @@
 
   // AST elements
   fn::ast::Block* v_block;
+  fn::ast::BlockValue* v_blockvalue;
   fn::ast::Statement* v_statement;
   fn::ast::Reference* v_reference;
   fn::ast::Id* v_id;
@@ -49,6 +50,7 @@
 
 // Non-terminal symbols.
 %type <v_block> program block
+%type <v_blockvalue> blockvalue
 %type <v_statements> statements
 %type <v_statement> statement
 %type <v_reference> reference
@@ -106,7 +108,7 @@ value:
 | infixOperation
 | reference
 | functionCall
-| block
+| blockvalue
 | functionDef
 | conditional
   ;
@@ -177,6 +179,12 @@ params:
 block:
   '{' statements '}' { 
     $$ = new fn::ast::Block(*$2);
+    delete $2; 
+  }
+
+blockvalue:
+  '{' statements '}' { 
+    $$ = new fn::ast::BlockValue(*$2);
     delete $2; 
   }
 

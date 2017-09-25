@@ -21,7 +21,7 @@ TEST_CASE("Fn set/call") {
 //     }
 
 //     x.y(1)
-//   )") == "2");
+//   )")->asNumber() == fn::Number(0, 2));
 // }
 
 // TEST_CASE("Fn call within block") {
@@ -31,7 +31,7 @@ TEST_CASE("Fn set/call") {
 //     }
 
 //     (x(1)).foo(1)
-//   )") == "2");
+//   )")->asNumber() == fn::Number(0, 2));
 // }
 
 // There was a time when we weren't passing params

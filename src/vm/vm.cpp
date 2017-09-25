@@ -107,6 +107,21 @@ vm::Value* VM::run(bytecode::CodeByte instructions[], size_t num_bytes) {
       // counter is moved by jumpIfLastFalse
       break;
 
+    case FN_OP_NEW_FRAME:
+      this->newFrame();
+      this->counter += 1;
+      break;
+
+    case FN_OP_COMPRESS:
+      this->compress();
+      this->counter += 1;
+      break;
+
+    case FN_OP_EXPAND:
+      this->expand();
+      this->counter += 1;
+      break;
+
     default:
       throw "Unexpected opcode"; // TODO: Make this more meaningful
 
@@ -337,17 +352,19 @@ void VM::load(bytecode::CodeByte value[]) {
   // Check each frame, top to bottom.
   vm::Value* foundValue = NULL;
   for(auto frame = this->callStack.rbegin(); frame != this->callStack.rend(); ++frame) {
-    if ((*frame)->symbols[name] != NULL) {
-      foundValue = (*frame)->symbols[name];
-      break;
+    foundValue = (*frame)->symbols[name];
+    if (foundValue != NULL) { 
+      // Cache the value of the requested symbol.
+      this->currentFrame->symbols[name] = foundValue;
+      break; 
     }
   }
 
-  if (foundValue != NULL) {
-    this->pushValue(foundValue);
-  } else {
+  if (foundValue == NULL) {
     throw "Cannot find variable";
   }
+
+  this->pushValue(foundValue);
 }
 
 // DECLARE_DEF [LENGTH (1)] [NUM_ARGS (1)] [ARG_NAMES (1)*]
@@ -391,8 +408,7 @@ void VM::call() {
   vm::Def def = this->popValue()->asDef();
 
   // Push a CallFrame onto the stack.
-  vm::CallFrame* frame = new vm::CallFrame();
-  frame->returnCounter = this->counter + 1;
+  vm::CallFrame* frame = new vm::CallFrame(this->counter + 1);
   
   // Set up ValueStack and SymbolTable
   std::vector<bytecode::NameHash> argNames = def.args;
@@ -451,4 +467,35 @@ void VM::jumpIfLastFalse(bytecode::CodeByte value[]) {
   // else...
   DEBUG("FALSE_JUMP(" << std::to_string(jump) << ") = NO JUMP");
   this->counter += FALSE_JUMP_BYTES;
+}
+
+// NEW_FRAME
+// (1 byte)
+//
+// Push a new frame onto the frame stack.
+void VM::newFrame() {
+  DEBUG("NEW_FRAME");
+  this->pushFrame(new vm::CallFrame());
+}
+
+// COMPRESS
+// (1 byte)
+//
+// Pop the current frame and push it on the value stack.
+void VM::compress() {
+  DEBUG("COMPRESS");
+  vm::CallFrame* compressedFrame = this->currentFrame;
+  this->popFrame();
+  this->currentFrame->values.push_back(new vm::CallFrameValue(compressedFrame));
+}
+
+// EXPAND
+// (1 byte)
+//
+// Pop the value stack and push it onto the frame stack.
+void VM::expand() {
+  DEBUG("EXPAND");
+  vm::CallFrame* expandedFrame = this->currentFrame->values.back()->asCallFrame();
+  this->currentFrame->values.pop_back();
+  this->pushFrame(expandedFrame);
 }

@@ -48,6 +48,10 @@ namespace fn { namespace bytecode {
 
   #define FN_OP_FALSE_JUMP (fn::bytecode::OpCode)(60)
 
+  #define FN_OP_NEW_FRAME (fn::bytecode::OpCode)(70)
+  #define FN_OP_COMPRESS (fn::bytecode::OpCode)(71)
+  #define FN_OP_EXPAND (fn::bytecode::OpCode)(72)
+  
 
   // Instruction references are given by this type.
   // TODO: Expand to 32-bit.
@@ -141,5 +145,9 @@ namespace fn { namespace bytecode {
   CodeBlob iLoad(NameHash hash);
 
   CodeBlob iJumpIfLastFalse(InstructionIndex jump);
+
+  CodeBlob iNewFrame();
+  CodeBlob iCompress();
+  CodeBlob iExpand();
 
 }}

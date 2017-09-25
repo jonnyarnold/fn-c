@@ -5,52 +5,18 @@
 #pragma once
 
 #include "stdlib.h" // size_t
-#include <vector> // std::vector
-#include <stack> // std::stack
-#include <unordered_map> // std::unordered_map
 
 #include "src/bytecode.h" // CodeByte
 #include "src/vm/value.h" // vm::Value
 #include "src/vm/def.h" // vm::Def
 #include "src/number.h" // Number
 
+#include "src/vm/callframe.h" // vm::CallFrame
+
+#define INITIAL_VALUE_MAP_CAPACITY 4
+#define INITIAL_SYMBOL_TABLE_CAPACITY 16
+
 namespace fn {
-
-  namespace vm {
-    typedef std::vector<vm::Value*> ValueMap;
-    typedef std::unordered_map<bytecode::NameHash, vm::Value*> SymbolTable;
-
-    class CallFrame {
-    public:
-      // Denotes the place the program counter will be set to
-      // when RETURN_LAST is hit.
-      bytecode::InstructionIndex returnCounter;
-
-      // The values defined in the given frame.
-      vm::ValueMap values;
-
-      // The symbols defined in the given frame.
-      vm::SymbolTable symbols;
-
-      CallFrame(bytecode::InstructionIndex returnCounter) {
-        this->returnCounter = returnCounter;
-
-        // The [] operator returns 0 if a value
-        // is not found. To make sure that's not
-        // confused with the first element, we push
-        // a NULL value to the 0 position.
-        this->values = vm::ValueMap{ NULL };
-      }
-
-      CallFrame() : CallFrame(-1) {}
-
-      ~CallFrame() {
-        for(auto value : this->values) {
-          if (value != NULL) { delete value; }
-        }
-      }
-    };
-  }
 
   // VM is the virtual machine that instructions are run in.
   class VM {
@@ -109,6 +75,11 @@ namespace fn {
     void returnLast();
 
     void jumpIfLastFalse(bytecode::CodeByte[]);
+
+    // Frame manipulation.
+    void newFrame();
+    void compress();
+    void expand();
   };
 
 }

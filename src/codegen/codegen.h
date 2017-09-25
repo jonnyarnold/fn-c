@@ -32,6 +32,7 @@ namespace fn {
     bytecode::CodeBlob digest(ast::Deref* deref);
     bytecode::CodeBlob digest(ast::Assignment* assignment);
     bytecode::CodeBlob digest(ast::Block* block);
+    bytecode::CodeBlob digest(ast::BlockValue* block);
     bytecode::CodeBlob digest(ast::Bool* b);
     bytecode::CodeBlob digest(ast::Number* n);
     bytecode::CodeBlob digest(ast::String* s);

@@ -9,6 +9,9 @@
 
 namespace fn { namespace vm {
 
+  // Forward declaration
+  class CallFrame;
+
   class Value {
   public:
     virtual ~Value() {};
@@ -17,6 +20,7 @@ namespace fn { namespace vm {
     virtual bytecode::InstructionIndex getCallCounterPos() { throw "Not callable!"; }
     virtual bool isDef() { return false; }
     virtual Def asDef() { throw "Not a Def!"; }
+    virtual CallFrame* asCallFrame() { throw "Not a CallFrame!"; }
     virtual bool eq(Value* other) = 0;
     virtual std::string toString() = 0;
   };
@@ -74,6 +78,21 @@ namespace fn { namespace vm {
     bool eq(Value* other) override {
       if(!other->isDef()) { return false; }
       return (this->value == other->asDef());
+    }
+  };
+
+  class CallFrameValue : public Value {
+  protected:
+    CallFrame* value;
+  public:
+    CallFrameValue(CallFrame* value) : value(value) {}
+    ~CallFrameValue() = default;
+    CallFrame* asCallFrame() override { return this->value; }
+    std::string toString() override {
+      return "{}";
+    }
+    bool eq(Value* other) override {
+      return false;
     }
   };
 

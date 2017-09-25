@@ -67,4 +67,8 @@ namespace fn { namespace bytecode {
 
   CodeBlob iJumpIfLastFalse(InstructionIndex jump) { return CodeBlob{FN_OP_FALSE_JUMP, jump}; }
 
+  CodeBlob iNewFrame() { return CodeBlob{FN_OP_NEW_FRAME}; }
+  CodeBlob iCompress() { return CodeBlob{FN_OP_COMPRESS}; }
+  CodeBlob iExpand() { return CodeBlob{FN_OP_EXPAND}; }
+
 }}

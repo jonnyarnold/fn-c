@@ -21,6 +21,7 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Statement* statement) {
   try_digest_as(ast::Deref);
   try_digest_as(ast::Assignment);
   try_digest_as(ast::Block);
+  try_digest_as(ast::BlockValue);
   try_digest_as(ast::Bool);
   try_digest_as(ast::Number);
   try_digest_as(ast::String);
@@ -37,13 +38,11 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Id* id) {
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Deref* deref) {
-  // bytecode::CodeBlob blob = this->digest(deref->parent);
-  // TODO: Push scope!
-  // blob.append(this->digest(deref->child));
-  // TODO: Pop scope!
-  // return blob;
-
-  return this->digest(deref->child);
+  bytecode::CodeBlob blob = this->digest(deref->parent);
+  blob.append(bytecode::iExpand());
+  blob.append(this->digest(deref->child));
+  blob.append(bytecode::iReturnLast());
+  return blob;
 }
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Assignment* assignment) {
@@ -72,13 +71,19 @@ bytecode::CodeBlob CodeGenerator::digest(ast::Assignment* assignment) {
 
 bytecode::CodeBlob CodeGenerator::digest(ast::Block* block) {
   bytecode::CodeBlob blockBlob = bytecode::CodeBlob();
-
-  // TODO: Push new scope?
   for (auto statement : block->statements) {
     blockBlob.append(this->digest(statement));
   }
-  // TODO: Pop scope into variable?
+  return blockBlob;
+}
 
+bytecode::CodeBlob CodeGenerator::digest(ast::BlockValue* block) {
+  bytecode::CodeBlob blockBlob = bytecode::CodeBlob();
+  blockBlob.append(bytecode::iNewFrame());
+  for (auto statement : block->statements) {
+    blockBlob.append(this->digest(statement));
+  }
+  blockBlob.append(bytecode::iCompress());
   return blockBlob;
 }
 

@@ -117,6 +117,36 @@ namespace fn { namespace ast {
     }
   };
 
+  // Represents a collection of statements which,
+  // when executed, return a value.
+  //
+  // They can be thought of as zero-arity, immediately executed
+  // function closures, if you're feeling masochistic.
+  class BlockValue : public Value {
+  public:
+    std::vector<Statement*> statements;
+
+    BlockValue(std::vector<Statement*> statements) { this->statements = statements; }
+    BlockValue() { this->statements = std::vector<Statement*>(); }
+    ~BlockValue() {
+      for(auto statement : this->statements) { delete statement; }
+    }
+
+    std::string asString(int indent) override {
+      std::string result = "(BLOCKVALUE [\n";
+
+      for(auto statement: this->statements) {
+        result += std::string(indent + 2, ' ') +
+          statement->asString(indent + 2) +
+          "\n";
+      }
+
+      result += std::string(indent, ' ') + "])";
+
+      return result;
+    }
+  };
+
   // Represents a boolean value.
   class Bool : public Value {
   public:
