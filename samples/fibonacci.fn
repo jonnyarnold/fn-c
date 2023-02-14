@@ -6,5 +6,30 @@ fib = fn(x) {
   }
 }
 
-# print(fib(10))
-fib(25)
+fib(15)
+
+---
+
+{ 15 } # data
+
+NEW-FN # result0
+  1 # args
+  1 # return-values
+  { 0, 1, 2, true} # data
+  
+  EQ arg0 data0 # result0
+  JUMP-IF-FALSE result0
+    LOAD data0
+    RETURN 1
+  EQ arg0 data1 # result1
+  JUMP-IF-FALSE result1
+    COPY data1 return0
+    RETURN 1
+  SUB arg0 data1 # result2
+  CALL1 self result2 # result3
+  SUB arg0 data2 # result4
+  CALL1 self result4 # result5
+  RETURN 1
+
+CALL1 result1 data0 # result1
+RETURN

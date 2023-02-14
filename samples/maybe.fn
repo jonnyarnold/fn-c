@@ -1,0 +1,47 @@
+type Bool
+
+type True:
+  is Bool
+
+type False:
+  is Bool
+
+invert Bool ->
+  True -> False
+  False -> True
+
+type Point x y z:
+  where:
+    x is Number 
+    y is Number
+    z is Number
+
+type Delta x y z:
+  where:
+    x is Number 
+    y is Number
+    z is Number
+
+translate (Point point-x point-y point-z) (Delta delta-x delta-y delta-z) ->
+  (Point (add point-x delta-x) (add point-y delta-y) (add point-z delta-z))
+
+type Shape:
+  must translate (Delta x y z)
+
+Square topLeft bottomRight:
+  where:
+    topLeft is Point
+    bottomRight is Point
+  
+  is Shape:
+    translate delta -> 
+      (Square (translate topLeft delta) (translate bottomRight delta))
+
+Circle center radius:
+  where:
+    center is Point
+    radius is PositiveNumber
+
+  is Shape:
+    translate delta ->
+      (Circle (translate center delta) radius)

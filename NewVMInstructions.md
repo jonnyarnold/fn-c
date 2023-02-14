@@ -62,7 +62,7 @@ RETURN [a] {} ; [b] {} = [b, a] {}
 
 - `PUSH_DEF` pushes a value onto the value stack that denotes the function definition: its position in the instruction set, number of arguments and argument names are stored.
 - `CALL` creates a new frame and populates it with the given parameters. The function and its parameters are removed from the parent's value stack.
-- `RETURN` takes the top of the current value stack and pushes it onto the value stack of the frame below. It also pops the current frame and replaces  off the frame stack and destroys it.
+- `RETURN` takes the top of the current value stack and pushes it onto the value stack of the frame below. It also pops the current frame off the frame stack and destroys it.
 
 ## Blocks
 

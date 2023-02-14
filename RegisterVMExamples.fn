@@ -1,0 +1,81 @@
+z = 1
+a = fn(x) {
+  b = fn(y) {
+    x + y + z
+  }
+}
+a(1).b(2)
+
+CHUNK # C0 = b
+  arity 1
+  numExtraRegisters 2
+  staticData [
+    1 # z : Rational
+  ]
+  instructions [
+    GETPARENT 1 rARG0 # parent.x
+    ADD r2 r0 r1 # x + y
+    ADD rRETURN r2 r0 # [(x+y) + z]
+  ]
+
+CHUNK # C1 = a
+  arity 1
+  numExtraRegisters 0
+  staticData [
+    C0 # b : Function
+  ]
+  instructions [
+    CLOSE r1 r0 rSELF # b.bind(self)
+    REFERENCE rRETURN rSELF
+  ]
+
+CHUNK # C2 = main
+  arity 0
+  numExtraRegisters 2
+  staticData [
+    1 # z : Rational
+    2 # : Rational
+    C1 # a : Function
+  ]
+  instructions [
+    CALL1 r3 r2 r0 # a(1)
+    GETCHILD r4 r3 r1 # (a(1)).b
+    CALL1 rRETURN r3 r1 # (a(1)).[b(2)]
+  ]
+
+
+
+a = 2
+x = { y = 1; z = a }
+x.y
+
+
+
+x = 2
+y = when {
+  x eq 1 { x + 1 }
+  x eq 2 { x - 1 }
+  true   { x }
+}
+y
+
+CHUNK # C0 = main
+  arity 0
+  numExtraRegisters ?
+  staticData [
+    2 # x : Rational
+    1
+    true
+  ]
+  instructions [
+    EQ r3 r0 r1
+    JUMPIFFALSE r3 2
+      ADD rRETURN r0 r1
+      JUMP 7
+    EQ r3 r0 r0
+    JUMPIFFALSE r3 2
+      SUB rRETURN r0 r1
+      JUMP 3
+    JUMPIFFALSE r2 2
+      COPY rRETURN r2
+  ]
