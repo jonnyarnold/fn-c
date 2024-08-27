@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        ".env*": "dotenv",
+        "stdio.h": "c"
+    },
+    "editor.formatOnSave": true
+}

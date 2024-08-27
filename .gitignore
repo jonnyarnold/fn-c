@@ -1,5 +1,3 @@
-_LOCAL
 bin/*
 obj/*
 tmp/*
-callgrind.*
