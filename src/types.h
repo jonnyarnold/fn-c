@@ -4,3 +4,4 @@
 
 typedef unsigned long long int Word;
 typedef signed long long int I64;
+typedef unsigned long long int U64;

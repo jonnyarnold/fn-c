@@ -1,6 +1,13 @@
 #include "test.h"
 #include "vm.h"
 
+int test_Value_size()
+{
+    ASSERT("sizeof(Value) == 16", sizeof(Value) == 16);
+    ASSERT("sizeof(ValueData) == 8", sizeof(ValueData) == 8);
+    return 0;
+}
+
 int test_Word_bitAt()
 {
     // test_extracts_bit
@@ -18,5 +25,5 @@ int test_Word_bitAt()
 // FIXME: Break up this file
 int main(int argc, char **argv)
 {
-    return test_Word_bitAt();
+    return (test_Value_size() || test_Word_bitAt());
 }

@@ -22,7 +22,7 @@ bin/fn: $(MAIN_OBJS)
 
 .PHONY: test
 test: bin/test-fn
-	./bin/test-fn
+	time ./bin/test-fn
 
 bin/test-fn: $(TEST_OBJS)
 	$(LINK) -o $@ $^

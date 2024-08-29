@@ -2,7 +2,9 @@
 // https://jera.com/techinfo/jtns/jtn002
 
 #include <stdio.h>
+#include <assert.h>
 
+// TODO: Replace with <assert.h>?
 #define ASSERT(message, test)         \
     if (!(test))                      \
     {                                 \

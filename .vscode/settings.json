@@ -1,7 +1,10 @@
 {
     "files.associations": {
         ".env*": "dotenv",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "assert.h": "c",
+        "stdlib.h": "c",
+        "_size_t.h": "c"
     },
     "editor.formatOnSave": true
 }
