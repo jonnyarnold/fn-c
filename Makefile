@@ -4,17 +4,30 @@
 COMPILE=gcc -std=c11 -Isrc -c -Wall -Wextra
 LINK=gcc -Isrc -Lobj -Wall -Wextra
 
-SRC_FILES=$(shell find src -type f -name *.c)
-OBJ_FILES=$(patsubst src/%,obj/%,$(SRC_FILES:.c=.o))
+MAIN_SRCS=$(shell find src -type f -name *.c -not -name *test.c)
+MAIN_OBJS=$(patsubst src/%,obj/%,$(MAIN_SRCS:.c=.o))
+
+TEST_SRCS=$(shell find src -type f -name *.c -not -name main.c)
+TEST_OBJS=$(patsubst src/%,obj/%,$(TEST_SRCS:.c=.o))
+
+ALL_SRCS=$(shell find src -type f -name *.c)
+ALL_OBJS=$(patsubst src/%,obj/%,$(ALL_SRCS:.c=.o))
 
 .PHONY: run
 run: bin/fn
 	./bin/fn
 
-bin/fn: $(OBJ_FILES)
+bin/fn: $(MAIN_OBJS)
 	$(LINK) -o $@ $^
 
-$(OBJ_FILES): obj/%.o : src/%.c
+.PHONY: test
+test: bin/test-fn
+	./bin/test-fn
+
+bin/test-fn: $(TEST_OBJS)
+	$(LINK) -o $@ $^
+
+$(ALL_OBJS): obj/%.o : src/%.c
 	$(COMPILE) -o $@ $^
 
 .PHONY: clean
