@@ -11,9 +11,18 @@ Value File_open(Value fileName, Value mode)
 {
     char *unpackedFilename = VALUE_UNWRAP_CHARS(fileName);
 
+    // FIXME: Get Flags
     Word unpackedMode = VALUE_UNWRAP_WORD(mode);
     char *modeChars = "r";
 
     FILE *file = fopen(unpackedFilename, modeChars);
     return VALUE_WRAP_FILE(file);
+}
+
+void File_write(Value file, Value data)
+{
+    FILE *unpackedFile = VALUE_UNWRAP_FILE(file);
+    char *unpackedData = VALUE_UNWRAP_CHARS(data);
+
+    fprintf(unpackedFile, unpackedData);
 }

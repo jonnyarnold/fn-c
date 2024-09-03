@@ -44,8 +44,8 @@ Value Word_bitAt(Value word, Value index);
 #define VALUE_UNWRAP_FILE(v) (v.data.asFile)
 Value File_open(Value filename, Value mode);
 Value File_read(Value file);
-Value File_write(Value file, Value data);
-Value File_close(Value file);
+void File_write(Value file, Value data);
+void File_close(Value file);
 
 #define VALUE_WRAP_I64(i) ((Value){VALUETYPE_I64, {.asI64 = (i)}})
 #define VALUE_IS_I64(v) (v.type == VALUETYPE_I64)
